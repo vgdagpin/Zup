@@ -28,11 +28,33 @@ partial class frmMain
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
-        this.Text = "Form1";
+        components = new System.ComponentModel.Container();
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+        notipIconZup = new NotifyIcon(components);
+        SuspendLayout();
+        // 
+        // notipIconZup
+        // 
+        notipIconZup.Icon = (Icon)resources.GetObject("notipIconZup.Icon");
+        notipIconZup.Text = "Zup";
+        notipIconZup.Visible = true;
+        // 
+        // frmMain
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(800, 450);
+        FormBorderStyle = FormBorderStyle.FixedToolWindow;
+        Name = "frmMain";
+        ShowIcon = false;
+        ShowInTaskbar = false;
+        Text = "Form1";
+        WindowState = FormWindowState.Minimized;
+        Load += frmMain_Load;
+        ResumeLayout(false);
     }
 
     #endregion
+
+    private NotifyIcon notipIconZup;
 }
