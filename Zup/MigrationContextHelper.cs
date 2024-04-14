@@ -1,12 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Zup.Entities;
 
 namespace Zup
@@ -21,7 +16,7 @@ namespace Zup
             {
                 options.UseSqlite
                 (
-                    connectionString: @"Filename=C:\Working Directory\Github\vgdagpin\Zup.db",
+                    connectionString: $"Filename={Program.DbPath}",
                     sqliteOptionsAction: opt =>
                     {
                         opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);

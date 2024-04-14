@@ -1,23 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace Zup.CustomControls;
+﻿namespace Zup.CustomControls;
 
 public partial class EachEntry : UserControl
 {
     const int wrapLength = 30;
+    const string StartChar = "►";
+    const string StopChar = "■";
 
     public bool IsStarted { get; private set; }
 
-    private DateTime? startedOn = null;
-    private DateTime? endedOn = null;
     private string txt = null!;
 
     public delegate void OnResume(string entry);
@@ -28,10 +18,7 @@ public partial class EachEntry : UserControl
 
     public override string Text
     {
-        get
-        {
-            return txt;
-        }
+        get => txt;
         set
         {
             txt = value;
@@ -52,31 +39,9 @@ public partial class EachEntry : UserControl
 
     public int EntryID { get; set; }
 
-    public DateTime StartedOn
-    {
-        get
-        {
-            return startedOn ?? DateTime.MinValue;
-        }
-        set
-        {
-            startedOn = value;
-            //lblStart.Text = value.ToString("hh:mmtt");
-        }
-    }
+    public DateTime? StartedOn { get; set; }
 
-    public DateTime? EndedOn
-    {
-        get
-        {
-            return endedOn;
-        }
-        set
-        {
-            endedOn = value;
-            //lblEnd.Text = value?.ToString("hh:mmtt");
-        }
-    }
+    public DateTime? EndedOn { get; set; }
 
     public EachEntry(string text)
     {
@@ -104,13 +69,14 @@ public partial class EachEntry : UserControl
         if (EndedOn == null)
         {
             lblStart.Text = $"{StartedOn:hh:mmtt}";
+            lblDuration.Text = "";
 
             return;
         }
 
         lblStart.Text = $"{StartedOn:hh:mmtt} - {EndedOn:hh:mmtt}";
 
-        var diff = EndedOn.Value - StartedOn;
+        var diff = EndedOn.Value - StartedOn!.Value;
 
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
     }
@@ -119,7 +85,7 @@ public partial class EachEntry : UserControl
     {
         tmr.Stop();
         EndedOn = DateTime.Now;
-        btnToggleStartStop.Text = "►";
+        btnToggleStartStop.Text = StartChar;
         btnToggleStartStop.ForeColor = Color.Black;
         IsStarted = false;
 
@@ -142,14 +108,15 @@ public partial class EachEntry : UserControl
                 return;
             }
         }
-        else
+
+        if (StartedOn == null)
         {
             StartedOn = DateTime.Now;
         }
 
         tmr.Start();
 
-        btnToggleStartStop.Text = "■";
+        btnToggleStartStop.Text = StopChar;
         btnToggleStartStop.ForeColor = Color.Red;
         IsStarted = true;
 
@@ -170,7 +137,7 @@ public partial class EachEntry : UserControl
 
     private void timer1_Tick(object sender, EventArgs e)
     {
-        var diff = DateTime.Now - StartedOn;
+        var diff = DateTime.Now - StartedOn!.Value;
 
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
     }

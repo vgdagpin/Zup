@@ -8,6 +8,22 @@ namespace Zup;
 
 internal static class Program
 {
+    internal static string DbPath
+    {
+        get
+        {
+            var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var path = Path.Combine(myDoc, "Zup");
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            return Path.Combine(path, "Zup.db");
+        }
+    }
+
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
     static IHostBuilder CreateHostBuilder()
@@ -15,7 +31,6 @@ internal static class Program
         return Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) => 
             {
-
                 services.AddTransient<frmMain>();
                 services.AddTransient<frmEntryList>();
                 services.AddTransient<frmSetting>();
@@ -26,7 +41,7 @@ internal static class Program
                 {
                     optionsAction.UseSqlite
                     (
-                        connectionString: @"Filename=C:\Working Directory\Github\vgdagpin\Zup.db",
+                        connectionString: $"Filename={DbPath}",
                         sqliteOptionsAction: opt =>
                         {
                             opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
