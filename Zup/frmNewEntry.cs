@@ -1,21 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Formats.Tar;
 
 namespace Zup;
 
 
 public partial class frmNewEntry : Form
 {
+    private AutoCompleteStringCollection SuggestionSource = new AutoCompleteStringCollection();
+
+    public delegate void OnNewEntry(string entry);
+
+    public event OnNewEntry? OnNewEntryEvent;
+
+    private string[]? Suggestions = null;
+
     public frmNewEntry()
     {
         InitializeComponent();
+
+        txtEntry.AutoCompleteMode = AutoCompleteMode.None;
+        txtEntry.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        txtEntry.AutoCompleteCustomSource = SuggestionSource;
     }
 
     private void frmNewEntry_FormClosing(object sender, FormClosingEventArgs e)
@@ -25,11 +29,6 @@ public partial class frmNewEntry : Form
         txtEntry.Text = "";
 
         Hide();
-    }
-
-    private void frmNewEntry_Load(object sender, EventArgs e)
-    {
-        txtEntry.Focus();
     }
 
     private void txtEntry_KeyDown(object sender, KeyEventArgs e)
@@ -44,8 +43,64 @@ public partial class frmNewEntry : Form
 
         if (e.KeyCode == Keys.Enter)
         {
+            var temp = listBox1.Items.Count > 0
+                ? listBox1.Items[0].ToString()
+                : txtEntry.Text.Trim();
+
+            if (!string.IsNullOrWhiteSpace(temp))
+            {
+                if (OnNewEntryEvent != null)
+                {
+                    OnNewEntryEvent(temp);
+                }
+            }
+
             e.SuppressKeyPress = true;
             Close();
         }
+    }
+
+    public void ShowNewEntryDialog(params string[] suggestions)
+    {
+        Suggestions = suggestions;
+
+        Show();
+    }
+
+    private void frmNewEntry_VisibleChanged(object sender, EventArgs e)
+    {
+        if (Visible)
+        {
+            txtEntry.Focus();
+
+            txtEntry.AutoCompleteCustomSource.Clear();
+
+            if (Suggestions != null && Suggestions.Length > 0)
+            {
+                txtEntry.AutoCompleteCustomSource.AddRange(Suggestions);
+
+                Suggestions = Suggestions.Reverse().ToArray();
+
+                listBox1.DataSource = Suggestions;
+            }
+        }
+    }
+
+    private void txtEntry_TextChanged(object sender, EventArgs e)
+    {
+        tmrShowSuggest.Stop();
+        tmrShowSuggest.Start();
+    }
+
+    private void tmrShowSuggest_Tick(object sender, EventArgs e)
+    {
+        tmrShowSuggest.Stop();
+
+        var searchText = txtEntry.Text.ToLower();
+        var filteredSuggestions = SuggestionSource.Cast<string>()
+            .Where(item => item.ToLower().Contains(searchText))
+            .ToList();
+
+        listBox1.DataSource = filteredSuggestions;
     }
 }

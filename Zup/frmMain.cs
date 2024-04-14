@@ -5,10 +5,7 @@ namespace Zup;
 
 public partial class frmMain : Form
 {
-    private frmNewEntry m_FormNewEntry = new frmNewEntry();
     private frmEntryList m_FormEntryList = new frmEntryList();
-
-    private List<frmEachEntry> m_EachEntry = new List<frmEachEntry>();
 
     #region Initialize
     [DllImport("user32.dll")]
@@ -38,7 +35,7 @@ public partial class frmMain : Form
     {
         if (m.Msg == 0x0312 && m.WParam.ToInt32() == 1)
         {
-            m_FormNewEntry.Show();
+            m_FormEntryList.ShowNewEntry();
         }
 
         base.WndProc(ref m);

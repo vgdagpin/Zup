@@ -35,7 +35,7 @@ partial class frmEntryList
         // 
         flowLayoutPanel1.AutoScroll = true;
         flowLayoutPanel1.Dock = DockStyle.Fill;
-        flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+        flowLayoutPanel1.FlowDirection = FlowDirection.BottomUp;
         flowLayoutPanel1.Location = new Point(0, 0);
         flowLayoutPanel1.Name = "flowLayoutPanel1";
         flowLayoutPanel1.Size = new Size(280, 130);
@@ -51,6 +51,7 @@ partial class frmEntryList
         Controls.Add(flowLayoutPanel1);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
+        Opacity = 0.7D;
         ShowIcon = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;

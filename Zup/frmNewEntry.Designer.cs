@@ -28,23 +28,42 @@ partial class frmNewEntry
     /// </summary>
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
         var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
         txtEntry = new TextBox();
+        tmrShowSuggest = new System.Windows.Forms.Timer(components);
+        listBox1 = new ListBox();
         SuspendLayout();
         // 
         // txtEntry
         // 
+        txtEntry.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         txtEntry.Location = new Point(12, 12);
         txtEntry.Name = "txtEntry";
-        txtEntry.Size = new Size(513, 23);
+        txtEntry.Size = new Size(513, 33);
         txtEntry.TabIndex = 0;
+        txtEntry.TextChanged += txtEntry_TextChanged;
         txtEntry.KeyDown += txtEntry_KeyDown;
+        // 
+        // tmrShowSuggest
+        // 
+        tmrShowSuggest.Tick += tmrShowSuggest_Tick;
+        // 
+        // listBox1
+        // 
+        listBox1.FormattingEnabled = true;
+        listBox1.ItemHeight = 15;
+        listBox1.Location = new Point(14, 56);
+        listBox1.Name = "listBox1";
+        listBox1.Size = new Size(511, 94);
+        listBox1.TabIndex = 1;
         // 
         // frmNewEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(537, 64);
+        ClientSize = new Size(537, 163);
+        Controls.Add(listBox1);
         Controls.Add(txtEntry);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         Icon = (Icon)resources.GetObject("$this.Icon");
@@ -53,10 +72,10 @@ partial class frmNewEntry
         Name = "frmNewEntry";
         SizeGripStyle = SizeGripStyle.Hide;
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "Entry";
+        Text = "Task";
         TopMost = true;
         FormClosing += frmNewEntry_FormClosing;
-        Load += frmNewEntry_Load;
+        VisibleChanged += frmNewEntry_VisibleChanged;
         ResumeLayout(false);
         PerformLayout();
     }
@@ -64,4 +83,6 @@ partial class frmNewEntry
     #endregion
 
     private TextBox txtEntry;
+    private System.Windows.Forms.Timer tmrShowSuggest;
+    private ListBox listBox1;
 }
