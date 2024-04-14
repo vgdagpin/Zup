@@ -34,6 +34,7 @@ partial class EachEntry
         lblStart = new Label();
         tmr = new System.Windows.Forms.Timer(components);
         lblDuration = new Label();
+        btnUpdate = new Button();
         SuspendLayout();
         // 
         // lblText
@@ -87,11 +88,26 @@ partial class EachEntry
         lblDuration.TabIndex = 5;
         lblDuration.Text = "00:00:00";
         // 
+        // btnUpdate
+        // 
+        btnUpdate.FlatAppearance.BorderColor = Color.Gray;
+        btnUpdate.FlatStyle = FlatStyle.Flat;
+        btnUpdate.Font = new Font("Consolas", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        btnUpdate.ForeColor = Color.Black;
+        btnUpdate.Location = new Point(204, 2);
+        btnUpdate.Name = "btnUpdate";
+        btnUpdate.Size = new Size(19, 19);
+        btnUpdate.TabIndex = 6;
+        btnUpdate.TabStop = false;
+        btnUpdate.Text = "₰";
+        btnUpdate.UseVisualStyleBackColor = true;
+        // 
         // EachEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
+        Controls.Add(btnUpdate);
         Controls.Add(lblDuration);
         Controls.Add(lblStart);
         Controls.Add(btnToggleStartStop);
@@ -110,4 +126,5 @@ partial class EachEntry
     private Label lblStart;
     private System.Windows.Forms.Timer tmr;
     private Label lblDuration;
+    private Button btnUpdate;
 }

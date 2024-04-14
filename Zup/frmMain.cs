@@ -6,6 +6,8 @@ namespace Zup;
 public partial class frmMain : Form
 {
     private frmEntryList m_FormEntryList = new frmEntryList();
+    private frmSetting m_FormSetting = new frmSetting();
+    private frmView m_FormView = new frmView();
 
     #region Initialize
     [DllImport("user32.dll")]
@@ -68,5 +70,20 @@ public partial class frmMain : Form
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
     {
         Close();
+    }
+
+    private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormSetting.Show();
+    }
+
+    private void viewToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormView.Show();
+    }
+
+    private void notifIconZup_DoubleClick(object sender, EventArgs e)
+    {
+        m_FormView.Show();
     }
 }

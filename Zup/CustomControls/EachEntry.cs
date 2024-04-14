@@ -12,7 +12,7 @@ namespace Zup.CustomControls;
 
 public partial class EachEntry : UserControl
 {
-    const int wrapLength = 35;
+    const int wrapLength = 30;
 
     public bool IsStarted { get; private set; }
 

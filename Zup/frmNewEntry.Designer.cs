@@ -37,10 +37,10 @@ partial class frmNewEntry
         // 
         // txtEntry
         // 
-        txtEntry.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        txtEntry.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
         txtEntry.Location = new Point(12, 12);
         txtEntry.Name = "txtEntry";
-        txtEntry.Size = new Size(513, 33);
+        txtEntry.Size = new Size(513, 25);
         txtEntry.TabIndex = 0;
         txtEntry.TextChanged += txtEntry_TextChanged;
         txtEntry.KeyDown += txtEntry_KeyDown;
@@ -53,16 +53,16 @@ partial class frmNewEntry
         // 
         listBox1.FormattingEnabled = true;
         listBox1.ItemHeight = 15;
-        listBox1.Location = new Point(14, 56);
+        listBox1.Location = new Point(12, 43);
         listBox1.Name = "listBox1";
-        listBox1.Size = new Size(511, 94);
+        listBox1.Size = new Size(511, 64);
         listBox1.TabIndex = 1;
         // 
         // frmNewEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(537, 163);
+        ClientSize = new Size(537, 120);
         Controls.Add(listBox1);
         Controls.Add(txtEntry);
         FormBorderStyle = FormBorderStyle.FixedSingle;

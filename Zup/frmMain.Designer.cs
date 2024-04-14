@@ -32,6 +32,7 @@ partial class frmMain
         var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
         notifIconZup = new NotifyIcon(components);
         notifCms = new ContextMenuStrip(components);
+        viewToolStripMenuItem = new ToolStripMenuItem();
         settingsToolStripMenuItem = new ToolStripMenuItem();
         toolStripSeparator1 = new ToolStripSeparator();
         exitToolStripMenuItem = new ToolStripMenuItem();
@@ -45,18 +46,28 @@ partial class frmMain
         notifIconZup.Icon = (Icon)resources.GetObject("notifIconZup.Icon");
         notifIconZup.Text = "Zup";
         notifIconZup.Visible = true;
+        notifIconZup.DoubleClick += notifIconZup_DoubleClick;
         // 
         // notifCms
         // 
-        notifCms.Items.AddRange(new ToolStripItem[] { settingsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, settingsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(117, 54);
+        notifCms.Size = new Size(117, 76);
+        // 
+        // viewToolStripMenuItem
+        // 
+        viewToolStripMenuItem.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+        viewToolStripMenuItem.Size = new Size(116, 22);
+        viewToolStripMenuItem.Text = "View";
+        viewToolStripMenuItem.Click += viewToolStripMenuItem_Click;
         // 
         // settingsToolStripMenuItem
         // 
         settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
         settingsToolStripMenuItem.Size = new Size(116, 22);
         settingsToolStripMenuItem.Text = "Settings";
+        settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
         // 
         // toolStripSeparator1
         // 
@@ -100,4 +111,5 @@ partial class frmMain
     private ToolStripMenuItem settingsToolStripMenuItem;
     private ToolStripSeparator toolStripSeparator1;
     private ToolStripMenuItem exitToolStripMenuItem;
+    private ToolStripMenuItem viewToolStripMenuItem;
 }
