@@ -1,4 +1,5 @@
 ﻿using System.Formats.Tar;
+using Zup.Entities;
 
 namespace Zup;
 
@@ -12,14 +13,17 @@ public partial class frmNewEntry : Form
     public event OnNewEntry? OnNewEntryEvent;
 
     private string[]? Suggestions = null;
+    private readonly ZupDbContext dbContext;
 
-    public frmNewEntry()
+    public frmNewEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
 
         txtEntry.AutoCompleteMode = AutoCompleteMode.None;
         txtEntry.AutoCompleteSource = AutoCompleteSource.CustomSource;
         txtEntry.AutoCompleteCustomSource = SuggestionSource;
+
+        this.dbContext = dbContext;
     }
 
     private void frmNewEntry_FormClosing(object sender, FormClosingEventArgs e)

@@ -1,7 +1,42 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Reflection;
+using Zup.Entities;
+
 namespace Zup;
 
 internal static class Program
 {
+    public static IServiceProvider ServiceProvider { get; private set; } = null!;
+
+    static IHostBuilder CreateHostBuilder()
+    {
+        return Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) => 
+            {
+
+                services.AddTransient<frmMain>();
+                services.AddTransient<frmEntryList>();
+                services.AddTransient<frmSetting>();
+                services.AddTransient<frmView>();
+                services.AddTransient<frmNewEntry>();
+
+                services.AddDbContext<ZupDbContext>(optionsAction =>
+                {
+                    optionsAction.UseSqlite
+                    (
+                        connectionString: @"Filename=C:\Working Directory\Github\vgdagpin\Zup.db",
+                        sqliteOptionsAction: opt =>
+                        {
+                            opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+                            opt.MigrationsHistoryTable("tbl_MigrationHistory");
+                        }
+                    );
+                }, ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+            });
+    }
+
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>
@@ -11,6 +46,10 @@ internal static class Program
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
-        Application.Run(new frmMain());
+
+        var host = CreateHostBuilder().Build();
+        ServiceProvider = host.Services;
+
+        Application.Run(ServiceProvider.GetRequiredService<frmMain>());
     }
 }

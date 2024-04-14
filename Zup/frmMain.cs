@@ -1,13 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Zup.Entities;
 
 namespace Zup;
 
 public partial class frmMain : Form
 {
-    private frmEntryList m_FormEntryList = new frmEntryList();
-    private frmSetting m_FormSetting = new frmSetting();
-    private frmView m_FormView = new frmView();
+    private frmEntryList m_FormEntryList;
+    private frmSetting m_FormSetting;
+    private frmView m_FormView;
 
     #region Initialize
     [DllImport("user32.dll")]
@@ -25,12 +27,18 @@ public partial class frmMain : Form
         }
     }
 
-    public frmMain()
+    public frmMain(ZupDbContext dbContext, frmEntryList frmEntryList, frmSetting frmSetting, frmView frmView)
     {
         InitializeComponent();
 
         // RegisterHotKey for Win+Shift+Z
         RegisterHotKey(this.Handle, 1, 12, (int)Keys.Z);
+
+        dbContext.Database.Migrate();
+
+        m_FormEntryList = frmEntryList;
+        m_FormSetting = frmSetting;
+        m_FormView = frmView;
     }
 
     protected override void WndProc(ref Message m)

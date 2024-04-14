@@ -9,12 +9,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Zup.CustomControls;
+using Zup.Entities;
+using static Zup.frmNewEntry;
 
 namespace Zup;
 public partial class frmEntryList : Form
 {
-    private frmNewEntry m_FormNewEntry = new frmNewEntry();
+    private frmNewEntry m_FormNewEntry;
     private bool p_OnLoad = true;
+    private readonly ZupDbContext m_DbContext;
 
     protected override CreateParams CreateParams
     {
@@ -26,12 +29,15 @@ public partial class frmEntryList : Form
         }
     }
 
-    public frmEntryList()
+    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry)
     {
         InitializeComponent();
 
         Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 5;
         Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 5;
+
+        m_DbContext = dbContext;
+        m_FormNewEntry = frmNewEntry;
     }
 
     private void frmEntryList_FormClosing(object sender, FormClosingEventArgs e)
@@ -50,25 +56,45 @@ public partial class frmEntryList : Form
 
     private void frmEntryList_Load(object sender, EventArgs e)
     {
-        m_FormNewEntry.OnNewEntryEvent += FormNewEntry_OnNewEntryEvent;
+        m_FormNewEntry.OnNewEntryEvent += M_FormNewEntry_OnNewEntryEvent;
 
-        FormNewEntry_OnNewEntryEvent("Vincent");
-        FormNewEntry_OnNewEntryEvent("Dagpin");
-        FormNewEntry_OnNewEntryEvent("Task 101");
-        FormNewEntry_OnNewEntryEvent("Task 102");
-        FormNewEntry_OnNewEntryEvent("Task 502");
-        FormNewEntry_OnNewEntryEvent("Task 605");
-        FormNewEntry_OnNewEntryEvent("The quick brown fox jumps over the lazy dog");
+        var tasks = m_DbContext.TimeLogs.ToList();
+
+        foreach (var task in tasks)
+        {
+            var eachEntry = new EachEntry(task.ID, task.Task, task.StartedOn, task.EndedOn);
+
+            eachEntry.OnResumeEvent += NewEntry_OnResumeEvent;
+            eachEntry.OnStopEvent += Ee_OnStopEvent;
+
+            FormNewEntry_OnNewEntryEvent(eachEntry);
+        }
 
         p_OnLoad = false;
     }
 
-    private void FormNewEntry_OnNewEntryEvent(string entry)
+    private void M_FormNewEntry_OnNewEntryEvent(string entry)
     {
-        var newEntry = new EachEntry(entry, DateTime.Now, null);
+        var newE = new tbl_TimeLog
+        {
+            Task = entry,
+            StartedOn = DateTime.Now
+        };
 
-        newEntry.OnResumeEvent += NewEntry_OnResumeEvent;
+        m_DbContext.TimeLogs.Add(newE);
 
+        m_DbContext.SaveChanges();
+
+        var ee = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
+
+        ee.OnResumeEvent += NewEntry_OnResumeEvent;
+        ee.OnStopEvent += Ee_OnStopEvent;
+
+        FormNewEntry_OnNewEntryEvent(ee);
+    }
+
+    private void FormNewEntry_OnNewEntryEvent(EachEntry newEntry)
+    {
         flowLayoutPanel1.Controls.Add(newEntry);
 
         ActiveControl = newEntry;
@@ -82,7 +108,34 @@ public partial class frmEntryList : Form
 
     private void NewEntry_OnResumeEvent(string entry)
     {
-        FormNewEntry_OnNewEntryEvent(entry);
+        var newE = new tbl_TimeLog
+        {
+            Task = entry,
+            StartedOn = DateTime.Now
+        };
+
+        m_DbContext.TimeLogs.Add(newE);
+
+        m_DbContext.SaveChanges();
+
+        var ee = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
+
+        ee.OnResumeEvent += NewEntry_OnResumeEvent;
+        ee.OnStopEvent += Ee_OnStopEvent;
+
+        FormNewEntry_OnNewEntryEvent(ee);
+    }
+
+    private void Ee_OnStopEvent(int id, DateTime endOn)
+    {
+        var existingE = m_DbContext.TimeLogs.Find(id);
+
+        if (existingE != null)
+        {
+            existingE.EndedOn = endOn;
+
+            m_DbContext.SaveChanges();
+        }
     }
 
     private void StopAll()

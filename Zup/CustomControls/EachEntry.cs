@@ -21,8 +21,10 @@ public partial class EachEntry : UserControl
     private string txt = null!;
 
     public delegate void OnResume(string entry);
+    public delegate void OnStop(int id, DateTime endOn);
 
     public event OnResume? OnResumeEvent;
+    public event OnStop? OnStopEvent;
 
     public override string Text
     {
@@ -47,6 +49,8 @@ public partial class EachEntry : UserControl
             }
         }
     }
+
+    public int EntryID { get; set; }
 
     public DateTime StartedOn
     {
@@ -83,10 +87,11 @@ public partial class EachEntry : UserControl
         WriteTime();
     }
 
-    public EachEntry(string text, DateTime startedOn, DateTime? endedOn)
+    public EachEntry(int entryID, string text, DateTime startedOn, DateTime? endedOn = null)
     {
         InitializeComponent();
 
+        EntryID = entryID;
         Text = text;
         StartedOn = startedOn;
         EndedOn = endedOn;
@@ -119,6 +124,11 @@ public partial class EachEntry : UserControl
         IsStarted = false;
 
         WriteTime();
+
+        if (OnStopEvent != null)
+        {
+            OnStopEvent(EntryID, EndedOn.Value);
+        }
     }
 
     public void Start()
