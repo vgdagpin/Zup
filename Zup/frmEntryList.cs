@@ -40,9 +40,5 @@ public partial class frmEntryList : Form
     {
         flowLayoutPanel1.Controls.Add(new EachEntry());
         flowLayoutPanel1.Controls.Add(new EachEntry());
-        flowLayoutPanel1.Controls.Add(new EachEntry());
-        flowLayoutPanel1.Controls.Add(new EachEntry());
-        flowLayoutPanel1.Controls.Add(new EachEntry());
-        flowLayoutPanel1.Controls.Add(new EachEntry());
     }
 }
