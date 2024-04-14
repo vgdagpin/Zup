@@ -40,7 +40,7 @@ partial class frmNewEntry
         txtEntry.TabIndex = 0;
         txtEntry.KeyDown += txtEntry_KeyDown;
         // 
-        // frmEntry
+        // frmNewEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -50,9 +50,11 @@ partial class frmNewEntry
         Icon = (Icon)resources.GetObject("$this.Icon");
         MaximizeBox = false;
         MinimizeBox = false;
-        Name = "frmEntry";
+        Name = "frmNewEntry";
         SizeGripStyle = SizeGripStyle.Hide;
+        StartPosition = FormStartPosition.CenterScreen;
         Text = "Entry";
+        TopMost = true;
         FormClosing += frmNewEntry_FormClosing;
         Load += frmNewEntry_Load;
         ResumeLayout(false);

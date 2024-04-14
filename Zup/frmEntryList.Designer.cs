@@ -28,11 +28,41 @@ partial class frmEntryList
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
-        this.Text = "frmEntryList";
+        flowLayoutPanel1 = new FlowLayoutPanel();
+        SuspendLayout();
+        // 
+        // flowLayoutPanel1
+        // 
+        flowLayoutPanel1.AutoScroll = true;
+        flowLayoutPanel1.Dock = DockStyle.Fill;
+        flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+        flowLayoutPanel1.Location = new Point(0, 0);
+        flowLayoutPanel1.Name = "flowLayoutPanel1";
+        flowLayoutPanel1.Size = new Size(280, 172);
+        flowLayoutPanel1.TabIndex = 0;
+        flowLayoutPanel1.WrapContents = false;
+        // 
+        // frmEntryList
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        BackColor = Color.FromArgb(192, 192, 255);
+        ClientSize = new Size(280, 172);
+        Controls.Add(flowLayoutPanel1);
+        FormBorderStyle = FormBorderStyle.None;
+        Name = "frmEntryList";
+        ShowIcon = false;
+        ShowInTaskbar = false;
+        StartPosition = FormStartPosition.Manual;
+        Text = "frmEntryList";
+        TopMost = true;
+        TransparencyKey = Color.FromArgb(192, 192, 255);
+        FormClosing += frmEntryList_FormClosing;
+        Load += frmEntryList_Load;
+        ResumeLayout(false);
     }
 
     #endregion
+
+    private FlowLayoutPanel flowLayoutPanel1;
 }

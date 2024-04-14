@@ -5,8 +5,12 @@ namespace Zup;
 
 public partial class frmMain : Form
 {
-    protected virtual frmNewEntry m_FormNewEntry { get; set; } = new frmNewEntry();
+    private frmNewEntry m_FormNewEntry = new frmNewEntry();
+    private frmEntryList m_FormEntryList = new frmEntryList();
 
+    private List<frmEachEntry> m_EachEntry = new List<frmEachEntry>();
+
+    #region Initialize
     [DllImport("user32.dll")]
     public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
     [DllImport("user32.dll")]
@@ -25,12 +29,6 @@ public partial class frmMain : Form
     public frmMain()
     {
         InitializeComponent();
-
-        // Modifier keys codes: Alt = 1, Ctrl = 2, Shift = 4, Win = 8
-        // Compute the addition of each combination of the keys you want to be pressed
-        // ALT+CTRL = 1 + 2 = 3 , CTRL+SHIFT = 2 + 4 = 6...
-        //RegisterHotKey(this.Handle, 1, 6, (int)Keys.F12);
-
 
         // RegisterHotKey for Win+Shift+Z
         RegisterHotKey(this.Handle, 1, 12, (int)Keys.Z);
@@ -52,11 +50,26 @@ public partial class frmMain : Form
 
         base.OnClosing(e);
     }
+    #endregion
 
     private void frmMain_Load(object sender, EventArgs e)
     {
-
+        Visible = false;
     }
 
-    
+    private void tmrDelayShowList_Tick(object sender, EventArgs e)
+    {
+
+
+        m_FormEntryList.Show();
+
+
+
+        tmrDelayShowList.Stop();
+    }
+
+    private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Close();
+    }
 }
