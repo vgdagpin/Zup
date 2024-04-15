@@ -29,10 +29,11 @@ partial class frmNewEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
         txtEntry = new TextBox();
         tmrShowSuggest = new System.Windows.Forms.Timer(components);
         listBox1 = new ListBox();
+        tmrFocus = new System.Windows.Forms.Timer(components);
         SuspendLayout();
         // 
         // txtEntry
@@ -57,6 +58,11 @@ partial class frmNewEntry
         listBox1.Name = "listBox1";
         listBox1.Size = new Size(511, 64);
         listBox1.TabIndex = 1;
+        // 
+        // tmrFocus
+        // 
+        tmrFocus.Enabled = true;
+        tmrFocus.Tick += tmrFocus_Tick;
         // 
         // frmNewEntry
         // 
@@ -85,4 +91,5 @@ partial class frmNewEntry
     private TextBox txtEntry;
     private System.Windows.Forms.Timer tmrShowSuggest;
     private ListBox listBox1;
+    private System.Windows.Forms.Timer tmrFocus;
 }

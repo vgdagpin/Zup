@@ -65,7 +65,13 @@ public partial class frmNewEntry : Form
 
     public void ShowNewEntryDialog(params string[] suggestions)
     {
+        if (Visible)
+        {
+            return;
+        }
+
         Suggestions = suggestions;
+        tmrFocus.Enabled = true;
 
         ShowDialog();
     }
@@ -105,5 +111,12 @@ public partial class frmNewEntry : Form
             .ToList();
 
         listBox1.DataSource = filteredSuggestions;
+    }
+
+    private void tmrFocus_Tick(object sender, EventArgs e)
+    {
+        Activate();
+
+        tmrFocus.Enabled = false;
     }
 }
