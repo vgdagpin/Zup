@@ -2,9 +2,10 @@
 
 public partial class EachEntry : UserControl
 {
-    const int wrapLength = 30;
     const string StartChar = "►";
     const string StopChar = "■";
+
+    Color RunningColor = Color.LightPink;
 
     public bool IsStarted { get; private set; }
 
@@ -55,6 +56,9 @@ public partial class EachEntry : UserControl
         EndedOn = endedOn;
 
         WriteTime();
+
+        BackColor = DefaultBackColor;
+        btnToggleStartStop.ForeColor = DefaultForeColor;
     }
 
     private void WriteTime()
@@ -79,7 +83,7 @@ public partial class EachEntry : UserControl
         tmr.Stop();
         EndedOn = DateTime.Now;
         btnToggleStartStop.Text = StartChar;
-        btnToggleStartStop.ForeColor = Color.Black;
+        btnToggleStartStop.ForeColor = DefaultForeColor;
         IsStarted = false;
 
         WriteTime();
@@ -88,6 +92,8 @@ public partial class EachEntry : UserControl
         {
             OnStopEvent(EntryID, EndedOn.Value);
         }
+
+        BackColor = DefaultBackColor;
     }
 
     public void Start()
@@ -114,6 +120,8 @@ public partial class EachEntry : UserControl
         IsStarted = true;
 
         EndedOn = null;
+
+        BackColor = RunningColor;
     }
 
     private void btnToggleStartStop_Click(object sender, EventArgs e)

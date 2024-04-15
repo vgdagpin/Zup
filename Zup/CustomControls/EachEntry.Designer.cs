@@ -114,7 +114,7 @@ partial class EachEntry
         Controls.Add(lblStart);
         Controls.Add(btnToggleStartStop);
         Controls.Add(lblText);
-        Margin = new Padding(3, 1, 3, 1);
+        Margin = new Padding(1, 0, 1, 1);
         Name = "EachEntry";
         Size = new Size(247, 35);
         ResumeLayout(false);

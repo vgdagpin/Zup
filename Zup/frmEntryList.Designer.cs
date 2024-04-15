@@ -38,7 +38,7 @@ partial class frmEntryList
         flowLayoutPanel1.FlowDirection = FlowDirection.BottomUp;
         flowLayoutPanel1.Location = new Point(0, 0);
         flowLayoutPanel1.Name = "flowLayoutPanel1";
-        flowLayoutPanel1.Size = new Size(270, 71);
+        flowLayoutPanel1.Size = new Size(266, 71);
         flowLayoutPanel1.TabIndex = 0;
         flowLayoutPanel1.WrapContents = false;
         // 
@@ -47,11 +47,11 @@ partial class frmEntryList
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(192, 192, 255);
-        ClientSize = new Size(270, 71);
+        ClientSize = new Size(266, 71);
         Controls.Add(flowLayoutPanel1);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
-        Opacity = 0.7D;
+        Opacity = 0.9D;
         ShowIcon = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;

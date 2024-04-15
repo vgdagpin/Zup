@@ -25,8 +25,8 @@ public partial class frmEntryList : Form
     {
         InitializeComponent();
 
-        Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 5;
-        Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 5;
+        Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+        Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
