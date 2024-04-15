@@ -41,10 +41,10 @@ partial class EachEntry
         // lblText
         // 
         lblText.AutoEllipsis = true;
-        lblText.Cursor = Cursors.Hand;
+        lblText.Font = new Font("Segoe UI", 7F);
         lblText.Location = new Point(4, 4);
         lblText.Name = "lblText";
-        lblText.Size = new Size(194, 15);
+        lblText.Size = new Size(194, 13);
         lblText.TabIndex = 0;
         lblText.Text = "Task #1";
         toolTip.SetToolTip(lblText, "Test");
@@ -66,11 +66,10 @@ partial class EachEntry
         // 
         // lblStart
         // 
-        lblStart.Cursor = Cursors.Hand;
-        lblStart.Font = new Font("Segoe UI", 8.25F);
-        lblStart.Location = new Point(3, 22);
+        lblStart.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        lblStart.Location = new Point(5, 18);
         lblStart.Name = "lblStart";
-        lblStart.Size = new Size(167, 15);
+        lblStart.Size = new Size(94, 12);
         lblStart.TabIndex = 2;
         lblStart.Text = "00:00AM - 00:00AM";
         // 
@@ -81,12 +80,11 @@ partial class EachEntry
         // 
         // lblDuration
         // 
-        lblDuration.Cursor = Cursors.Hand;
-        lblDuration.Font = new Font("Segoe UI", 8.25F);
-        lblDuration.Location = new Point(189, 24);
+        lblDuration.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        lblDuration.Location = new Point(192, 21);
         lblDuration.Name = "lblDuration";
         lblDuration.RightToLeft = RightToLeft.Yes;
-        lblDuration.Size = new Size(55, 15);
+        lblDuration.Size = new Size(55, 12);
         lblDuration.TabIndex = 5;
         lblDuration.Text = "00:00:00";
         // 
@@ -118,7 +116,7 @@ partial class EachEntry
         Controls.Add(lblText);
         Margin = new Padding(3, 1, 3, 1);
         Name = "EachEntry";
-        Size = new Size(247, 42);
+        Size = new Size(247, 35);
         ResumeLayout(false);
     }
 
