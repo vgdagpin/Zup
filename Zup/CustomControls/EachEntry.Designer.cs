@@ -35,17 +35,19 @@ partial class EachEntry
         tmr = new System.Windows.Forms.Timer(components);
         lblDuration = new Label();
         btnUpdate = new Button();
+        toolTip = new ToolTip(components);
         SuspendLayout();
         // 
         // lblText
         // 
-        lblText.AutoSize = true;
+        lblText.AutoEllipsis = true;
         lblText.Cursor = Cursors.Hand;
         lblText.Location = new Point(4, 4);
         lblText.Name = "lblText";
-        lblText.Size = new Size(45, 15);
+        lblText.Size = new Size(194, 15);
         lblText.TabIndex = 0;
         lblText.Text = "Task #1";
+        toolTip.SetToolTip(lblText, "Test");
         // 
         // btnToggleStartStop
         // 
@@ -100,6 +102,7 @@ partial class EachEntry
         btnUpdate.TabIndex = 6;
         btnUpdate.TabStop = false;
         btnUpdate.Text = "₰";
+        toolTip.SetToolTip(btnUpdate, "Update Entry");
         btnUpdate.UseVisualStyleBackColor = true;
         btnUpdate.Click += btnUpdate_Click;
         // 
@@ -117,7 +120,6 @@ partial class EachEntry
         Name = "EachEntry";
         Size = new Size(247, 42);
         ResumeLayout(false);
-        PerformLayout();
     }
 
     #endregion
@@ -128,4 +130,5 @@ partial class EachEntry
     private System.Windows.Forms.Timer tmr;
     private Label lblDuration;
     private Button btnUpdate;
+    private ToolTip toolTip;
 }

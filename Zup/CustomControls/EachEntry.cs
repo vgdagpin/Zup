@@ -8,8 +8,6 @@ public partial class EachEntry : UserControl
 
     public bool IsStarted { get; private set; }
 
-    private string txt = null!;
-
     public delegate void OnResume(string entry);
     public delegate void OnStop(int id, DateTime endOn);
     public delegate void OnUpdate(int id);
@@ -20,21 +18,14 @@ public partial class EachEntry : UserControl
 
     public override string Text
     {
-        get => txt;
+        get => lblText.Text;
         set
         {
-            txt = value;
-
-            if (value != null)
+            lblText.Text = value;
+            
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                if (value.Length > wrapLength)
-                {
-                    lblText.Text = value.Substring(0, wrapLength) + "..";
-                }
-                else
-                {
-                    lblText.Text = value;
-                }
+                toolTip.SetToolTip(lblText, value);
             }
         }
     }

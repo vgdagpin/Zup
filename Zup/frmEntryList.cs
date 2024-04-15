@@ -50,6 +50,7 @@ public partial class frmEntryList : Form
     private void frmEntryList_Load(object sender, EventArgs e)
     {
         m_FormNewEntry.OnNewEntryEvent += EachEntry_NewEntryEventHandler;
+        m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
 
         var tasks = m_DbContext.TimeLogs.ToList();
 
@@ -65,7 +66,17 @@ public partial class frmEntryList : Form
         }
 
         p_OnLoad = false;
-    }    
+    }
+
+    private void FormUpdateEntry_OnDeleteEventHandler(int entryID)
+    {
+        var entryToRemove = flowLayoutPanel1.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
+
+        if (entryToRemove != null)
+        {
+            flowLayoutPanel1.Controls.Remove(entryToRemove);
+        }
+    }
 
     private void EachEntry_NewEntryEventHandler(string entry)
     {

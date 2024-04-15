@@ -28,28 +28,19 @@ partial class frmUpdateEntry
     /// </summary>
     private void InitializeComponent()
     {
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
-        label2 = new Label();
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
+        btnDelete = new Button();
         SuspendLayout();
-        // 
-        // label2
-        // 
-        label2.AutoSize = true;
-        label2.Location = new Point(12, 9);
-        label2.Name = "label2";
-        label2.Size = new Size(38, 15);
-        label2.TabIndex = 2;
-        label2.Text = "Notes";
         // 
         // rtbNote
         // 
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.BorderStyle = BorderStyle.FixedSingle;
-        rtbNote.Location = new Point(217, 10);
+        rtbNote.Location = new Point(217, 33);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(426, 346);
+        rtbNote.Size = new Size(426, 323);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
@@ -61,20 +52,30 @@ partial class frmUpdateEntry
         lbNotes.DisplayMember = "Summary";
         lbNotes.FormattingEnabled = true;
         lbNotes.ItemHeight = 15;
-        lbNotes.Location = new Point(67, 9);
+        lbNotes.Location = new Point(7, 9);
         lbNotes.Name = "lbNotes";
-        lbNotes.Size = new Size(144, 347);
+        lbNotes.Size = new Size(204, 347);
         lbNotes.TabIndex = 4;
         lbNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
+        // 
+        // btnDelete
+        // 
+        btnDelete.Location = new Point(568, 4);
+        btnDelete.Name = "btnDelete";
+        btnDelete.Size = new Size(75, 23);
+        btnDelete.TabIndex = 5;
+        btnDelete.Text = "Delete";
+        btnDelete.UseVisualStyleBackColor = true;
+        btnDelete.Click += btnDelete_Click;
         // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(655, 365);
+        Controls.Add(btnDelete);
         Controls.Add(lbNotes);
         Controls.Add(rtbNote);
-        Controls.Add(label2);
         Icon = (Icon)resources.GetObject("$this.Icon");
         MaximizeBox = false;
         MinimizeBox = false;
@@ -83,11 +84,10 @@ partial class frmUpdateEntry
         FormClosing += frmUpdateEntry_FormClosing;
         Load += frmUpdateEntry_Load;
         ResumeLayout(false);
-        PerformLayout();
     }
 
     #endregion
-    private Label label2;
     private RichTextBox rtbNote;
     private ListBox lbNotes;
+    private Button btnDelete;
 }

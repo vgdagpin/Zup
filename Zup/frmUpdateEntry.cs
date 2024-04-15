@@ -9,6 +9,10 @@ public partial class frmUpdateEntry : Form
     private int? selectedEntryID;
     private int? selectedNoteID;
 
+    public delegate void OnDelete(int entryID);
+
+    public event OnDelete? OnDeleteEvent;
+
     public frmUpdateEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
@@ -134,6 +138,24 @@ public partial class frmUpdateEntry : Form
 
         rtbNote.Text = sel.Note;
         selectedNoteID = sel.ID;
+    }
+
+    private void btnDelete_Click(object sender, EventArgs e)
+    {
+        var entry = p_DbContext.TimeLogs.Find(selectedEntryID);
+
+        if (entry != null)
+        {
+            p_DbContext.TimeLogs.Remove(entry);
+            p_DbContext.SaveChanges();
+        }
+
+        if (OnDeleteEvent != null)
+        {
+            OnDeleteEvent(selectedEntryID!.Value);
+        }
+
+        Close();
     }
 }
 
