@@ -3,6 +3,7 @@
 using Zup.Entities;
 
 namespace Zup;
+
 public partial class frmUpdateEntry : Form
 {
     private readonly ZupDbContext p_DbContext;
@@ -78,6 +79,32 @@ public partial class frmUpdateEntry : Form
         }
     }
 
+    void DeleteNote()
+    {
+        var confirm = MessageBox.Show("Continue to delete this note?", "Delete Note", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+        if (confirm == DialogResult.Cancel)
+        {
+            return;
+        }
+
+        var lll = lbNotes.Items.Cast<NoteSummary>().Single(a => a.ID == selectedNoteID);
+        var existingNote = p_DbContext.Notes.Find(selectedNoteID);
+
+        if (existingNote != null)
+        {
+            p_DbContext.Notes.Remove(existingNote);
+
+            lbNotes.Items.Remove(lll);
+
+            p_DbContext.SaveChanges();
+        }
+
+        btnDeleteNote.Enabled = false;
+        selectedNoteID = null;
+        rtbNote.Clear();
+    }
+
     void SaveChanges()
     {
         if (selectedNoteID != null)
@@ -89,9 +116,7 @@ public partial class frmUpdateEntry : Form
             {
                 if (string.IsNullOrWhiteSpace(rtbNote.Text))
                 {
-                    p_DbContext.Notes.Remove(existingNote);
-
-                    lbNotes.Items.Remove(lll);
+                    DeleteNote();
                 }
                 else
                 {
@@ -100,9 +125,9 @@ public partial class frmUpdateEntry : Form
 
                     lll.Summary = NoteSummary.Parse(existingNote).Summary;
                     lll.Note = rtbNote.Text;
-                }
 
-                p_DbContext.SaveChanges();
+                    p_DbContext.SaveChanges();
+                }
             }
         }
         else
@@ -125,6 +150,9 @@ public partial class frmUpdateEntry : Form
                 rtbNote.Clear();
             }
         }
+
+        selectedNoteID = null;
+        btnDeleteNote.Enabled = false;
     }
 
     private void lbNotes_SelectedIndexChanged(object sender, EventArgs e)
@@ -138,10 +166,19 @@ public partial class frmUpdateEntry : Form
 
         rtbNote.Text = sel.Note;
         selectedNoteID = sel.ID;
+
+        btnDeleteNote.Enabled = true;
     }
 
-    private void btnDelete_Click(object sender, EventArgs e)
+    private void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        var result = MessageBox.Show(Text, "Delete Entry", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+        if (result == DialogResult.Cancel)
+        {
+            return;
+        }
+
         var entry = p_DbContext.TimeLogs.Find(selectedEntryID);
 
         if (entry != null)
@@ -157,6 +194,35 @@ public partial class frmUpdateEntry : Form
 
         Close();
     }
+
+    private void btnDeleteNote_Click(object sender, EventArgs e)
+    {
+        DeleteNote();
+    }
+
+    private void lbNotes_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyData == Keys.Delete)
+        {
+            DeleteNote();
+        }
+    }
+
+    private void btnNewNote_Click(object sender, EventArgs e)
+    {
+        selectedNoteID = null;
+        rtbNote.Clear();
+    }
+
+    private void btnSaveNote_Click(object sender, EventArgs e)
+    {
+        SaveChanges();
+    }
+
+    private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        btnSaveNote.Enabled = rtbNote.Text.Trim().Length > 0;
+    }
 }
 
 public class NoteSummary
@@ -170,7 +236,7 @@ public class NoteSummary
 
     public static NoteSummary Parse(tbl_Note newNote)
     {
-        const int noteLen = 15;
+        const int noteLen = 30;
 
         return new NoteSummary
         {

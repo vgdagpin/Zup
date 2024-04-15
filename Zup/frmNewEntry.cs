@@ -67,7 +67,7 @@ public partial class frmNewEntry : Form
     {
         Suggestions = suggestions;
 
-        Show();
+        ShowDialog();
     }
 
     private void frmNewEntry_VisibleChanged(object sender, EventArgs e)

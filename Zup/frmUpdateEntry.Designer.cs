@@ -31,18 +31,24 @@ partial class frmUpdateEntry
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
-        btnDelete = new Button();
+        menuStrip1 = new MenuStrip();
+        deleteEntryToolStripMenuItem = new ToolStripMenuItem();
+        btnDeleteNote = new Button();
+        btnNewNote = new Button();
+        btnSaveNote = new Button();
+        menuStrip1.SuspendLayout();
         SuspendLayout();
         // 
         // rtbNote
         // 
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.BorderStyle = BorderStyle.FixedSingle;
-        rtbNote.Location = new Point(217, 33);
+        rtbNote.Location = new Point(217, 39);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(426, 323);
+        rtbNote.Size = new Size(426, 327);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
+        rtbNote.KeyPress += rtbNote_KeyPress;
         rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
         // 
         // lbNotes
@@ -52,42 +58,98 @@ partial class frmUpdateEntry
         lbNotes.DisplayMember = "Summary";
         lbNotes.FormattingEnabled = true;
         lbNotes.ItemHeight = 15;
-        lbNotes.Location = new Point(7, 9);
+        lbNotes.Location = new Point(7, 39);
         lbNotes.Name = "lbNotes";
-        lbNotes.Size = new Size(204, 347);
+        lbNotes.Size = new Size(204, 242);
         lbNotes.TabIndex = 4;
         lbNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
+        lbNotes.KeyDown += lbNotes_KeyDown;
         // 
-        // btnDelete
+        // menuStrip1
         // 
-        btnDelete.Location = new Point(568, 4);
-        btnDelete.Name = "btnDelete";
-        btnDelete.Size = new Size(75, 23);
-        btnDelete.TabIndex = 5;
-        btnDelete.Text = "Delete";
-        btnDelete.UseVisualStyleBackColor = true;
-        btnDelete.Click += btnDelete_Click;
+        menuStrip1.Items.AddRange(new ToolStripItem[] { deleteEntryToolStripMenuItem });
+        menuStrip1.Location = new Point(0, 0);
+        menuStrip1.Name = "menuStrip1";
+        menuStrip1.Size = new Size(655, 24);
+        menuStrip1.TabIndex = 6;
+        menuStrip1.Text = "menuStrip1";
+        // 
+        // deleteEntryToolStripMenuItem
+        // 
+        deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
+        deleteEntryToolStripMenuItem.Size = new Size(82, 20);
+        deleteEntryToolStripMenuItem.Text = "Delete Entry";
+        deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;
+        // 
+        // btnDeleteNote
+        // 
+        btnDeleteNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        btnDeleteNote.Enabled = false;
+        btnDeleteNote.Location = new Point(7, 316);
+        btnDeleteNote.Name = "btnDeleteNote";
+        btnDeleteNote.Size = new Size(204, 23);
+        btnDeleteNote.TabIndex = 7;
+        btnDeleteNote.Text = "Delete Note (Del)";
+        btnDeleteNote.TextAlign = ContentAlignment.MiddleLeft;
+        btnDeleteNote.UseVisualStyleBackColor = true;
+        btnDeleteNote.Click += btnDeleteNote_Click;
+        // 
+        // btnNewNote
+        // 
+        btnNewNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        btnNewNote.Location = new Point(7, 287);
+        btnNewNote.Name = "btnNewNote";
+        btnNewNote.Size = new Size(204, 23);
+        btnNewNote.TabIndex = 8;
+        btnNewNote.Text = "New Note (CTRL+N)";
+        btnNewNote.TextAlign = ContentAlignment.MiddleLeft;
+        btnNewNote.UseVisualStyleBackColor = true;
+        btnNewNote.Click += btnNewNote_Click;
+        // 
+        // btnSaveNote
+        // 
+        btnSaveNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        btnSaveNote.Enabled = false;
+        btnSaveNote.Location = new Point(7, 345);
+        btnSaveNote.Name = "btnSaveNote";
+        btnSaveNote.Size = new Size(204, 23);
+        btnSaveNote.TabIndex = 9;
+        btnSaveNote.Text = "Save Note (CTRL+S)";
+        btnSaveNote.TextAlign = ContentAlignment.MiddleLeft;
+        btnSaveNote.UseVisualStyleBackColor = true;
+        btnSaveNote.Click += btnSaveNote_Click;
         // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(655, 365);
-        Controls.Add(btnDelete);
+        ClientSize = new Size(655, 375);
+        Controls.Add(btnSaveNote);
+        Controls.Add(btnNewNote);
+        Controls.Add(btnDeleteNote);
         Controls.Add(lbNotes);
         Controls.Add(rtbNote);
+        Controls.Add(menuStrip1);
         Icon = (Icon)resources.GetObject("$this.Icon");
+        MainMenuStrip = menuStrip1;
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "frmUpdateEntry";
         Text = "frmUpdateEntry";
         FormClosing += frmUpdateEntry_FormClosing;
         Load += frmUpdateEntry_Load;
+        menuStrip1.ResumeLayout(false);
+        menuStrip1.PerformLayout();
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
     private RichTextBox rtbNote;
     private ListBox lbNotes;
-    private Button btnDelete;
+    private MenuStrip menuStrip1;
+    private ToolStripMenuItem deleteEntryToolStripMenuItem;
+    private Button btnDeleteNote;
+    private Button btnNewNote;
+    private Button btnSaveNote;
 }
