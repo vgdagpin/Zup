@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
+﻿using System.Data;
 using Zup.CustomControls;
 using Zup.Entities;
-using static Zup.frmNewEntry;
 
 namespace Zup;
 public partial class frmEntryList : Form
 {
     private frmNewEntry m_FormNewEntry;
+    private frmUpdateEntry m_FormUpdateEntry;
+
     private bool p_OnLoad = true;
     private readonly ZupDbContext m_DbContext;
 
@@ -29,7 +21,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry)
+    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry)
     {
         InitializeComponent();
 
@@ -38,6 +30,7 @@ public partial class frmEntryList : Form
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
+        m_FormUpdateEntry = frmUpdateEntry;
     }
 
     private void frmEntryList_FormClosing(object sender, FormClosingEventArgs e)
@@ -56,7 +49,7 @@ public partial class frmEntryList : Form
 
     private void frmEntryList_Load(object sender, EventArgs e)
     {
-        m_FormNewEntry.OnNewEntryEvent += M_FormNewEntry_OnNewEntryEvent;
+        m_FormNewEntry.OnNewEntryEvent += EachEntry_NewEntryEventHandler;
 
         var tasks = m_DbContext.TimeLogs.ToList();
 
@@ -64,16 +57,17 @@ public partial class frmEntryList : Form
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.StartedOn, task.EndedOn);
 
-            eachEntry.OnResumeEvent += NewEntry_OnResumeEvent;
-            eachEntry.OnStopEvent += Ee_OnStopEvent;
+            eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
+            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
 
-            FormNewEntry_OnNewEntryEvent(eachEntry);
+            AddEntryToFlowLayoutControl(eachEntry);
         }
 
         p_OnLoad = false;
-    }
+    }    
 
-    private void M_FormNewEntry_OnNewEntryEvent(string entry)
+    private void EachEntry_NewEntryEventHandler(string entry)
     {
         var newE = new tbl_TimeLog
         {
@@ -87,13 +81,19 @@ public partial class frmEntryList : Form
 
         var ee = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
 
-        ee.OnResumeEvent += NewEntry_OnResumeEvent;
-        ee.OnStopEvent += Ee_OnStopEvent;
+        ee.OnResumeEvent += EachEntry_NewEntryEventHandler;
+        ee.OnStopEvent += EachEntry_OnStopEventHandler;
+        ee.OnUpdateEvent += EachEntry_OnUpdateEvent;
 
-        FormNewEntry_OnNewEntryEvent(ee);
+        AddEntryToFlowLayoutControl(ee);
     }
 
-    private void FormNewEntry_OnNewEntryEvent(EachEntry newEntry)
+    private void EachEntry_OnUpdateEvent(int id)
+    {
+        m_FormUpdateEntry.ShowUpdateEntry(id);
+    }
+
+    private void AddEntryToFlowLayoutControl(EachEntry newEntry)
     {
         flowLayoutPanel1.Controls.Add(newEntry);
 
@@ -104,29 +104,9 @@ public partial class frmEntryList : Form
             StopAll();
             newEntry.Start();
         }
-    }
+    }   
 
-    private void NewEntry_OnResumeEvent(string entry)
-    {
-        var newE = new tbl_TimeLog
-        {
-            Task = entry,
-            StartedOn = DateTime.Now
-        };
-
-        m_DbContext.TimeLogs.Add(newE);
-
-        m_DbContext.SaveChanges();
-
-        var ee = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
-
-        ee.OnResumeEvent += NewEntry_OnResumeEvent;
-        ee.OnStopEvent += Ee_OnStopEvent;
-
-        FormNewEntry_OnNewEntryEvent(ee);
-    }
-
-    private void Ee_OnStopEvent(int id, DateTime endOn)
+    private void EachEntry_OnStopEventHandler(int id, DateTime endOn)
     {
         var existingE = m_DbContext.TimeLogs.Find(id);
 

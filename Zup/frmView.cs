@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Zup;
+
 public partial class frmView : Form
 {
-    public frmView()
+    private readonly ZupDbContext p_DbContext;
+
+    public frmView(ZupDbContext dbContext)
     {
         InitializeComponent();
+        p_DbContext = dbContext;        
     }
 
     private void frmView_FormClosing(object sender, FormClosingEventArgs e)
@@ -22,4 +19,48 @@ public partial class frmView : Form
 
         Hide();
     }
+
+    private void frmView_VisibleChanged(object sender, EventArgs e)
+    {
+        if (Visible)
+        {
+            dgView.DataSource = p_DbContext.TimeLogs
+                .OrderByDescending(a => a.ID)
+                .ToList()
+                .Select(a =>
+                {
+                    string? duration = null;
+
+                    if (a.EndedOn != null)
+                    {
+                        var diff = a.EndedOn!.Value - a.StartedOn;
+
+                        duration = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
+                    }
+
+                    return new TimeLogSummary
+                    {
+                        ID = a.ID,
+                        Task = a.Task,
+                        StartedOn = a.StartedOn.ToString("MM/dd hh:mm tt"),
+                        EndedOn = a.EndedOn?.ToString("MM/dd hh:mm tt"),
+                        Duration = duration
+                    };
+                })
+                .ToList();
+        }
+    }
+}
+
+public class TimeLogSummary
+{
+    public int ID { get; set; }
+
+    [MaxLength(255)]
+    public string Task { get; set; } = null!;
+
+
+    public string StartedOn { get; set; } = null!;
+    public string? EndedOn { get; set; }
+    public string? Duration { get; set; }
 }

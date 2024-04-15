@@ -12,9 +12,11 @@ public partial class EachEntry : UserControl
 
     public delegate void OnResume(string entry);
     public delegate void OnStop(int id, DateTime endOn);
+    public delegate void OnUpdate(int id);
 
     public event OnResume? OnResumeEvent;
     public event OnStop? OnStopEvent;
+    public event OnUpdate? OnUpdateEvent;
 
     public override string Text
     {
@@ -140,5 +142,13 @@ public partial class EachEntry : UserControl
         var diff = DateTime.Now - StartedOn!.Value;
 
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
+    }
+
+    private void btnUpdate_Click(object sender, EventArgs e)
+    {
+        if (OnUpdateEvent != null)
+        {
+            OnUpdateEvent(EntryID);
+        }
     }
 }

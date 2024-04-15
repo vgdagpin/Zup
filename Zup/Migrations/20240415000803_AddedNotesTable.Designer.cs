@@ -4,20 +4,43 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Zup;
 
 #nullable disable
 
 namespace Zup.Migrations
 {
     [DbContext(typeof(ZupDbContext))]
-    [Migration("20240414225004_Init")]
-    partial class Init
+    [Migration("20240415000803_AddedNotesTable")]
+    partial class AddedNotesTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+
+            modelBuilder.Entity("Zup.Entities.tbl_Note", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LogID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Notes");
+                });
 
             modelBuilder.Entity("Zup.Entities.tbl_TimeLog", b =>
                 {
@@ -28,14 +51,12 @@ namespace Zup.Migrations
                     b.Property<DateTime?>("EndedOn")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Notes")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("StartedOn")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Task")
                         .IsRequired()
+                        .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");

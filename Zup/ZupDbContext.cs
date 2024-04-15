@@ -1,19 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Zup.Entities;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zup.Entities;
+namespace Zup;
 
 public class ZupDbContext : DbContext
 {
     public DbSet<tbl_TimeLog> TimeLogs { get; set; }
+    public DbSet<tbl_Note> Notes { get; set; }
 
     public ZupDbContext(DbContextOptions<ZupDbContext> dbContextOptions) : base(dbContextOptions)
     {
-        
+
     }
 }

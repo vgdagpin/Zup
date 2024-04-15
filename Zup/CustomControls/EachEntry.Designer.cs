@@ -101,6 +101,7 @@ partial class EachEntry
         btnUpdate.TabStop = false;
         btnUpdate.Text = "₰";
         btnUpdate.UseVisualStyleBackColor = true;
+        btnUpdate.Click += btnUpdate_Click;
         // 
         // EachEntry
         // 

@@ -28,6 +28,7 @@ partial class frmSetting
     /// </summary>
     private void InitializeComponent()
     {
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
         SuspendLayout();
         // 
         // frmSetting
@@ -35,8 +36,9 @@ partial class frmSetting
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(800, 450);
+        Icon = (Icon)resources.GetObject("$this.Icon");
         Name = "frmSetting";
-        Text = "frmSetting";
+        Text = "Setting";
         FormClosing += frmSetting_FormClosing;
         ResumeLayout(false);
     }

@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Zup.Entities;
 
 namespace Zup
 {

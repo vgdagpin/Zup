@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
-using Zup.Entities;
 
 namespace Zup;
 
@@ -36,6 +35,7 @@ internal static class Program
                 services.AddTransient<frmSetting>();
                 services.AddTransient<frmView>();
                 services.AddTransient<frmNewEntry>();
+                services.AddTransient<frmUpdateEntry>();
 
                 services.AddDbContext<ZupDbContext>(optionsAction =>
                 {

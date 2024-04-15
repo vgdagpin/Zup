@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Zup.Entities;
 
 public class tbl_TimeLog
 {
     public int ID { get; set; }
+
+    [MaxLength(255)]
     public string Task { get; set; } = null!;
-    public string? Notes { get; set; }
+
+
     public DateTime StartedOn { get; set; }
     public DateTime? EndedOn { get; set; }
 }
