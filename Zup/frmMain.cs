@@ -31,7 +31,12 @@ public partial class frmMain : Form
         InitializeComponent();
 
         // RegisterHotKey for Win+Shift+Z
-        RegisterHotKey(this.Handle, 1, 12, (int)Keys.Z);
+        // RegisterHoykey for Shift+Alt+J
+
+
+        RegisterHotKey(this.Handle, 1, 12, (int)Keys.J);
+        RegisterHotKey(this.Handle, 2, 12, (int)Keys.K);
+        RegisterHotKey(this.Handle, 3, 12, (int)Keys.L);
 
         dbContext.Database.Migrate();
 
@@ -45,6 +50,14 @@ public partial class frmMain : Form
         if (m.Msg == 0x0312 && m.WParam.ToInt32() == 1)
         {
             m_FormEntryList.ShowNewEntry();
+        }
+        else if (m.Msg == 0x0312 && m.WParam.ToInt32() == 2)
+        {
+            m_FormEntryList.UpdateCurrentRunningTask();
+        }
+        else if (m.Msg == 0x0312 && m.WParam.ToInt32() == 3)
+        {
+            m_FormEntryList.ToggleLastRunningTask();
         }
 
         base.WndProc(ref m);
@@ -92,5 +105,20 @@ public partial class frmMain : Form
     private void notifIconZup_DoubleClick(object sender, EventArgs e)
     {
         m_FormView.Show();
+    }
+
+    private void openNewEntryToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormEntryList.ShowNewEntry();
+    }
+
+    private void updateCurrentRunningTaskToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormEntryList.UpdateCurrentRunningTask();
+    }
+
+    private void toggleLastRunningTaskToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormEntryList.ToggleLastRunningTask();
     }
 }

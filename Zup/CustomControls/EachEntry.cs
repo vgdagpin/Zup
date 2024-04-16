@@ -12,10 +12,12 @@ public partial class EachEntry : UserControl
     public delegate void OnResume(string entry);
     public delegate void OnStop(int id, DateTime endOn);
     public delegate void OnUpdate(int id);
+    public delegate void OnStart(int id);
 
     public event OnResume? OnResumeEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
+    public event OnStart? OnStartEvent;
 
     public override string Text
     {
@@ -122,6 +124,11 @@ public partial class EachEntry : UserControl
         EndedOn = null;
 
         BackColor = RunningColor;
+
+        if (OnStartEvent != null)
+        {
+            OnStartEvent(EntryID);
+        }
     }
 
     private void btnToggleStartStop_Click(object sender, EventArgs e)

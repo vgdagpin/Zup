@@ -1,6 +1,4 @@
-﻿using System.Formats.Tar;
-
-namespace Zup;
+﻿namespace Zup;
 
 
 public partial class frmNewEntry : Form
@@ -46,9 +44,13 @@ public partial class frmNewEntry : Form
 
         if (e.KeyCode == Keys.Enter)
         {
+            e.SuppressKeyPress = true;
+
             var temp = listBox1.Items.Count > 0
                 ? listBox1.Items[0].ToString()
                 : txtEntry.Text.Trim();
+
+            Close();            
 
             if (!string.IsNullOrWhiteSpace(temp))
             {
@@ -57,9 +59,6 @@ public partial class frmNewEntry : Form
                     OnNewEntryEvent(temp);
                 }
             }
-
-            e.SuppressKeyPress = true;
-            Close();
         }
     }
 

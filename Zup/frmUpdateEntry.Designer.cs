@@ -28,6 +28,7 @@ partial class frmUpdateEntry
     /// </summary>
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
@@ -36,6 +37,7 @@ partial class frmUpdateEntry
         btnDeleteNote = new Button();
         btnNewNote = new Button();
         btnSaveNote = new Button();
+        tmrFocus = new System.Windows.Forms.Timer(components);
         menuStrip1.SuspendLayout();
         SuspendLayout();
         // 
@@ -48,6 +50,7 @@ partial class frmUpdateEntry
         rtbNote.Size = new Size(426, 327);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
+        rtbNote.KeyDown += rtbNote_KeyDown;
         rtbNote.KeyPress += rtbNote_KeyPress;
         rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
         // 
@@ -119,6 +122,10 @@ partial class frmUpdateEntry
         btnSaveNote.UseVisualStyleBackColor = true;
         btnSaveNote.Click += btnSaveNote_Click;
         // 
+        // tmrFocus
+        // 
+        tmrFocus.Tick += tmrFocus_Tick;
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -152,4 +159,5 @@ partial class frmUpdateEntry
     private Button btnDeleteNote;
     private Button btnNewNote;
     private Button btnSaveNote;
+    private System.Windows.Forms.Timer tmrFocus;
 }

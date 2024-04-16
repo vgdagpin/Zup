@@ -11,6 +11,9 @@ public partial class frmEntryList : Form
     private bool p_OnLoad = true;
     private readonly ZupDbContext m_DbContext;
 
+    private int? CurrentRunningTaskID;
+    private int? LastRunningTaskID;
+
     protected override CreateParams CreateParams
     {
         get
@@ -25,7 +28,8 @@ public partial class frmEntryList : Form
     {
         InitializeComponent();
 
-        Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+        //Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+        Left = 2;
         Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
 
         m_DbContext = dbContext;
@@ -42,9 +46,11 @@ public partial class frmEntryList : Form
 
     public void ShowNewEntry()
     {
-        m_FormNewEntry.ShowNewEntryDialog(flowLayoutPanel1.Controls.Cast<EachEntry>()
+        var suggestions = flowLayoutPanel1.Controls.Cast<EachEntry>()
             .Select(a => a.Text)
-            .Distinct().ToArray());
+            .Distinct().ToArray();
+
+        m_FormNewEntry.ShowNewEntryDialog(suggestions);
     }
 
     private void frmEntryList_Load(object sender, EventArgs e)
@@ -60,12 +66,19 @@ public partial class frmEntryList : Form
 
             eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
             eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
 
             AddEntryToFlowLayoutControl(eachEntry);
         }
 
         p_OnLoad = false;
+    }
+
+    private void EachEntry_OnStartEvent(int id)
+    {
+        CurrentRunningTaskID = id;
+        LastRunningTaskID = id;
     }
 
     private void FormUpdateEntry_OnDeleteEventHandler(int entryID)
@@ -90,13 +103,16 @@ public partial class frmEntryList : Form
 
         m_DbContext.SaveChanges();
 
-        var ee = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
+        var eachEntry = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
 
-        ee.OnResumeEvent += EachEntry_NewEntryEventHandler;
-        ee.OnStopEvent += EachEntry_OnStopEventHandler;
-        ee.OnUpdateEvent += EachEntry_OnUpdateEvent;
+        eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
+        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
 
-        AddEntryToFlowLayoutControl(ee);
+        AddEntryToFlowLayoutControl(eachEntry);
+
+        EachEntry_OnUpdateEvent(newE.ID);
     }
 
     private void EachEntry_OnUpdateEvent(int id)
@@ -115,7 +131,7 @@ public partial class frmEntryList : Form
             StopAll();
             newEntry.Start();
         }
-    }   
+    }
 
     private void EachEntry_OnStopEventHandler(int id, DateTime endOn)
     {
@@ -127,6 +143,8 @@ public partial class frmEntryList : Form
 
             m_DbContext.SaveChanges();
         }
+
+        CurrentRunningTaskID = null;
     }
 
     private void StopAll()
@@ -136,6 +154,41 @@ public partial class frmEntryList : Form
             if (item.IsStarted)
             {
                 item.Stop();
+            }
+        }
+    }
+
+    public void UpdateCurrentRunningTask()
+    {
+        if (CurrentRunningTaskID == null)
+        {
+            return;
+        }
+
+        EachEntry_OnUpdateEvent(CurrentRunningTaskID.Value);
+    }
+
+    public void ToggleLastRunningTask()
+    {
+        if (LastRunningTaskID == null)
+        {
+            return;
+        }
+
+        foreach (EachEntry item in flowLayoutPanel1.Controls)
+        {
+            if (item.EntryID != LastRunningTaskID)
+            {
+                continue;
+            }
+
+            if (item.IsStarted)
+            {
+                item.Stop();
+            }
+            else
+            {
+                item.Start();
             }
         }
     }

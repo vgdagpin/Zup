@@ -61,7 +61,6 @@ partial class frmNewEntry
         // 
         // tmrFocus
         // 
-        tmrFocus.Enabled = true;
         tmrFocus.Tick += tmrFocus_Tick;
         // 
         // frmNewEntry

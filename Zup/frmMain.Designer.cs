@@ -29,7 +29,7 @@ partial class frmMain
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
         notifIconZup = new NotifyIcon(components);
         notifCms = new ContextMenuStrip(components);
         viewToolStripMenuItem = new ToolStripMenuItem();
@@ -37,6 +37,9 @@ partial class frmMain
         toolStripSeparator1 = new ToolStripSeparator();
         exitToolStripMenuItem = new ToolStripMenuItem();
         tmrDelayShowList = new System.Windows.Forms.Timer(components);
+        openNewEntryToolStripMenuItem = new ToolStripMenuItem();
+        updateCurrentRunningTaskToolStripMenuItem = new ToolStripMenuItem();
+        toggleLastRunningTaskToolStripMenuItem = new ToolStripMenuItem();
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -50,34 +53,34 @@ partial class frmMain
         // 
         // notifCms
         // 
-        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, settingsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(117, 76);
+        notifCms.Size = new Size(298, 164);
         // 
         // viewToolStripMenuItem
         // 
         viewToolStripMenuItem.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-        viewToolStripMenuItem.Size = new Size(116, 22);
+        viewToolStripMenuItem.Size = new Size(297, 22);
         viewToolStripMenuItem.Text = "View";
         viewToolStripMenuItem.Click += viewToolStripMenuItem_Click;
         // 
         // settingsToolStripMenuItem
         // 
         settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-        settingsToolStripMenuItem.Size = new Size(116, 22);
+        settingsToolStripMenuItem.Size = new Size(297, 22);
         settingsToolStripMenuItem.Text = "Settings";
         settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
         // 
         // toolStripSeparator1
         // 
         toolStripSeparator1.Name = "toolStripSeparator1";
-        toolStripSeparator1.Size = new Size(113, 6);
+        toolStripSeparator1.Size = new Size(294, 6);
         // 
         // exitToolStripMenuItem
         // 
         exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-        exitToolStripMenuItem.Size = new Size(116, 22);
+        exitToolStripMenuItem.Size = new Size(297, 22);
         exitToolStripMenuItem.Text = "Exit";
         exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
         // 
@@ -86,6 +89,30 @@ partial class frmMain
         tmrDelayShowList.Enabled = true;
         tmrDelayShowList.Interval = 1000;
         tmrDelayShowList.Tick += tmrDelayShowList_Tick;
+        // 
+        // openNewEntryToolStripMenuItem
+        // 
+        openNewEntryToolStripMenuItem.Name = "openNewEntryToolStripMenuItem";
+        openNewEntryToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.J;
+        openNewEntryToolStripMenuItem.Size = new Size(297, 22);
+        openNewEntryToolStripMenuItem.Text = "Open New Entry";
+        openNewEntryToolStripMenuItem.Click += openNewEntryToolStripMenuItem_Click;
+        // 
+        // updateCurrentRunningTaskToolStripMenuItem
+        // 
+        updateCurrentRunningTaskToolStripMenuItem.Name = "updateCurrentRunningTaskToolStripMenuItem";
+        updateCurrentRunningTaskToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.K;
+        updateCurrentRunningTaskToolStripMenuItem.Size = new Size(297, 22);
+        updateCurrentRunningTaskToolStripMenuItem.Text = "Update Current Running Task";
+        updateCurrentRunningTaskToolStripMenuItem.Click += updateCurrentRunningTaskToolStripMenuItem_Click;
+        // 
+        // toggleLastRunningTaskToolStripMenuItem
+        // 
+        toggleLastRunningTaskToolStripMenuItem.Name = "toggleLastRunningTaskToolStripMenuItem";
+        toggleLastRunningTaskToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.L;
+        toggleLastRunningTaskToolStripMenuItem.Size = new Size(297, 22);
+        toggleLastRunningTaskToolStripMenuItem.Text = "Toggle Last Running Task";
+        toggleLastRunningTaskToolStripMenuItem.Click += toggleLastRunningTaskToolStripMenuItem_Click;
         // 
         // frmMain
         // 
@@ -112,4 +139,7 @@ partial class frmMain
     private ToolStripSeparator toolStripSeparator1;
     private ToolStripMenuItem exitToolStripMenuItem;
     private ToolStripMenuItem viewToolStripMenuItem;
+    private ToolStripMenuItem openNewEntryToolStripMenuItem;
+    private ToolStripMenuItem updateCurrentRunningTaskToolStripMenuItem;
+    private ToolStripMenuItem toggleLastRunningTaskToolStripMenuItem;
 }

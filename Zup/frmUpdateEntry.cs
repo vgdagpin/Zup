@@ -51,14 +51,16 @@ public partial class frmUpdateEntry : Form
 
         selectedEntryID = entryID;
 
-        Show();
-
         Text = entry.Task;
 
         foreach (var note in p_DbContext.Notes.Where(a => a.LogID == entryID).ToList())
         {
             lbNotes.Items.Add(NoteSummary.Parse(note));
         }
+
+        tmrFocus.Enabled = true;
+
+        Show();        
     }
 
     private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -222,6 +224,22 @@ public partial class frmUpdateEntry : Form
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
     {
         btnSaveNote.Enabled = rtbNote.Text.Trim().Length > 0;
+    }
+
+    private void tmrFocus_Tick(object sender, EventArgs e)
+    {
+        Activate();
+
+        tmrFocus.Enabled = false;
+    }
+
+    private void rtbNote_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            e.SuppressKeyPress = true;
+            Close();
+        }
     }
 }
 
