@@ -32,7 +32,7 @@ partial class frmNewEntry
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
         txtEntry = new TextBox();
         tmrShowSuggest = new System.Windows.Forms.Timer(components);
-        listBox1 = new ListBox();
+        lbSuggestions = new ListBox();
         tmrFocus = new System.Windows.Forms.Timer(components);
         SuspendLayout();
         // 
@@ -52,12 +52,13 @@ partial class frmNewEntry
         // 
         // listBox1
         // 
-        listBox1.FormattingEnabled = true;
-        listBox1.ItemHeight = 15;
-        listBox1.Location = new Point(12, 43);
-        listBox1.Name = "listBox1";
-        listBox1.Size = new Size(511, 64);
-        listBox1.TabIndex = 1;
+        lbSuggestions.FormattingEnabled = true;
+        lbSuggestions.ItemHeight = 15;
+        lbSuggestions.Location = new Point(12, 43);
+        lbSuggestions.Name = "listBox1";
+        lbSuggestions.Size = new Size(511, 64);
+        lbSuggestions.TabIndex = 1;
+        lbSuggestions.DoubleClick += lbSuggestions_DoubleClick;
         // 
         // tmrFocus
         // 
@@ -68,7 +69,7 @@ partial class frmNewEntry
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(537, 120);
-        Controls.Add(listBox1);
+        Controls.Add(lbSuggestions);
         Controls.Add(txtEntry);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         Icon = (Icon)resources.GetObject("$this.Icon");
@@ -89,6 +90,6 @@ partial class frmNewEntry
 
     private TextBox txtEntry;
     private System.Windows.Forms.Timer tmrShowSuggest;
-    private ListBox listBox1;
+    private ListBox lbSuggestions;
     private System.Windows.Forms.Timer tmrFocus;
 }

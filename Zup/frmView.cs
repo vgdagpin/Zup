@@ -7,10 +7,14 @@ public partial class frmView : Form
 {
     private readonly ZupDbContext p_DbContext;
 
+    public delegate void OnSelectedItem(int entryID);
+
+    public event OnSelectedItem? OnSelectedItemEvent;
+
     public frmView(ZupDbContext dbContext)
     {
         InitializeComponent();
-        p_DbContext = dbContext;        
+        p_DbContext = dbContext;
     }
 
     private void frmView_FormClosing(object sender, FormClosingEventArgs e)
@@ -49,6 +53,19 @@ public partial class frmView : Form
                 })
                 .ToList();
         }
+    }
+
+    private void dgView_DoubleClick(object sender, EventArgs e)
+    {
+        dgView.SelectedRows.Cast<DataGridViewRow>().ToList().ForEach(a =>
+        {
+            var id = (int)a.Cells["ID"].Value;
+
+            if (OnSelectedItemEvent != null)
+            {
+                OnSelectedItemEvent(id);
+            }
+        });
     }
 }
 

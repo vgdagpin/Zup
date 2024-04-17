@@ -80,6 +80,7 @@ partial class frmUpdateEntry
         // deleteEntryToolStripMenuItem
         // 
         deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
+        deleteEntryToolStripMenuItem.ShortcutKeys = Keys.Delete;
         deleteEntryToolStripMenuItem.Size = new Size(82, 20);
         deleteEntryToolStripMenuItem.Text = "Delete Entry";
         deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;

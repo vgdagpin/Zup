@@ -61,6 +61,16 @@ public partial class EachEntry : UserControl
 
         BackColor = DefaultBackColor;
         btnToggleStartStop.ForeColor = DefaultForeColor;
+
+        VisibleChanged += EachEntry_VisibleChanged;
+    }
+
+    private void EachEntry_VisibleChanged(object? sender, EventArgs e)
+    {
+        if (!Visible)
+        {
+            tmr.Enabled = false;
+        }
     }
 
     private void WriteTime()

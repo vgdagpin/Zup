@@ -28,19 +28,19 @@ partial class frmEntryList
     /// </summary>
     private void InitializeComponent()
     {
-        flowLayoutPanel1 = new FlowLayoutPanel();
+        flpTaskList = new FlowLayoutPanel();
         SuspendLayout();
         // 
         // flowLayoutPanel1
         // 
-        flowLayoutPanel1.AutoScroll = true;
-        flowLayoutPanel1.Dock = DockStyle.Fill;
-        flowLayoutPanel1.FlowDirection = FlowDirection.BottomUp;
-        flowLayoutPanel1.Location = new Point(0, 0);
-        flowLayoutPanel1.Name = "flowLayoutPanel1";
-        flowLayoutPanel1.Size = new Size(266, 71);
-        flowLayoutPanel1.TabIndex = 0;
-        flowLayoutPanel1.WrapContents = false;
+        flpTaskList.AutoScroll = true;
+        flpTaskList.Dock = DockStyle.Fill;
+        flpTaskList.FlowDirection = FlowDirection.BottomUp;
+        flpTaskList.Location = new Point(0, 0);
+        flpTaskList.Name = "flowLayoutPanel1";
+        flpTaskList.Size = new Size(266, 71);
+        flpTaskList.TabIndex = 0;
+        flpTaskList.WrapContents = false;
         // 
         // frmEntryList
         // 
@@ -48,7 +48,7 @@ partial class frmEntryList
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(192, 192, 255);
         ClientSize = new Size(266, 71);
-        Controls.Add(flowLayoutPanel1);
+        Controls.Add(flpTaskList);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
         Opacity = 0.9D;
@@ -65,5 +65,5 @@ partial class frmEntryList
 
     #endregion
 
-    private FlowLayoutPanel flowLayoutPanel1;
+    private FlowLayoutPanel flpTaskList;
 }

@@ -28,7 +28,7 @@ partial class frmView
     /// </summary>
     private void InitializeComponent()
     {
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
         dgView = new DataGridView();
         ID = new DataGridViewTextBoxColumn();
         Task = new DataGridViewTextBoxColumn();
@@ -42,14 +42,18 @@ partial class frmView
         // 
         dgView.AllowUserToAddRows = false;
         dgView.AllowUserToDeleteRows = false;
+        dgView.AllowUserToResizeRows = false;
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration });
         dgView.Location = new Point(11, 59);
+        dgView.MultiSelect = false;
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
+        dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgView.Size = new Size(777, 379);
         dgView.TabIndex = 0;
+        dgView.DoubleClick += dgView_DoubleClick;
         // 
         // ID
         // 

@@ -34,12 +34,12 @@ partial class frmMain
         notifCms = new ContextMenuStrip(components);
         viewToolStripMenuItem = new ToolStripMenuItem();
         settingsToolStripMenuItem = new ToolStripMenuItem();
-        toolStripSeparator1 = new ToolStripSeparator();
-        exitToolStripMenuItem = new ToolStripMenuItem();
-        tmrDelayShowList = new System.Windows.Forms.Timer(components);
         openNewEntryToolStripMenuItem = new ToolStripMenuItem();
         updateCurrentRunningTaskToolStripMenuItem = new ToolStripMenuItem();
         toggleLastRunningTaskToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator1 = new ToolStripSeparator();
+        exitToolStripMenuItem = new ToolStripMenuItem();
+        tmrDelayShowList = new System.Windows.Forms.Timer(components);
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -55,7 +55,7 @@ partial class frmMain
         // 
         notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(298, 164);
+        notifCms.Size = new Size(298, 142);
         // 
         // viewToolStripMenuItem
         // 
@@ -71,24 +71,6 @@ partial class frmMain
         settingsToolStripMenuItem.Size = new Size(297, 22);
         settingsToolStripMenuItem.Text = "Settings";
         settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
-        // 
-        // toolStripSeparator1
-        // 
-        toolStripSeparator1.Name = "toolStripSeparator1";
-        toolStripSeparator1.Size = new Size(294, 6);
-        // 
-        // exitToolStripMenuItem
-        // 
-        exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-        exitToolStripMenuItem.Size = new Size(297, 22);
-        exitToolStripMenuItem.Text = "Exit";
-        exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
-        // 
-        // tmrDelayShowList
-        // 
-        tmrDelayShowList.Enabled = true;
-        tmrDelayShowList.Interval = 1000;
-        tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
         // openNewEntryToolStripMenuItem
         // 
@@ -113,6 +95,24 @@ partial class frmMain
         toggleLastRunningTaskToolStripMenuItem.Size = new Size(297, 22);
         toggleLastRunningTaskToolStripMenuItem.Text = "Toggle Last Running Task";
         toggleLastRunningTaskToolStripMenuItem.Click += toggleLastRunningTaskToolStripMenuItem_Click;
+        // 
+        // toolStripSeparator1
+        // 
+        toolStripSeparator1.Name = "toolStripSeparator1";
+        toolStripSeparator1.Size = new Size(294, 6);
+        // 
+        // exitToolStripMenuItem
+        // 
+        exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+        exitToolStripMenuItem.Size = new Size(297, 22);
+        exitToolStripMenuItem.Text = "Exit";
+        exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
+        // 
+        // tmrDelayShowList
+        // 
+        tmrDelayShowList.Enabled = true;
+        tmrDelayShowList.Interval = 300;
+        tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
         // frmMain
         // 

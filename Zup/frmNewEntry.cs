@@ -32,25 +32,39 @@ public partial class frmNewEntry : Form
         Hide();
     }
 
+    private string? GetSelectedItem(bool forceFromTextBox = false)
+    {
+        var temp = lbSuggestions.Items.Count > 0
+                ? lbSuggestions.Items[0].ToString()
+                : txtEntry.Text.Trim();
+
+        if (lbSuggestions.SelectedIndex > 0)
+        {
+            temp = lbSuggestions.SelectedItem?.ToString();
+        }
+
+        if (forceFromTextBox)
+        {
+            temp = txtEntry.Text.Trim();
+        }
+
+        return temp;
+    }
+
     private void txtEntry_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape)
         {
             e.SuppressKeyPress = true;
             Close();
-
-            return;
         }
-
-        if (e.KeyCode == Keys.Enter)
+        else if (e.KeyCode == Keys.Enter)
         {
             e.SuppressKeyPress = true;
 
-            var temp = listBox1.Items.Count > 0
-                ? listBox1.Items[0].ToString()
-                : txtEntry.Text.Trim();
+            var temp = GetSelectedItem(e.Control);
 
-            Close();            
+            Close();
 
             if (!string.IsNullOrWhiteSpace(temp))
             {
@@ -58,6 +72,40 @@ public partial class frmNewEntry : Form
                 {
                     OnNewEntryEvent(temp);
                 }
+            }
+        }
+        else if (e.KeyCode == Keys.Down)
+        {
+            if (lbSuggestions.Items.Count == 0)
+            {
+                return;
+            }
+
+            if (lbSuggestions.SelectedIndex < 0)
+            {
+                lbSuggestions.SelectedIndex = 0;
+            }
+
+            if (lbSuggestions.SelectedIndex < lbSuggestions.Items.Count - 1)
+            {
+                lbSuggestions.SelectedIndex++;
+            }
+        }
+        else if (e.KeyCode == Keys.Up)
+        {
+            if (lbSuggestions.Items.Count == 0)
+            {
+                return;
+            }
+
+            if (lbSuggestions.SelectedIndex < 0)
+            {
+                lbSuggestions.SelectedIndex = 0;
+            }
+
+            if (lbSuggestions.SelectedIndex > 0)
+            {
+                lbSuggestions.SelectedIndex--;
             }
         }
     }
@@ -87,9 +135,9 @@ public partial class frmNewEntry : Form
             {
                 txtEntry.AutoCompleteCustomSource.AddRange(Suggestions);
 
-                Suggestions = Suggestions.Reverse().ToArray();
+                // Suggestions = Suggestions.Reverse().ToArray();
 
-                listBox1.DataSource = Suggestions;
+                lbSuggestions.DataSource = Suggestions;
             }
         }
     }
@@ -109,7 +157,7 @@ public partial class frmNewEntry : Form
             .Where(item => item.ToLower().Contains(searchText))
             .ToList();
 
-        listBox1.DataSource = filteredSuggestions;
+        lbSuggestions.DataSource = filteredSuggestions;
     }
 
     private void tmrFocus_Tick(object sender, EventArgs e)
@@ -117,5 +165,20 @@ public partial class frmNewEntry : Form
         Activate();
 
         tmrFocus.Enabled = false;
+    }
+
+    private void lbSuggestions_DoubleClick(object sender, EventArgs e)
+    {
+        var temp = GetSelectedItem();
+
+        Close();
+
+        if (!string.IsNullOrWhiteSpace(temp))
+        {
+            if (OnNewEntryEvent != null)
+            {
+                OnNewEntryEvent(temp);
+            }
+        }
     }
 }

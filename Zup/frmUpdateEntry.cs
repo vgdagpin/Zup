@@ -174,6 +174,11 @@ public partial class frmUpdateEntry : Form
 
     private void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        DeleteEntry();
+    }
+
+    private void DeleteEntry()
+    {
         var result = MessageBox.Show(Text, "Delete Entry", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         if (result == DialogResult.Cancel)
@@ -239,6 +244,10 @@ public partial class frmUpdateEntry : Form
         {
             e.SuppressKeyPress = true;
             Close();
+        }
+        else if (e.KeyCode == Keys.Delete)
+        {
+            DeleteEntry();
         }
     }
 }

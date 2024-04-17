@@ -30,19 +30,29 @@ public partial class frmMain : Form
     {
         InitializeComponent();
 
-        // RegisterHotKey for Win+Shift+Z
-        // RegisterHoykey for Shift+Alt+J
+        /*
+          MOD_ALT: 0x0001
+          MOD_CONTROL: 0x0002
+          MOD_SHIFT: 0x0004
+          MOD_WIN: 0x0008
+         */
 
-
-        RegisterHotKey(this.Handle, 1, 12, (int)Keys.J);
-        RegisterHotKey(this.Handle, 2, 12, (int)Keys.K);
-        RegisterHotKey(this.Handle, 3, 12, (int)Keys.L);
+        RegisterHotKey(this.Handle, 1, 5, (int)Keys.J);
+        RegisterHotKey(this.Handle, 2, 5, (int)Keys.K);
+        RegisterHotKey(this.Handle, 3, 5, (int)Keys.L);
 
         dbContext.Database.Migrate();
 
         m_FormEntryList = frmEntryList;
         m_FormSetting = frmSetting;
         m_FormView = frmView;
+
+        m_FormView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
+    }
+
+    private void FormView_OnSelectedItemEvent(int entryID)
+    {
+        m_FormEntryList.ShowUpdateEntry(entryID);
     }
 
     protected override void WndProc(ref Message m)
@@ -78,12 +88,7 @@ public partial class frmMain : Form
 
     private void tmrDelayShowList_Tick(object sender, EventArgs e)
     {
-
-
         m_FormEntryList.Show();
-
-
-
         tmrDelayShowList.Stop();
     }
 
@@ -94,16 +99,37 @@ public partial class frmMain : Form
 
     private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (m_FormSetting.Visible)
+        {
+            m_FormSetting.Activate();
+
+            return;
+        }
+
         m_FormSetting.Show();
     }
 
     private void viewToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (m_FormView.Visible)
+        {
+            m_FormView.Activate();
+
+            return;
+        }
+
         m_FormView.Show();
     }
 
     private void notifIconZup_DoubleClick(object sender, EventArgs e)
     {
+        if (m_FormView.Visible)
+        {
+            m_FormView.Activate();
+
+            return;
+        }
+
         m_FormView.Show();
     }
 

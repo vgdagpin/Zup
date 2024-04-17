@@ -14,6 +14,8 @@ public partial class frmEntryList : Form
     private int? CurrentRunningTaskID;
     private int? LastRunningTaskID;
 
+    public bool ListIsReady = false;
+
     protected override CreateParams CreateParams
     {
         get
@@ -28,8 +30,8 @@ public partial class frmEntryList : Form
     {
         InitializeComponent();
 
-        //Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
-        Left = 2;
+        Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+        // Left = 2;
         Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
 
         m_DbContext = dbContext;
@@ -46,11 +48,35 @@ public partial class frmEntryList : Form
 
     public void ShowNewEntry()
     {
-        var suggestions = flowLayoutPanel1.Controls.Cast<EachEntry>()
-            .Select(a => a.Text)
-            .Distinct().ToArray();
+        if (!ListIsReady)
+        {
+            return;
+        }
 
-        m_FormNewEntry.ShowNewEntryDialog(suggestions);
+        var suggestions = new List<string>();
+
+        var currentList = flpTaskList.Controls.Cast<EachEntry>()
+            .Where(a => a.Visible)
+            .Select(a => a.Text)
+            .Reverse()
+            .ToArray();
+
+        if (currentList.Length > 1)
+        {
+            suggestions.Add(currentList[1]);
+        }
+
+        foreach (var item in currentList)
+        {
+            if (suggestions.Contains(item))
+            {
+                continue;
+            }
+
+            suggestions.Add(item);
+        }
+
+        m_FormNewEntry.ShowNewEntryDialog(suggestions.ToArray());
     }
 
     private void frmEntryList_Load(object sender, EventArgs e)
@@ -72,6 +98,8 @@ public partial class frmEntryList : Form
             AddEntryToFlowLayoutControl(eachEntry);
         }
 
+        ListIsReady = true;
+
         p_OnLoad = false;
     }
 
@@ -83,11 +111,12 @@ public partial class frmEntryList : Form
 
     private void FormUpdateEntry_OnDeleteEventHandler(int entryID)
     {
-        var entryToRemove = flowLayoutPanel1.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
+        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
 
         if (entryToRemove != null)
         {
-            flowLayoutPanel1.Controls.Remove(entryToRemove);
+            // only hide, remove will auto scroll the list to bottom because the list is in reverse
+            entryToRemove.Hide();
         }
     }
 
@@ -117,12 +146,17 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnUpdateEvent(int id)
     {
-        m_FormUpdateEntry.ShowUpdateEntry(id);
+        ShowUpdateEntry(id);
+    }
+
+    public void ShowUpdateEntry(int entryID)
+    {
+        m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry)
     {
-        flowLayoutPanel1.Controls.Add(newEntry);
+        flpTaskList.Controls.Add(newEntry);
 
         ActiveControl = newEntry;
 
@@ -149,7 +183,7 @@ public partial class frmEntryList : Form
 
     private void StopAll()
     {
-        foreach (EachEntry item in flowLayoutPanel1.Controls)
+        foreach (EachEntry item in flpTaskList.Controls)
         {
             if (item.IsStarted)
             {
@@ -175,7 +209,7 @@ public partial class frmEntryList : Form
             return;
         }
 
-        foreach (EachEntry item in flowLayoutPanel1.Controls)
+        foreach (EachEntry item in flpTaskList.Controls)
         {
             if (item.EntryID != LastRunningTaskID)
             {
