@@ -19,13 +19,15 @@ public partial class EachEntry : UserControl
     public event OnUpdate? OnUpdateEvent;
     public event OnStart? OnStartEvent;
 
+    public event MouseEventHandler? TaskMouseDown;
+
     public override string Text
     {
         get => lblText.Text;
         set
         {
             lblText.Text = value;
-            
+
             if (!string.IsNullOrWhiteSpace(value))
             {
                 toolTip.SetToolTip(lblText, value);
@@ -63,6 +65,71 @@ public partial class EachEntry : UserControl
         btnToggleStartStop.ForeColor = DefaultForeColor;
 
         VisibleChanged += EachEntry_VisibleChanged;
+
+        RegisterMouseDownAndDoubleClick();
+    }
+
+    private void RegisterMouseDownAndDoubleClick()
+    {
+        MouseDown += (sender, args) =>
+        {
+            if (args.Button == MouseButtons.Left)
+            {
+                if (args.Clicks == 1) // mousedown
+                {
+                    TaskMouseDown?.Invoke(sender, args);
+                }
+                else // double click
+                {
+                    OnUpdateEvent?.Invoke(EntryID);
+                }
+            }
+        };
+
+        lblText.MouseDown += (sender, args) =>
+        {
+            if (args.Button == MouseButtons.Left)
+            {
+                if (args.Clicks == 1) // mousedown
+                {
+                    TaskMouseDown?.Invoke(sender, args);
+                }
+                else // double click
+                {
+                    OnUpdateEvent?.Invoke(EntryID);
+                }
+            }
+        };
+
+        lblStart.MouseDown += (sender, args) => 
+        {
+            if (args.Button == MouseButtons.Left)
+            {
+                if (args.Clicks == 1) // mousedown
+                {
+                    TaskMouseDown?.Invoke(sender, args);
+                }
+                else // double click
+                {
+                    OnUpdateEvent?.Invoke(EntryID);
+                }
+            }
+        };
+
+        lblDuration.MouseDown += (sender, args) =>
+        {
+            if (args.Button == MouseButtons.Left)
+            {
+                if (args.Clicks == 1) // mousedown
+                {
+                    TaskMouseDown?.Invoke(sender, args);
+                }
+                else // double click
+                {
+                    OnUpdateEvent?.Invoke(EntryID);
+                }
+            }
+        };
     }
 
     private void EachEntry_VisibleChanged(object? sender, EventArgs e)
@@ -153,18 +220,10 @@ public partial class EachEntry : UserControl
         }
     }
 
-    private void timer1_Tick(object sender, EventArgs e)
+    private void tmrDuration_Tick(object sender, EventArgs e)
     {
         var diff = DateTime.Now - StartedOn!.Value;
 
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
-    }
-
-    private void btnUpdate_Click(object sender, EventArgs e)
-    {
-        if (OnUpdateEvent != null)
-        {
-            OnUpdateEvent(EntryID);
-        }
     }
 }

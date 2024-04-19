@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using System.Runtime.InteropServices;
+
 using Zup.CustomControls;
 using Zup.Entities;
 
@@ -16,6 +18,14 @@ public partial class frmEntryList : Form
 
     public bool ListIsReady = false;
 
+    public const int WM_NCLBUTTONDOWN = 0xA1;
+    public const int HT_CAPTION = 0x2;
+
+    [DllImport("user32.dll")]
+    public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+    [DllImport("user32.dll")]
+    public static extern bool ReleaseCapture();
+
     protected override CreateParams CreateParams
     {
         get
@@ -30,9 +40,20 @@ public partial class frmEntryList : Form
     {
         InitializeComponent();
 
-        Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
-        // Left = 2;
-        Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
+        if (Properties.Settings.Default.FormLocationX == 0 && Properties.Settings.Default.FormLocationY == 0)
+        {
+            Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+            Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
+
+            Properties.Settings.Default.FormLocationX = Left;
+            Properties.Settings.Default.FormLocationY = Top;
+            Properties.Settings.Default.Save();
+        }
+        else
+        {
+            Left = Properties.Settings.Default.FormLocationX;
+            Top = Properties.Settings.Default.FormLocationY;
+        }
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
@@ -94,6 +115,7 @@ public partial class frmEntryList : Form
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
             eachEntry.OnStartEvent += EachEntry_OnStartEvent;
             eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
             AddEntryToFlowLayoutControl(eachEntry);
         }
@@ -138,6 +160,7 @@ public partial class frmEntryList : Form
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
         eachEntry.OnStartEvent += EachEntry_OnStartEvent;
         eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
         AddEntryToFlowLayoutControl(eachEntry);
 
@@ -225,5 +248,29 @@ public partial class frmEntryList : Form
                 item.Start();
             }
         }
+    }
+
+    private void frmEntryList_MouseDown(object? sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            ReleaseCapture();
+            SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+        }
+    }
+
+    private void frmEntryList_Move(object sender, EventArgs e)
+    {
+        tmrSaveSetting.Enabled = false;
+        tmrSaveSetting.Enabled = true;
+    }
+
+    private void tmrSaveSetting_Tick(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.FormLocationX = Left;
+        Properties.Settings.Default.FormLocationY = Top;
+        Properties.Settings.Default.Save();
+
+        tmrSaveSetting.Enabled = false;
     }
 }

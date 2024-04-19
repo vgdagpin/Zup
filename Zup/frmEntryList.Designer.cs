@@ -28,19 +28,26 @@ partial class frmEntryList
     /// </summary>
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
         flpTaskList = new FlowLayoutPanel();
+        tmrSaveSetting = new System.Windows.Forms.Timer(components);
         SuspendLayout();
         // 
-        // flowLayoutPanel1
+        // flpTaskList
         // 
         flpTaskList.AutoScroll = true;
         flpTaskList.Dock = DockStyle.Fill;
         flpTaskList.FlowDirection = FlowDirection.BottomUp;
         flpTaskList.Location = new Point(0, 0);
-        flpTaskList.Name = "flowLayoutPanel1";
+        flpTaskList.Name = "flpTaskList";
         flpTaskList.Size = new Size(266, 71);
         flpTaskList.TabIndex = 0;
         flpTaskList.WrapContents = false;
+        // 
+        // tmrSaveSetting
+        // 
+        tmrSaveSetting.Interval = 1000;
+        tmrSaveSetting.Tick += tmrSaveSetting_Tick;
         // 
         // frmEntryList
         // 
@@ -60,10 +67,13 @@ partial class frmEntryList
         TransparencyKey = Color.FromArgb(192, 192, 255);
         FormClosing += frmEntryList_FormClosing;
         Load += frmEntryList_Load;
+        MouseDown += frmEntryList_MouseDown;
+        Move += frmEntryList_Move;
         ResumeLayout(false);
     }
 
     #endregion
 
     private FlowLayoutPanel flpTaskList;
+    private System.Windows.Forms.Timer tmrSaveSetting;
 }
