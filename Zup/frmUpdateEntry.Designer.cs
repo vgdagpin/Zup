@@ -33,11 +33,16 @@ partial class frmUpdateEntry
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         menuStrip1 = new MenuStrip();
-        deleteEntryToolStripMenuItem = new ToolStripMenuItem();
+        editToolStripMenuItem = new ToolStripMenuItem();
         btnDeleteNote = new Button();
         btnNewNote = new Button();
         btnSaveNote = new Button();
         tmrFocus = new System.Windows.Forms.Timer(components);
+        txtTask = new TextBox();
+        dtFrom = new DateTimePicker();
+        dtTo = new DateTimePicker();
+        deleteEntryToolStripMenuItem = new ToolStripMenuItem();
+        saveToolStripMenuItem = new ToolStripMenuItem();
         menuStrip1.SuspendLayout();
         SuspendLayout();
         // 
@@ -45,9 +50,9 @@ partial class frmUpdateEntry
         // 
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.BorderStyle = BorderStyle.FixedSingle;
-        rtbNote.Location = new Point(217, 39);
+        rtbNote.Location = new Point(217, 99);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(426, 327);
+        rtbNote.Size = new Size(426, 267);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.KeyDown += rtbNote_KeyDown;
@@ -61,29 +66,29 @@ partial class frmUpdateEntry
         lbNotes.DisplayMember = "Summary";
         lbNotes.FormattingEnabled = true;
         lbNotes.ItemHeight = 15;
-        lbNotes.Location = new Point(7, 39);
+        lbNotes.Location = new Point(7, 99);
         lbNotes.Name = "lbNotes";
-        lbNotes.Size = new Size(204, 242);
+        lbNotes.Size = new Size(204, 182);
         lbNotes.TabIndex = 4;
         lbNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
         lbNotes.KeyDown += lbNotes_KeyDown;
         // 
         // menuStrip1
         // 
-        menuStrip1.Items.AddRange(new ToolStripItem[] { deleteEntryToolStripMenuItem });
+        menuStrip1.Items.AddRange(new ToolStripItem[] { editToolStripMenuItem });
         menuStrip1.Location = new Point(0, 0);
         menuStrip1.Name = "menuStrip1";
         menuStrip1.Size = new Size(655, 24);
         menuStrip1.TabIndex = 6;
         menuStrip1.Text = "menuStrip1";
         // 
-        // deleteEntryToolStripMenuItem
+        // editToolStripMenuItem
         // 
-        deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
-        deleteEntryToolStripMenuItem.ShortcutKeys = Keys.Delete;
-        deleteEntryToolStripMenuItem.Size = new Size(82, 20);
-        deleteEntryToolStripMenuItem.Text = "Delete Entry";
-        deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;
+        editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { deleteEntryToolStripMenuItem, saveToolStripMenuItem });
+        editToolStripMenuItem.Name = "editToolStripMenuItem";
+        editToolStripMenuItem.ShortcutKeys = Keys.Delete;
+        editToolStripMenuItem.Size = new Size(39, 20);
+        editToolStripMenuItem.Text = "Edit";
         // 
         // btnDeleteNote
         // 
@@ -127,11 +132,55 @@ partial class frmUpdateEntry
         // 
         tmrFocus.Tick += tmrFocus_Tick;
         // 
+        // txtTask
+        // 
+        txtTask.Location = new Point(7, 33);
+        txtTask.Name = "txtTask";
+        txtTask.Size = new Size(636, 23);
+        txtTask.TabIndex = 10;
+        // 
+        // dtFrom
+        // 
+        dtFrom.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
+        dtFrom.Format = DateTimePickerFormat.Custom;
+        dtFrom.Location = new Point(309, 62);
+        dtFrom.Name = "dtFrom";
+        dtFrom.Size = new Size(164, 23);
+        dtFrom.TabIndex = 11;
+        // 
+        // dtTo
+        // 
+        dtTo.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
+        dtTo.Format = DateTimePickerFormat.Custom;
+        dtTo.Location = new Point(479, 62);
+        dtTo.Name = "dtTo";
+        dtTo.Size = new Size(164, 23);
+        dtTo.TabIndex = 12;
+        dtTo.ValueChanged += dtTo_ValueChanged;
+        // 
+        // deleteEntryToolStripMenuItem
+        // 
+        deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
+        deleteEntryToolStripMenuItem.ShortcutKeys = Keys.Delete;
+        deleteEntryToolStripMenuItem.Size = new Size(180, 22);
+        deleteEntryToolStripMenuItem.Text = "Delete Entry";
+        deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;
+        // 
+        // saveToolStripMenuItem
+        // 
+        saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+        saveToolStripMenuItem.Size = new Size(180, 22);
+        saveToolStripMenuItem.Text = "Save";
+        saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(655, 375);
+        Controls.Add(dtTo);
+        Controls.Add(dtFrom);
+        Controls.Add(txtTask);
         Controls.Add(btnSaveNote);
         Controls.Add(btnNewNote);
         Controls.Add(btnDeleteNote);
@@ -156,9 +205,14 @@ partial class frmUpdateEntry
     private RichTextBox rtbNote;
     private ListBox lbNotes;
     private MenuStrip menuStrip1;
-    private ToolStripMenuItem deleteEntryToolStripMenuItem;
+    private ToolStripMenuItem editToolStripMenuItem;
     private Button btnDeleteNote;
     private Button btnNewNote;
     private Button btnSaveNote;
     private System.Windows.Forms.Timer tmrFocus;
+    private TextBox txtTask;
+    private DateTimePicker dtFrom;
+    private DateTimePicker dtTo;
+    private ToolStripMenuItem deleteEntryToolStripMenuItem;
+    private ToolStripMenuItem saveToolStripMenuItem;
 }

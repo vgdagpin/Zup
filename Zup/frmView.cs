@@ -34,12 +34,13 @@ public partial class frmView : Form
                 .Select(a =>
                 {
                     string? duration = null;
+                    TimeSpan? durationData = null;
 
                     if (a.EndedOn != null)
                     {
-                        var diff = a.EndedOn!.Value - a.StartedOn;
+                        durationData = a.EndedOn!.Value - a.StartedOn;
 
-                        duration = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
+                        duration = $"{durationData.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
                     }
 
                     return new TimeLogSummary
@@ -48,7 +49,8 @@ public partial class frmView : Form
                         Task = a.Task,
                         StartedOn = a.StartedOn.ToString("MM/dd hh:mm tt"),
                         EndedOn = a.EndedOn?.ToString("MM/dd hh:mm tt"),
-                        Duration = duration
+                        Duration = duration,
+                        DurationData = durationData
                     };
                 })
                 .ToList();
@@ -57,15 +59,30 @@ public partial class frmView : Form
 
     private void dgView_DoubleClick(object sender, EventArgs e)
     {
-        dgView.SelectedRows.Cast<DataGridViewRow>().ToList().ForEach(a =>
-        {
-            var id = (int)a.Cells["ID"].Value;
-
-            if (OnSelectedItemEvent != null)
+        dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
+            .ToList()
+            .ForEach(a =>
             {
-                OnSelectedItemEvent(id);
-            }
-        });
+                if (OnSelectedItemEvent != null)
+                {
+                    OnSelectedItemEvent(a.ID);
+                }
+            });
+    }
+
+    private void dgView_SelectionChanged(object sender, EventArgs e)
+    {
+        TimeSpan ts = new TimeSpan();
+
+        dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
+            .Where(a => a.DurationData != null)
+            .ToList()
+            .ForEach(a =>
+            {
+                ts += a!.DurationData!.Value;
+            });
+
+        lblSelectedTotal.Text = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
     }
 }
 
@@ -80,4 +97,6 @@ public class TimeLogSummary
     public string StartedOn { get; set; } = null!;
     public string? EndedOn { get; set; }
     public string? Duration { get; set; }
+
+    public TimeSpan? DurationData { get; set; }
 }

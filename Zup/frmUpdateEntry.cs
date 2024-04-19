@@ -14,6 +14,8 @@ public partial class frmUpdateEntry : Form
 
     public event OnDelete? OnDeleteEvent;
 
+    const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
+
     public frmUpdateEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
@@ -52,6 +54,19 @@ public partial class frmUpdateEntry : Form
         selectedEntryID = entryID;
 
         Text = entry.Task;
+        txtTask.Text = entry.Task;
+        dtFrom.Value = entry.StartedOn;
+
+
+        if (entry.EndedOn != null)
+        {
+            dtTo.Value = entry.EndedOn.Value;
+            dtTo.CustomFormat = DateTimeCustomFormat;
+        }
+        else
+        {
+            dtTo.CustomFormat = " ";
+        }
 
         foreach (var note in p_DbContext.Notes.Where(a => a.LogID == entryID).ToList())
         {
@@ -60,7 +75,7 @@ public partial class frmUpdateEntry : Form
 
         tmrFocus.Enabled = true;
 
-        Show();        
+        Show();
     }
 
     private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -248,6 +263,27 @@ public partial class frmUpdateEntry : Form
         else if (e.KeyCode == Keys.Delete)
         {
             DeleteEntry();
+        }
+    }
+
+    private void dtTo_ValueChanged(object sender, EventArgs e)
+    {
+        dtTo.CustomFormat = DateTimeCustomFormat;
+    }
+
+    private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        var task = p_DbContext.TimeLogs.Find(selectedEntryID);
+
+        if (task != null)
+        {
+            task.Task = txtTask.Text;
+            task.StartedOn = dtFrom.Value;
+            task.EndedOn = dtTo.Value;
+
+            p_DbContext.SaveChanges();
+
+            MessageBox.Show("Saved!");
         }
     }
 }

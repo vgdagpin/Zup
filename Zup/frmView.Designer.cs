@@ -35,6 +35,8 @@ partial class frmView
         StartedOn = new DataGridViewTextBoxColumn();
         EndedOn = new DataGridViewTextBoxColumn();
         Duration = new DataGridViewTextBoxColumn();
+        DurationData = new DataGridViewTextBoxColumn();
+        lblSelectedTotal = new Label();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         SuspendLayout();
         // 
@@ -45,14 +47,14 @@ partial class frmView
         dgView.AllowUserToResizeRows = false;
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration });
-        dgView.Location = new Point(11, 59);
-        dgView.MultiSelect = false;
+        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationData });
+        dgView.Location = new Point(11, 12);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(777, 379);
+        dgView.Size = new Size(777, 403);
         dgView.TabIndex = 0;
+        dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
         // 
         // ID
@@ -96,11 +98,31 @@ partial class frmView
         Duration.Resizable = DataGridViewTriState.False;
         Duration.Width = 60;
         // 
+        // DurationData
+        // 
+        DurationData.DataPropertyName = "DurationData";
+        DurationData.HeaderText = "DurationData";
+        DurationData.Name = "DurationData";
+        DurationData.ReadOnly = true;
+        DurationData.Resizable = DataGridViewTriState.False;
+        DurationData.Visible = false;
+        // 
+        // lblSelectedTotal
+        // 
+        lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        lblSelectedTotal.Location = new Point(725, 422);
+        lblSelectedTotal.Name = "lblSelectedTotal";
+        lblSelectedTotal.Size = new Size(59, 23);
+        lblSelectedTotal.TabIndex = 1;
+        lblSelectedTotal.Text = "00:00:00";
+        lblSelectedTotal.TextAlign = ContentAlignment.MiddleRight;
+        // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(800, 450);
+        Controls.Add(lblSelectedTotal);
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
         Name = "frmView";
@@ -114,9 +136,11 @@ partial class frmView
     #endregion
 
     private DataGridView dgView;
+    private Label lblSelectedTotal;
     private DataGridViewTextBoxColumn ID;
     private DataGridViewTextBoxColumn Task;
     private DataGridViewTextBoxColumn StartedOn;
     private DataGridViewTextBoxColumn EndedOn;
     private DataGridViewTextBoxColumn Duration;
+    private DataGridViewTextBoxColumn DurationData;
 }
