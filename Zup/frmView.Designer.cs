@@ -37,6 +37,12 @@ partial class frmView
         Duration = new DataGridViewTextBoxColumn();
         DurationData = new DataGridViewTextBoxColumn();
         lblSelectedTotal = new Label();
+        label1 = new Label();
+        fbdTimesheetFolder = new FolderBrowserDialog();
+        txtTimesheetFolder = new TextBox();
+        btnBrowseTimesheetFolder = new Button();
+        btnExportTimesheet = new Button();
+        dtTimesheetDate = new DateTimePicker();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         SuspendLayout();
         // 
@@ -48,11 +54,11 @@ partial class frmView
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationData });
-        dgView.Location = new Point(11, 12);
+        dgView.Location = new Point(11, 50);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(777, 403);
+        dgView.Size = new Size(777, 417);
         dgView.TabIndex = 0;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
@@ -110,27 +116,82 @@ partial class frmView
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(725, 422);
+        lblSelectedTotal.Location = new Point(725, 474);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(59, 23);
         lblSelectedTotal.TabIndex = 1;
         lblSelectedTotal.Text = "00:00:00";
         lblSelectedTotal.TextAlign = ContentAlignment.MiddleRight;
         // 
+        // label1
+        // 
+        label1.AutoSize = true;
+        label1.Location = new Point(10, 14);
+        label1.Name = "label1";
+        label1.Size = new Size(105, 15);
+        label1.TabIndex = 2;
+        label1.Text = "Timesheets Folder:";
+        // 
+        // fbdTimesheetFolder
+        // 
+        fbdTimesheetFolder.RootFolder = Environment.SpecialFolder.MyDocuments;
+        // 
+        // txtTimesheetFolder
+        // 
+        txtTimesheetFolder.Location = new Point(121, 11);
+        txtTimesheetFolder.Name = "txtTimesheetFolder";
+        txtTimesheetFolder.Size = new Size(340, 23);
+        txtTimesheetFolder.TabIndex = 3;
+        // 
+        // btnBrowseTimesheetFolder
+        // 
+        btnBrowseTimesheetFolder.Location = new Point(467, 11);
+        btnBrowseTimesheetFolder.Name = "btnBrowseTimesheetFolder";
+        btnBrowseTimesheetFolder.Size = new Size(75, 23);
+        btnBrowseTimesheetFolder.TabIndex = 4;
+        btnBrowseTimesheetFolder.Text = "Browse";
+        btnBrowseTimesheetFolder.UseVisualStyleBackColor = true;
+        btnBrowseTimesheetFolder.Click += btnBrowseTimesheetFolder_Click;
+        // 
+        // btnExportTimesheet
+        // 
+        btnExportTimesheet.Location = new Point(575, 10);
+        btnExportTimesheet.Name = "btnExportTimesheet";
+        btnExportTimesheet.Size = new Size(115, 23);
+        btnExportTimesheet.TabIndex = 5;
+        btnExportTimesheet.Text = "Export selected to";
+        btnExportTimesheet.UseVisualStyleBackColor = true;
+        btnExportTimesheet.Click += btnExportTimesheet_Click;
+        // 
+        // dtTimesheetDate
+        // 
+        dtTimesheetDate.Format = DateTimePickerFormat.Short;
+        dtTimesheetDate.Location = new Point(692, 10);
+        dtTimesheetDate.Name = "dtTimesheetDate";
+        dtTimesheetDate.Size = new Size(96, 23);
+        dtTimesheetDate.TabIndex = 6;
+        // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(800, 450);
+        ClientSize = new Size(800, 502);
+        Controls.Add(dtTimesheetDate);
+        Controls.Add(btnExportTimesheet);
+        Controls.Add(btnBrowseTimesheetFolder);
+        Controls.Add(txtTimesheetFolder);
+        Controls.Add(label1);
         Controls.Add(lblSelectedTotal);
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
         Name = "frmView";
         Text = "View";
         FormClosing += frmView_FormClosing;
+        Load += frmView_Load;
         VisibleChanged += frmView_VisibleChanged;
         ((System.ComponentModel.ISupportInitialize)dgView).EndInit();
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
@@ -143,4 +204,10 @@ partial class frmView
     private DataGridViewTextBoxColumn EndedOn;
     private DataGridViewTextBoxColumn Duration;
     private DataGridViewTextBoxColumn DurationData;
+    private Label label1;
+    private FolderBrowserDialog fbdTimesheetFolder;
+    private TextBox txtTimesheetFolder;
+    private Button btnBrowseTimesheetFolder;
+    private Button btnExportTimesheet;
+    private DateTimePicker dtTimesheetDate;
 }

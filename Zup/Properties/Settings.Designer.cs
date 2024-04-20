@@ -46,5 +46,17 @@ namespace Zup.Properties {
                 this["FormLocationY"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TimesheetsFolder {
+            get {
+                return ((string)(this["TimesheetsFolder"]));
+            }
+            set {
+                this["TimesheetsFolder"] = value;
+            }
+        }
     }
 }

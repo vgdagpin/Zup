@@ -39,7 +39,7 @@ namespace Zup.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Notes");
+                    b.ToTable("Notes", (string)null);
                 });
 
             modelBuilder.Entity("Zup.Entities.tbl_TimeLog", b =>
@@ -61,7 +61,7 @@ namespace Zup.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("TimeLogs");
+                    b.ToTable("TimeLogs", (string)null);
                 });
 #pragma warning restore 612, 618
         }

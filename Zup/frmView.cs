@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Text;
+using Zup.Entities;
 
 namespace Zup;
 
@@ -29,6 +32,7 @@ public partial class frmView : Form
         if (Visible)
         {
             dgView.DataSource = p_DbContext.TimeLogs
+                .AsNoTracking()
                 .OrderByDescending(a => a.ID)
                 .ToList()
                 .Select(a =>
@@ -48,7 +52,9 @@ public partial class frmView : Form
                         ID = a.ID,
                         Task = a.Task,
                         StartedOn = a.StartedOn.ToString("MM/dd hh:mm tt"),
+                        StartedOnData = a.StartedOn,
                         EndedOn = a.EndedOn?.ToString("MM/dd hh:mm tt"),
+                        EndedOnData = a.EndedOn,
                         Duration = duration,
                         DurationData = durationData
                     };
@@ -72,7 +78,7 @@ public partial class frmView : Form
 
     private void dgView_SelectionChanged(object sender, EventArgs e)
     {
-        TimeSpan ts = new TimeSpan();
+        var ts = new TimeSpan();
 
         dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
             .Where(a => a.DurationData != null)
@@ -84,19 +90,135 @@ public partial class frmView : Form
 
         lblSelectedTotal.Text = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
     }
-}
 
-public class TimeLogSummary
-{
-    public int ID { get; set; }
+    private void btnBrowseTimesheetFolder_Click(object sender, EventArgs e)
+    {
+        var result = fbdTimesheetFolder.ShowDialog();
 
-    [MaxLength(255)]
-    public string Task { get; set; } = null!;
+        if (result == DialogResult.OK)
+        {
+            Properties.Settings.Default.TimesheetsFolder = fbdTimesheetFolder.SelectedPath;
+            Properties.Settings.Default.Save();
 
+            txtTimesheetFolder.Text = fbdTimesheetFolder.SelectedPath;
+        }
+    }
 
-    public string StartedOn { get; set; } = null!;
-    public string? EndedOn { get; set; }
-    public string? Duration { get; set; }
+    private void frmView_Load(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.TimesheetsFolder))
+        {
+            txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
+        }
+    }
 
-    public TimeSpan? DurationData { get; set; }
+    private void btnExportTimesheet_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(txtTimesheetFolder.Text))
+        {
+            MessageBox.Show("Timesheet directory is empty!");
+            return;
+        }
+
+        if (!Path.Exists(txtTimesheetFolder.Text))
+        {
+            MessageBox.Show("Timesheet directory doesn't exist!");
+            return;
+        }
+
+        var path = Path.Combine(txtTimesheetFolder.Text, $"{dtTimesheetDate.Value:MM-dd-yyyy}.fd");        
+
+        var content = new StringBuilder();
+
+        dgView.SelectedRows.Cast<DataGridViewRow>()
+            .Select(a => (TimeLogSummary)a.DataBoundItem)
+            .Where(a => a.DurationData != null)
+            .ToList()
+            .ForEach(a =>
+            {
+                content.AppendLine($"{a.StartedOnData.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.Duration}^False^False");
+            });
+
+        var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+
+        if (confirm == DialogResult.OK)
+        {
+            File.WriteAllText(path, content.ToString());
+        }
+    }
+
+    private string ExtractComments(int taskID)
+    {
+        var notes = p_DbContext.Notes.Where(a => a.LogID == taskID).ToList();
+
+        if (!notes.Any())
+        {
+            return string.Empty;
+        }
+
+        var str = new List<string>();
+
+        foreach (var note in notes)
+        {
+            str.Add(CleanNotes(note.Notes));
+        }
+
+        if (!str.Any())
+        {
+            return string.Empty;
+        }
+
+        return string.Join(';', str.Where(a => !string.IsNullOrWhiteSpace(a)));
+    }
+
+    private string CleanNotes(string notes)
+    {
+        notes = notes.Replace('^', ' ');
+        notes = notes.Replace(Environment.NewLine, " ");
+        notes = notes.Replace("\n\r", " ");
+        notes = notes.Replace("\n", " ");
+        notes = notes.Replace("\r", " ");
+
+        if (notes.Length > 100)
+        {
+            notes = notes.Substring(0, 100) + "...";
+        }
+
+        return notes;
+    }
+
+    private string GetClients(int taskID)
+    {
+        return string.Empty;
+    }
+
+    /*
+    // from Fuse
+    public void SaveTimesheet(string currentFile)
+    {
+        try
+        {
+            List<String> lines = new List<String>();
+            foreach (var task in Tasks)
+            {
+                lines.Add(task.TaskId + "^" + task.TaskDesc + "^" + task.Comments + "^" + task.Client + "^" + task.Duration + "^" + task.Running + "^" + task.Delete);
+            }
+
+            if (currentFile == DateTime.Now.Date.ToString("MM-dd-yyyy"))
+            {
+                endTime = Functions.GetDateTime("{0:MM/dd/yyyy h:mm:ss tt}");
+            }
+
+            lines.Add("FileEnd^" + MiscTimer.TaskSeconds + "^" + startTime + "^" + endTime + "^" + totalTimeClosed);
+            //start saving away data        
+            foreach (var item in awayData)
+            {
+                lines.Add("AwayData^" + item.Lock + "^" + item.Unlock + "^" + item.Add + "^" + item.Remove);
+            }
+
+            System.IO.File.WriteAllLines(Utility.CurrentStageUserDataTimesheetFolder + currentFile + ".fd", lines);
+        }
+        catch { }
+    }
+     */
 }
