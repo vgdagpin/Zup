@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Text;
-using Zup.Entities;
 
 namespace Zup;
 
@@ -51,12 +49,10 @@ public partial class frmView : Form
                     {
                         ID = a.ID,
                         Task = a.Task,
-                        StartedOn = a.StartedOn.ToString("MM/dd hh:mm tt"),
-                        StartedOnData = a.StartedOn,
-                        EndedOn = a.EndedOn?.ToString("MM/dd hh:mm tt"),
-                        EndedOnData = a.EndedOn,
-                        Duration = duration,
-                        DurationData = durationData
+                        StartedOn = a.StartedOn,
+                        EndedOn = a.EndedOn,
+                        Duration = durationData,
+                        DurationString = duration
                     };
                 })
                 .ToList();
@@ -81,11 +77,11 @@ public partial class frmView : Form
         var ts = new TimeSpan();
 
         dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
-            .Where(a => a.DurationData != null)
+            .Where(a => a.Duration != null)
             .ToList()
             .ForEach(a =>
             {
-                ts += a!.DurationData!.Value;
+                ts += a!.Duration!.Value;
             });
 
         lblSelectedTotal.Text = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
@@ -132,11 +128,11 @@ public partial class frmView : Form
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
             .Select(a => (TimeLogSummary)a.DataBoundItem)
-            .Where(a => a.DurationData != null)
+            .Where(a => a.Duration != null)
             .ToList()
             .ForEach(a =>
             {
-                content.AppendLine($"{a.StartedOnData.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.Duration}^False^False");
+                content.AppendLine($"{a.StartedOn.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
             });
 
         var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);

@@ -28,14 +28,10 @@ partial class frmView
     /// </summary>
     private void InitializeComponent()
     {
+        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
         dgView = new DataGridView();
-        ID = new DataGridViewTextBoxColumn();
-        Task = new DataGridViewTextBoxColumn();
-        StartedOn = new DataGridViewTextBoxColumn();
-        EndedOn = new DataGridViewTextBoxColumn();
-        Duration = new DataGridViewTextBoxColumn();
-        DurationData = new DataGridViewTextBoxColumn();
         lblSelectedTotal = new Label();
         label1 = new Label();
         fbdTimesheetFolder = new FolderBrowserDialog();
@@ -43,6 +39,12 @@ partial class frmView
         btnBrowseTimesheetFolder = new Button();
         btnExportTimesheet = new Button();
         dtTimesheetDate = new DateTimePicker();
+        ID = new DataGridViewTextBoxColumn();
+        Task = new DataGridViewTextBoxColumn();
+        StartedOn = new DataGridViewTextBoxColumn();
+        EndedOn = new DataGridViewTextBoxColumn();
+        Duration = new DataGridViewTextBoxColumn();
+        DurationString = new DataGridViewTextBoxColumn();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         SuspendLayout();
         // 
@@ -53,7 +55,7 @@ partial class frmView
         dgView.AllowUserToResizeRows = false;
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationData });
+        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString });
         dgView.Location = new Point(11, 50);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
@@ -62,56 +64,6 @@ partial class frmView
         dgView.TabIndex = 0;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
-        // 
-        // ID
-        // 
-        ID.DataPropertyName = "ID";
-        ID.HeaderText = "ID";
-        ID.Name = "ID";
-        ID.ReadOnly = true;
-        ID.Visible = false;
-        // 
-        // Task
-        // 
-        Task.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        Task.DataPropertyName = "Task";
-        Task.HeaderText = "Task";
-        Task.Name = "Task";
-        Task.ReadOnly = true;
-        // 
-        // StartedOn
-        // 
-        StartedOn.DataPropertyName = "StartedOn";
-        StartedOn.HeaderText = "Start";
-        StartedOn.Name = "StartedOn";
-        StartedOn.ReadOnly = true;
-        StartedOn.Resizable = DataGridViewTriState.False;
-        // 
-        // EndedOn
-        // 
-        EndedOn.DataPropertyName = "EndedOn";
-        EndedOn.HeaderText = "End";
-        EndedOn.Name = "EndedOn";
-        EndedOn.ReadOnly = true;
-        EndedOn.Resizable = DataGridViewTriState.False;
-        // 
-        // Duration
-        // 
-        Duration.DataPropertyName = "Duration";
-        Duration.HeaderText = "Duration";
-        Duration.Name = "Duration";
-        Duration.ReadOnly = true;
-        Duration.Resizable = DataGridViewTriState.False;
-        Duration.Width = 60;
-        // 
-        // DurationData
-        // 
-        DurationData.DataPropertyName = "DurationData";
-        DurationData.HeaderText = "DurationData";
-        DurationData.Name = "DurationData";
-        DurationData.ReadOnly = true;
-        DurationData.Resizable = DataGridViewTriState.False;
-        DurationData.Visible = false;
         // 
         // lblSelectedTotal
         // 
@@ -171,6 +123,61 @@ partial class frmView
         dtTimesheetDate.Size = new Size(96, 23);
         dtTimesheetDate.TabIndex = 6;
         // 
+        // ID
+        // 
+        ID.DataPropertyName = "ID";
+        ID.HeaderText = "ID";
+        ID.Name = "ID";
+        ID.ReadOnly = true;
+        ID.Visible = false;
+        // 
+        // Task
+        // 
+        Task.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        Task.DataPropertyName = "Task";
+        Task.HeaderText = "Task";
+        Task.Name = "Task";
+        Task.ReadOnly = true;
+        // 
+        // StartedOn
+        // 
+        StartedOn.DataPropertyName = "StartedOn";
+        dataGridViewCellStyle1.Format = "MM/dd hh:mm tt";
+        StartedOn.DefaultCellStyle = dataGridViewCellStyle1;
+        StartedOn.HeaderText = "Start";
+        StartedOn.Name = "StartedOn";
+        StartedOn.ReadOnly = true;
+        StartedOn.Resizable = DataGridViewTriState.False;
+        // 
+        // EndedOn
+        // 
+        EndedOn.DataPropertyName = "EndedOn";
+        dataGridViewCellStyle2.Format = "MM/dd hh:mm tt";
+        EndedOn.DefaultCellStyle = dataGridViewCellStyle2;
+        EndedOn.HeaderText = "End";
+        EndedOn.Name = "EndedOn";
+        EndedOn.ReadOnly = true;
+        EndedOn.Resizable = DataGridViewTriState.False;
+        // 
+        // Duration
+        // 
+        Duration.DataPropertyName = "Duration";
+        Duration.HeaderText = "Duration";
+        Duration.Name = "Duration";
+        Duration.ReadOnly = true;
+        Duration.Resizable = DataGridViewTriState.False;
+        Duration.Visible = false;
+        Duration.Width = 80;
+        // 
+        // DurationString
+        // 
+        DurationString.DataPropertyName = "DurationString";
+        DurationString.HeaderText = "Duration";
+        DurationString.Name = "DurationString";
+        DurationString.ReadOnly = true;
+        DurationString.Resizable = DataGridViewTriState.False;
+        DurationString.Width = 60;
+        // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -198,16 +205,16 @@ partial class frmView
 
     private DataGridView dgView;
     private Label lblSelectedTotal;
-    private DataGridViewTextBoxColumn ID;
-    private DataGridViewTextBoxColumn Task;
-    private DataGridViewTextBoxColumn StartedOn;
-    private DataGridViewTextBoxColumn EndedOn;
-    private DataGridViewTextBoxColumn Duration;
-    private DataGridViewTextBoxColumn DurationData;
     private Label label1;
     private FolderBrowserDialog fbdTimesheetFolder;
     private TextBox txtTimesheetFolder;
     private Button btnBrowseTimesheetFolder;
     private Button btnExportTimesheet;
     private DateTimePicker dtTimesheetDate;
+    private DataGridViewTextBoxColumn ID;
+    private DataGridViewTextBoxColumn Task;
+    private DataGridViewTextBoxColumn StartedOn;
+    private DataGridViewTextBoxColumn EndedOn;
+    private DataGridViewTextBoxColumn Duration;
+    private DataGridViewTextBoxColumn DurationString;
 }
