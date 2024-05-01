@@ -15,14 +15,7 @@ public partial class frmView : Form
     public frmView(ZupDbContext dbContext)
     {
         InitializeComponent();
-        p_DbContext = dbContext;
-    }
-
-    private void frmView_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        e.Cancel = true;
-
-        Hide();
+        p_DbContext = dbContext;        
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
@@ -97,6 +90,8 @@ public partial class frmView : Form
             Properties.Settings.Default.Save();
 
             txtTimesheetFolder.Text = fbdTimesheetFolder.SelectedPath;
+
+            SetLabelOutput();
         }
     }
 
@@ -106,40 +101,66 @@ public partial class frmView : Form
         {
             txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
         }
+
+        SetLabelOutput();
     }
 
-    private void btnExportTimesheet_Click(object sender, EventArgs e)
+    private void SetLabelOutput()
+    {
+        try
+        {
+            lblOutput.Text = GetOutputPath();
+        }
+        catch (Exception ex)
+        {
+            lblOutput.Text = ex.Message;
+        }
+    }
+
+    private string GetOutputPath()
     {
         if (string.IsNullOrWhiteSpace(txtTimesheetFolder.Text))
         {
-            MessageBox.Show("Timesheet directory is empty!");
-            return;
+            throw new Exception("Timesheet directory is empty!");
         }
 
         if (!Path.Exists(txtTimesheetFolder.Text))
         {
-            MessageBox.Show("Timesheet directory doesn't exist!");
-            return;
+            throw new Exception("Timesheet directory doesn't exist!");
         }
 
-        var path = Path.Combine(txtTimesheetFolder.Text, $"{dtTimesheetDate.Value:MM-dd-yyyy}.fd");        
+        var fileName = dtTimesheetDate.Value.ToString(dtTimesheetDate.CustomFormat);
 
-        var content = new StringBuilder();
+        return Path.Combine(txtTimesheetFolder.Text, $"{fileName}{txtExtension.Text}");
+    }
 
-        dgView.SelectedRows.Cast<DataGridViewRow>()
-            .Select(a => (TimeLogSummary)a.DataBoundItem)
-            .Where(a => a.Duration != null)
-            .ToList()
-            .ForEach(a =>
-            {
-                content.AppendLine($"{a.StartedOn.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
-            });
-
-        var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-
-        if (confirm == DialogResult.OK)
+    private void btnExportTimesheet_Click(object sender, EventArgs e)
+    {
+        try
         {
-            File.WriteAllText(path, content.ToString());
+            var path = GetOutputPath();
+
+            var content = new StringBuilder();
+
+            dgView.SelectedRows.Cast<DataGridViewRow>()
+                .Select(a => (TimeLogSummary)a.DataBoundItem)
+                .Where(a => a.Duration != null)
+                .ToList()
+                .ForEach(a =>
+                {
+                    content.AppendLine($"{a.StartedOn.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
+                });
+
+            var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+
+            if (confirm == DialogResult.OK)
+            {
+                File.WriteAllText(path, content.ToString());
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
         }
     }
 
@@ -156,7 +177,7 @@ public partial class frmView : Form
 
         foreach (var note in notes)
         {
-            str.Add(CleanNotes(note.Notes));
+            str.Add(NoteSummary.CleanNotes(note.Notes, 100));
         }
 
         if (!str.Any())
@@ -167,25 +188,19 @@ public partial class frmView : Form
         return string.Join(';', str.Where(a => !string.IsNullOrWhiteSpace(a)));
     }
 
-    private string CleanNotes(string notes)
-    {
-        notes = notes.Replace('^', ' ');
-        notes = notes.Replace(Environment.NewLine, " ");
-        notes = notes.Replace("\n\r", " ");
-        notes = notes.Replace("\n", " ");
-        notes = notes.Replace("\r", " ");
-
-        if (notes.Length > 100)
-        {
-            notes = notes.Substring(0, 100) + "...";
-        }
-
-        return notes;
-    }
-
     private string GetClients(int taskID)
     {
         return string.Empty;
+    }
+
+    private void txtExtension_TextChanged(object sender, EventArgs e)
+    {
+        SetLabelOutput();
+    }
+
+    private void dtTimesheetDate_ValueChanged(object sender, EventArgs e)
+    {
+        SetLabelOutput();
     }
 
     /*

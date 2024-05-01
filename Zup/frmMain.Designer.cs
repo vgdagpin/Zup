@@ -29,7 +29,7 @@ partial class frmMain
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
         notifIconZup = new NotifyIcon(components);
         notifCms = new ContextMenuStrip(components);
         viewToolStripMenuItem = new ToolStripMenuItem();
@@ -45,6 +45,9 @@ partial class frmMain
         // 
         // notifIconZup
         // 
+        notifIconZup.BalloonTipIcon = ToolTipIcon.Info;
+        notifIconZup.BalloonTipText = "Test";
+        notifIconZup.BalloonTipTitle = "Test Title";
         notifIconZup.ContextMenuStrip = notifCms;
         notifIconZup.Icon = (Icon)resources.GetObject("notifIconZup.Icon");
         notifIconZup.Text = "Zup";

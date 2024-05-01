@@ -1,14 +1,93 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Zup;
 
 public partial class frmMain : Form
 {
-    private frmEntryList m_FormEntryList;
+    static class Constants
+    {
+        public const int ShowUpdateEntry = 1;
+        public const int UpdateCurrentRunningTask = 2;
+        public const int ToggleLastRunningTask = 3;
+    }
+
+    IServiceProvider? serviceProvider;
+    private IServiceProvider m_ServiceProvider
+    {
+        get
+        {
+            if (serviceProvider == null)
+            {
+                serviceProvider = p_ServiceProvider.CreateScope().ServiceProvider;
+            }
+
+            return serviceProvider;
+        }
+    }
+
+    ZupDbContext? dbContext = null;
+    private ZupDbContext m_DbContext
+    {
+        get
+        {
+            if (dbContext == null)
+            {
+                dbContext = m_ServiceProvider.GetRequiredService<ZupDbContext>();
+            }
+
+            return dbContext;
+        }
+    }
+
+
+    frmEntryList? frmEntryList = null;
+    private frmEntryList m_FormEntryList
+    {
+        get
+        {
+            if (frmEntryList == null || frmEntryList.IsDisposed)
+            {
+                frmEntryList = m_ServiceProvider.GetRequiredService<frmEntryList>();
+
+                frmEntryList.OnListReadyEvent += FrmEntryList_OnListReadyEvent;
+            }
+
+            return frmEntryList;
+        }
+    }
+
+    private void FrmEntryList_OnListReadyEvent(int listCount)
+    {
+        if (listCount == 0)
+        {
+            notifIconZup.ShowBalloonTip(1000, "", "It's lonely here, press Shift+Alt+J to start adding task!", ToolTipIcon.Info);
+        }
+    }
+
+    frmView? frmView = null;
+    private frmView m_FormView
+    {
+        get
+        {
+            if (frmView == null || frmView.IsDisposed)
+            {
+                frmView = m_ServiceProvider.GetRequiredService<frmView>();
+
+                frmView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
+            }
+
+            return frmView;
+        }
+    }
+
+
+    private readonly IServiceProvider p_ServiceProvider;
     private frmSetting m_FormSetting;
-    private frmView m_FormView;
 
     #region Initialize
     [DllImport("user32.dll")]
@@ -26,7 +105,9 @@ public partial class frmMain : Form
         }
     }
 
-    public frmMain(ZupDbContext dbContext, frmEntryList frmEntryList, frmSetting frmSetting, frmView frmView)
+    
+
+    public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting)
     {
         InitializeComponent();
 
@@ -37,17 +118,96 @@ public partial class frmMain : Form
           MOD_WIN: 0x0008
          */
 
-        RegisterHotKey(this.Handle, 1, 5, (int)Keys.J);
-        RegisterHotKey(this.Handle, 2, 5, (int)Keys.K);
-        RegisterHotKey(this.Handle, 3, 5, (int)Keys.L);
+        RegisterHotKey(this.Handle, Constants.ShowUpdateEntry, 5, (int)Keys.J);
+        RegisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask, 5, (int)Keys.K);
+        RegisterHotKey(this.Handle, Constants.ToggleLastRunningTask, 5, (int)Keys.L);
 
-        dbContext.Database.Migrate();
-
-        m_FormEntryList = frmEntryList;
+        p_ServiceProvider = serviceProvider;
         m_FormSetting = frmSetting;
-        m_FormView = frmView;
 
-        m_FormView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
+        m_FormSetting.OnSettingUpdatedEvent += FormSetting_OnSettingUpdatedEvent;
+        m_FormSetting.OnDbTrimEvent += FormSetting_OnDbTrimEvent;
+        m_FormSetting.OnDbBackupEvent += FormSetting_OnDbBackupEvent;
+    }
+
+    private void FormSetting_OnDbBackupEvent()
+    {
+        var backupDir = m_DbContext.BackupDb();
+
+        OpenFolder(backupDir!);
+    }
+
+    private void OpenFolder(string folderPath)
+    {
+        if (Directory.Exists(folderPath))
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = folderPath,
+                FileName = "explorer.exe"
+            };
+
+            Process.Start(startInfo);
+        }
+        else
+        {
+            MessageBox.Show(string.Format("{0} Directory does not exist!", folderPath));
+        }
+    }
+
+    private void FormSetting_OnDbTrimEvent(int daysToKeep)
+    {
+        var keepDate = DateTime.Now.AddDays(-daysToKeep);
+
+        var toDel = m_DbContext.TimeLogs
+            .Where(a => a.StartedOn < keepDate)
+            .ToList();
+
+        var toDelNotes = m_DbContext.Notes
+            .Where(a => toDel.Select(b => b.ID).Contains(a.LogID))
+            .ToList();
+
+        m_DbContext.Notes.RemoveRange(toDelNotes);
+        m_DbContext.TimeLogs.RemoveRange(toDel);
+
+        m_DbContext.SaveChanges();
+
+        MessageBox.Show($"Trimmed {toDel.Count} record/s.");
+    }
+
+    private void FormSetting_OnSettingUpdatedEvent(string name, object value)
+    {
+        if (name == "AutoFold" && value is bool autoFold)
+        {
+            if (!autoFold)
+            {
+                m_FormEntryList.SetExpand(true);
+            }
+            else
+            {
+                m_FormEntryList.SetExpand(false);
+            }
+
+            m_FormEntryList.ResizeForm();
+        }
+        else if (name == "ItemsToShow")
+        {
+            m_FormEntryList.ResizeForm();
+        }
+        else if (name == "EntryListOpacity" && value is double opacity)
+        {
+            m_FormEntryList.Opacity = opacity;
+        }
+        else if (name == "UpdateDbPath")
+        {
+            m_FormEntryList.Close();
+
+            dbContext = null;
+            serviceProvider = null;
+            frmEntryList = null;
+
+            m_FormEntryList.Show();
+        }
     }
 
     private void FormView_OnSelectedItemEvent(int entryID)
@@ -57,17 +217,33 @@ public partial class frmMain : Form
 
     protected override void WndProc(ref Message m)
     {
-        if (m.Msg == 0x0312 && m.WParam.ToInt32() == 1)
+        if (m.Msg == 0x0312)
         {
-            m_FormEntryList.ShowNewEntry();
-        }
-        else if (m.Msg == 0x0312 && m.WParam.ToInt32() == 2)
-        {
-            m_FormEntryList.UpdateCurrentRunningTask();
-        }
-        else if (m.Msg == 0x0312 && m.WParam.ToInt32() == 3)
-        {
-            m_FormEntryList.ToggleLastRunningTask();
+            if (m.WParam.ToInt32() == Constants.ShowUpdateEntry
+                || m.WParam.ToInt32() == Constants.UpdateCurrentRunningTask
+                || m.WParam.ToInt32() == Constants.ToggleLastRunningTask)
+            {
+                if (!m_DbContext.IsThisWeekDb())
+                {
+                    m_DbContext.BackupDb();
+                }
+
+                switch (m.WParam.ToInt32())
+                {
+                    case Constants.ShowUpdateEntry:
+                        if (m_FormEntryList.ListIsReady)
+                        {
+                            m_FormEntryList.ShowNewEntry();
+                        }
+                        break;
+                    case Constants.UpdateCurrentRunningTask:
+                        m_FormEntryList.UpdateCurrentRunningTask();
+                        break;
+                    case Constants.ToggleLastRunningTask:
+                        m_FormEntryList.ToggleLastRunningTask();
+                        break;
+                }
+            }            
         }
 
         base.WndProc(ref m);
@@ -75,7 +251,9 @@ public partial class frmMain : Form
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        UnregisterHotKey(this.Handle, 1);
+        UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
+        UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
 
         base.OnClosing(e);
     }
@@ -135,7 +313,10 @@ public partial class frmMain : Form
 
     private void openNewEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        m_FormEntryList.ShowNewEntry();
+        if (m_FormEntryList.ListIsReady)
+        {
+            m_FormEntryList.ShowNewEntry();
+        }
     }
 
     private void updateCurrentRunningTaskToolStripMenuItem_Click(object sender, EventArgs e)

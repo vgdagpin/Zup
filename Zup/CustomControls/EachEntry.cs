@@ -1,4 +1,6 @@
-﻿namespace Zup.CustomControls;
+﻿using Microsoft.EntityFrameworkCore.Sqlite.Storage.Json.Internal;
+
+namespace Zup.CustomControls;
 
 public partial class EachEntry : UserControl
 {
@@ -35,11 +37,68 @@ public partial class EachEntry : UserControl
         }
     }
 
+    public const int ExpandedHeight = 35;
+    public const int CollapsedHeight = 22;
+
+    bool isExpanded = false;
+    public bool IsExpanded
+    {
+        get
+        {
+            return isExpanded;
+        }
+        set
+        {
+            isExpanded = value;
+
+            if (isExpanded)
+            {
+                Height = ExpandedHeight;
+                lblTimeInOut.Visible = true;
+                lblDuration.Visible = true;
+            }
+            else
+            {
+                Height = CollapsedHeight;
+                lblTimeInOut.Visible = false;
+                lblDuration.Visible = false;
+            }
+        }
+    }
+
+    public bool IsFirstItem { get; set; }
+
     public int EntryID { get; set; }
 
-    public DateTime? StartedOn { get; set; }
+    DateTime? startedOn;
+    public DateTime? StartedOn
+    {
+        get
+        {
+            return startedOn;
+        }
+        set
+        {
+            startedOn = value;
 
-    public DateTime? EndedOn { get; set; }
+            WriteTime();
+        }
+    }
+
+    DateTime? endedOn;
+    public DateTime? EndedOn
+    {
+        get
+        {
+            return endedOn;
+        }
+        set
+        {
+            endedOn = value;
+
+            WriteTime();
+        }
+    }
 
     public EachEntry(string text)
     {
@@ -67,69 +126,71 @@ public partial class EachEntry : UserControl
         VisibleChanged += EachEntry_VisibleChanged;
 
         RegisterMouseDownAndDoubleClick();
+
+        IsExpanded = !Properties.Settings.Default.AutoFold;
     }
 
     private void RegisterMouseDownAndDoubleClick()
     {
-        MouseDown += (sender, args) =>
-        {
-            if (args.Button == MouseButtons.Left)
-            {
-                if (args.Clicks == 1) // mousedown
-                {
-                    TaskMouseDown?.Invoke(sender, args);
-                }
-                else // double click
-                {
-                    OnUpdateEvent?.Invoke(EntryID);
-                }
-            }
-        };
+        //MouseDown += (sender, args) =>
+        //{
+        //    if (args.Button == MouseButtons.Left)
+        //    {
+        //        if (args.Clicks == 1) // mousedown
+        //        {
+        //            TaskMouseDown?.Invoke(sender, args);
+        //        }
+        //        else // double click
+        //        {
+        //            OnUpdateEvent?.Invoke(EntryID);
+        //        }
+        //    }
+        //};
 
-        lblText.MouseDown += (sender, args) =>
-        {
-            if (args.Button == MouseButtons.Left)
-            {
-                if (args.Clicks == 1) // mousedown
-                {
-                    TaskMouseDown?.Invoke(sender, args);
-                }
-                else // double click
-                {
-                    OnUpdateEvent?.Invoke(EntryID);
-                }
-            }
-        };
+        //lblText.MouseDown += (sender, args) =>
+        //{
+        //    if (args.Button == MouseButtons.Left)
+        //    {
+        //        if (args.Clicks == 1) // mousedown
+        //        {
+        //            TaskMouseDown?.Invoke(sender, args);
+        //        }
+        //        else // double click
+        //        {
+        //            OnUpdateEvent?.Invoke(EntryID);
+        //        }
+        //    }
+        //};
 
-        lblStart.MouseDown += (sender, args) => 
-        {
-            if (args.Button == MouseButtons.Left)
-            {
-                if (args.Clicks == 1) // mousedown
-                {
-                    TaskMouseDown?.Invoke(sender, args);
-                }
-                else // double click
-                {
-                    OnUpdateEvent?.Invoke(EntryID);
-                }
-            }
-        };
+        //lblTimeInOut.MouseDown += (sender, args) =>
+        //{
+        //    if (args.Button == MouseButtons.Left)
+        //    {
+        //        if (args.Clicks == 1) // mousedown
+        //        {
+        //            TaskMouseDown?.Invoke(sender, args);
+        //        }
+        //        else // double click
+        //        {
+        //            OnUpdateEvent?.Invoke(EntryID);
+        //        }
+        //    }
+        //};
 
-        lblDuration.MouseDown += (sender, args) =>
-        {
-            if (args.Button == MouseButtons.Left)
-            {
-                if (args.Clicks == 1) // mousedown
-                {
-                    TaskMouseDown?.Invoke(sender, args);
-                }
-                else // double click
-                {
-                    OnUpdateEvent?.Invoke(EntryID);
-                }
-            }
-        };
+        //lblDuration.MouseDown += (sender, args) =>
+        //{
+        //    if (args.Button == MouseButtons.Left)
+        //    {
+        //        if (args.Clicks == 1) // mousedown
+        //        {
+        //            TaskMouseDown?.Invoke(sender, args);
+        //        }
+        //        else // double click
+        //        {
+        //            OnUpdateEvent?.Invoke(EntryID);
+        //        }
+        //    }
+        //};
     }
 
     private void EachEntry_VisibleChanged(object? sender, EventArgs e)
@@ -144,13 +205,13 @@ public partial class EachEntry : UserControl
     {
         if (EndedOn == null)
         {
-            lblStart.Text = $"{StartedOn:hh:mmtt}";
+            lblTimeInOut.Text = $"{StartedOn:hh:mmtt}";
             lblDuration.Text = "";
 
             return;
         }
 
-        lblStart.Text = $"{StartedOn:hh:mmtt} - {EndedOn:hh:mmtt}";
+        lblTimeInOut.Text = $"{StartedOn:hh:mmtt} - {EndedOn:hh:mmtt}";
 
         var diff = EndedOn.Value - StartedOn!.Value;
 
@@ -173,6 +234,11 @@ public partial class EachEntry : UserControl
         }
 
         BackColor = DefaultBackColor;
+
+        if (!IsFirstItem && Properties.Settings.Default.AutoFold)
+        {
+            IsExpanded = false;
+        }
     }
 
     public void Start()
@@ -202,6 +268,8 @@ public partial class EachEntry : UserControl
 
         BackColor = RunningColor;
 
+        IsExpanded = true;
+
         if (OnStartEvent != null)
         {
             OnStartEvent(EntryID);
@@ -225,5 +293,65 @@ public partial class EachEntry : UserControl
         var diff = DateTime.Now - StartedOn!.Value;
 
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
+    }
+
+    private void lblText_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            if (e.Clicks == 1) // mousedown
+            {
+                TaskMouseDown?.Invoke(sender, e);
+            }
+            else // double click
+            {
+                OnUpdateEvent?.Invoke(EntryID);
+            }
+        }
+    }
+
+    private void lblTimeInOut_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            if (e.Clicks == 1) // mousedown
+            {
+                TaskMouseDown?.Invoke(sender, e);
+            }
+            else // double click
+            {
+                OnUpdateEvent?.Invoke(EntryID);
+            }
+        }
+    }
+
+    private void lblDuration_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            if (e.Clicks == 1) // mousedown
+            {
+                TaskMouseDown?.Invoke(sender, e);
+            }
+            else // double click
+            {
+                OnUpdateEvent?.Invoke(EntryID);
+            }
+        }
+    }
+
+    private void EachEntry_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            if (e.Clicks == 1) // mousedown
+            {
+                TaskMouseDown?.Invoke(sender, e);
+            }
+            else // double click
+            {
+                OnUpdateEvent?.Invoke(EntryID);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using System.Reflection;
 
 namespace Zup;
@@ -11,15 +12,29 @@ internal static class Program
     {
         get
         {
-            var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = Path.Combine(myDoc, "Zup");
-
-            if (!Directory.Exists(path))
+            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.DbPath))
             {
-                Directory.CreateDirectory(path);
+                var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var path = Path.Combine(myDoc, "Zup");
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                Properties.Settings.Default.DbPath = Path.Combine(path, $"Zup.db");
+
+                Properties.Settings.Default.Save();
             }
 
-            return Path.Combine(path, "Zup.db");
+            var dir = Path.GetDirectoryName(Properties.Settings.Default.DbPath)!;
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            return Properties.Settings.Default.DbPath;
         }
     }
 
@@ -48,7 +63,7 @@ internal static class Program
                             opt.MigrationsHistoryTable("tbl_MigrationHistory");
                         }
                     );
-                }, ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+                });
             });
     }
 
@@ -58,7 +73,6 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
 

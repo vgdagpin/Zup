@@ -40,7 +40,7 @@ partial class frmEntryList
         flpTaskList.FlowDirection = FlowDirection.BottomUp;
         flpTaskList.Location = new Point(0, 0);
         flpTaskList.Name = "flpTaskList";
-        flpTaskList.Size = new Size(266, 71);
+        flpTaskList.Size = new Size(266, 86);
         flpTaskList.TabIndex = 0;
         flpTaskList.WrapContents = false;
         // 
@@ -53,8 +53,8 @@ partial class frmEntryList
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(192, 192, 255);
-        ClientSize = new Size(266, 71);
+        BackColor = Color.LawnGreen;
+        ClientSize = new Size(266, 86);
         Controls.Add(flpTaskList);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
@@ -64,10 +64,9 @@ partial class frmEntryList
         StartPosition = FormStartPosition.Manual;
         Text = "frmEntryList";
         TopMost = true;
-        TransparencyKey = Color.FromArgb(192, 192, 255);
+        TransparencyKey = Color.LawnGreen;
         FormClosing += frmEntryList_FormClosing;
         Load += frmEntryList_Load;
-        MouseDown += frmEntryList_MouseDown;
         Move += frmEntryList_Move;
         ResumeLayout(false);
     }

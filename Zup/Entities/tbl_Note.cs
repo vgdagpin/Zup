@@ -14,6 +14,8 @@ public partial class tbl_Note
     [MaxLength(1000)]
     public string Notes { get; set; } = null!;
 
+    public string RTF { get; set; } = null!;
+
     public DateTime CreatedOn { get; set; }
 
     public DateTime? UpdatedOn { get; set; }

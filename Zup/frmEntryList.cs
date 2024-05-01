@@ -1,10 +1,13 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+
+using System.Data;
 using System.Runtime.InteropServices;
 
 using Zup.CustomControls;
 using Zup.Entities;
 
 namespace Zup;
+
 public partial class frmEntryList : Form
 {
     private frmNewEntry m_FormNewEntry;
@@ -16,15 +19,61 @@ public partial class frmEntryList : Form
     private int? CurrentRunningTaskID;
     private int? LastRunningTaskID;
 
-    public bool ListIsReady = false;
+    public bool ListIsReady { get; set; }
 
+    public delegate void OnListReady(int listCount);
+
+    public event OnListReady? OnListReadyEvent;
+
+    #region Draggable Form
     public const int WM_NCLBUTTONDOWN = 0xA1;
     public const int HT_CAPTION = 0x2;
 
     [DllImport("user32.dll")]
     public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
     [DllImport("user32.dll")]
     public static extern bool ReleaseCapture();
+
+    private void frmEntryList_MouseDown(object? sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            ReleaseCapture();
+            SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+        }
+    }
+
+    private void frmEntryList_Move(object sender, EventArgs e)
+    {
+        tmrSaveSetting.Enabled = false;
+        tmrSaveSetting.Enabled = true;
+    }
+
+    private void tmrSaveSetting_Tick(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.FormLocationX = Left;
+        Properties.Settings.Default.FormLocationY = Top;
+        Properties.Settings.Default.Save();
+
+        tmrSaveSetting.Enabled = false;
+    }
+
+    private void UpdateFormPosition()
+    {
+        if (Properties.Settings.Default.FormLocationX == 0
+            && Properties.Settings.Default.FormLocationY == 0)
+        {
+            Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
+            Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
+        }
+        else
+        {
+            Left = Properties.Settings.Default.FormLocationX;
+            Top = Properties.Settings.Default.FormLocationY;
+        }
+    }
+    #endregion
 
     protected override CreateParams CreateParams
     {
@@ -38,26 +87,13 @@ public partial class frmEntryList : Form
 
     public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry)
     {
-        InitializeComponent();
-
-        if (Properties.Settings.Default.FormLocationX == 0 && Properties.Settings.Default.FormLocationY == 0)
-        {
-            Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
-            Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
-
-            Properties.Settings.Default.FormLocationX = Left;
-            Properties.Settings.Default.FormLocationY = Top;
-            Properties.Settings.Default.Save();
-        }
-        else
-        {
-            Left = Properties.Settings.Default.FormLocationX;
-            Top = Properties.Settings.Default.FormLocationY;
-        }
+        InitializeComponent();        
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
         m_FormUpdateEntry = frmUpdateEntry;
+
+        m_DbContext.Database.Migrate();
     }
 
     private void frmEntryList_FormClosing(object sender, FormClosingEventArgs e)
@@ -65,15 +101,10 @@ public partial class frmEntryList : Form
         e.Cancel = true;
 
         Hide();
-    }
+    }    
 
     public void ShowNewEntry()
     {
-        if (!ListIsReady)
-        {
-            return;
-        }
-
         var suggestions = new List<string>();
 
         var currentList = flpTaskList.Controls.Cast<EachEntry>()
@@ -104,10 +135,28 @@ public partial class frmEntryList : Form
     {
         m_FormNewEntry.OnNewEntryEvent += EachEntry_NewEntryEventHandler;
         m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
+        m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
 
-        var tasks = m_DbContext.TimeLogs.ToList();
+        LoadListToControl();
 
-        foreach (var task in tasks)
+        if (Properties.Settings.Default.AutoFold)
+        {
+            SetExpand(false);
+        }        
+
+        p_OnLoad = false;
+
+        Opacity = Properties.Settings.Default.EntryListOpacity;
+
+        ResizeForm();
+        UpdateFormPosition();
+    }
+
+    private void LoadListToControl()
+    {
+        var count = 0;
+
+        foreach (var task in m_DbContext.TimeLogs.ToList())
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.StartedOn, task.EndedOn);
 
@@ -118,11 +167,62 @@ public partial class frmEntryList : Form
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
             AddEntryToFlowLayoutControl(eachEntry);
+
+            count++;
         }
 
         ListIsReady = true;
 
-        p_OnLoad = false;
+        if (OnListReadyEvent != null)
+        {
+            OnListReadyEvent(count);
+        }
+    }
+
+    public void ResizeForm()
+    {
+        int totalHeight = 0;        
+
+        if (Properties.Settings.Default.AutoFold)
+        {
+            if (Properties.Settings.Default.ItemsToShow > 0)
+            {
+                totalHeight += EachEntry.ExpandedHeight;
+                totalHeight += EachEntry.CollapsedHeight * (Properties.Settings.Default.ItemsToShow - 1);
+            }
+        }
+        else
+        {
+            totalHeight = EachEntry.ExpandedHeight * Properties.Settings.Default.ItemsToShow;
+        }
+
+        // margin-bottom
+        totalHeight += 1 * Properties.Settings.Default.ItemsToShow;
+
+        Height = totalHeight;
+    }
+
+    public void ExpandFirstEntryOnly()
+    {
+        var lastControl = flpTaskList.Controls.Cast<EachEntry>().LastOrDefault();
+
+        if (lastControl != null)
+        {
+            lastControl.IsExpanded = true;
+        }
+    }
+
+    private void FormUpdateEntry_OnSavedEventHandler(tbl_TimeLog log)
+    {
+        foreach (var entry in flpTaskList.Controls.Cast<EachEntry>())
+        {
+            if (entry.EntryID == log.ID)
+            {
+                entry.Text = log.Task;
+                entry.StartedOn = log.StartedOn;
+                entry.EndedOn = log.EndedOn;
+            }
+        }
     }
 
     private void EachEntry_OnStartEvent(int id)
@@ -164,7 +264,12 @@ public partial class frmEntryList : Form
 
         AddEntryToFlowLayoutControl(eachEntry);
 
-        EachEntry_OnUpdateEvent(newE.ID);
+        if (Properties.Settings.Default.AutoOpenUpdateWindow)
+        {
+            ShowUpdateEntry(newE.ID);
+        }
+
+        ResizeForm();
     }
 
     private void EachEntry_OnUpdateEvent(int id)
@@ -185,8 +290,23 @@ public partial class frmEntryList : Form
 
         if (!p_OnLoad)
         {
-            StopAll();
+            foreach (EachEntry item in flpTaskList.Controls)
+            {
+                item.IsFirstItem = false;
+
+                if (item.IsStarted)
+                {
+                    item.Stop();
+                }
+
+                if (Properties.Settings.Default.AutoFold)
+                {
+                    item.IsExpanded = false;
+                }
+            }
+
             newEntry.Start();
+            newEntry.IsFirstItem = true;
         }
     }
 
@@ -204,14 +324,33 @@ public partial class frmEntryList : Form
         CurrentRunningTaskID = null;
     }
 
-    private void StopAll()
+    public void SetExpand(bool expand)
     {
         foreach (EachEntry item in flpTaskList.Controls)
         {
-            if (item.IsStarted)
+            item.Visible = false;
+        }
+
+        if (expand)
+        {
+            foreach (EachEntry item in flpTaskList.Controls)
             {
-                item.Stop();
+                item.IsExpanded = true;
             }
+        }
+        else
+        {
+            foreach (EachEntry item in flpTaskList.Controls)
+            {
+                item.IsExpanded = false;
+            }
+
+            ExpandFirstEntryOnly();
+        }
+
+        foreach (EachEntry item in flpTaskList.Controls)
+        {
+            item.Visible = true;
         }
     }
 
@@ -222,7 +361,7 @@ public partial class frmEntryList : Form
             return;
         }
 
-        EachEntry_OnUpdateEvent(CurrentRunningTaskID.Value);
+        ShowUpdateEntry(CurrentRunningTaskID.Value);
     }
 
     public void ToggleLastRunningTask()
@@ -248,29 +387,5 @@ public partial class frmEntryList : Form
                 item.Start();
             }
         }
-    }
-
-    private void frmEntryList_MouseDown(object? sender, MouseEventArgs e)
-    {
-        if (e.Button == MouseButtons.Left)
-        {
-            ReleaseCapture();
-            SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-        }
-    }
-
-    private void frmEntryList_Move(object sender, EventArgs e)
-    {
-        tmrSaveSetting.Enabled = false;
-        tmrSaveSetting.Enabled = true;
-    }
-
-    private void tmrSaveSetting_Tick(object sender, EventArgs e)
-    {
-        Properties.Settings.Default.FormLocationX = Left;
-        Properties.Settings.Default.FormLocationY = Top;
-        Properties.Settings.Default.Save();
-
-        tmrSaveSetting.Enabled = false;
     }
 }

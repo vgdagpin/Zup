@@ -29,11 +29,11 @@ partial class EachEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        lblText = new Label();
+        lblText = new ZupLabel();
         btnToggleStartStop = new Button();
-        lblStart = new Label();
+        lblTimeInOut = new ZupLabel();
         tmr = new System.Windows.Forms.Timer(components);
-        lblDuration = new Label();
+        lblDuration = new ZupLabel();
         toolTip = new ToolTip(components);
         SuspendLayout();
         // 
@@ -43,10 +43,11 @@ partial class EachEntry
         lblText.Font = new Font("Segoe UI", 7F);
         lblText.Location = new Point(4, 4);
         lblText.Name = "lblText";
-        lblText.Size = new Size(194, 13);
+        lblText.Size = new Size(215, 13);
         lblText.TabIndex = 0;
         lblText.Text = "Task #1";
         toolTip.SetToolTip(lblText, "Test");
+        lblText.MouseDown += lblText_MouseDown;
         // 
         // btnToggleStartStop
         // 
@@ -56,21 +57,22 @@ partial class EachEntry
         btnToggleStartStop.ForeColor = Color.Black;
         btnToggleStartStop.Location = new Point(225, 2);
         btnToggleStartStop.Name = "btnToggleStartStop";
-        btnToggleStartStop.Size = new Size(19, 19);
+        btnToggleStartStop.Size = new Size(18, 18);
         btnToggleStartStop.TabIndex = 1;
         btnToggleStartStop.TabStop = false;
         btnToggleStartStop.Text = "►";
         btnToggleStartStop.UseVisualStyleBackColor = true;
         btnToggleStartStop.Click += btnToggleStartStop_Click;
         // 
-        // lblStart
+        // lblTimeInOut
         // 
-        lblStart.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
-        lblStart.Location = new Point(5, 18);
-        lblStart.Name = "lblStart";
-        lblStart.Size = new Size(94, 12);
-        lblStart.TabIndex = 2;
-        lblStart.Text = "00:00AM - 00:00AM";
+        lblTimeInOut.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        lblTimeInOut.Location = new Point(5, 18);
+        lblTimeInOut.Name = "lblTimeInOut";
+        lblTimeInOut.Size = new Size(94, 12);
+        lblTimeInOut.TabIndex = 2;
+        lblTimeInOut.Text = "00:00AM - 00:00AM";
+        lblTimeInOut.MouseDown += lblTimeInOut_MouseDown;
         // 
         // tmr
         // 
@@ -86,6 +88,7 @@ partial class EachEntry
         lblDuration.Size = new Size(55, 12);
         lblDuration.TabIndex = 5;
         lblDuration.Text = "00:00:00";
+        lblDuration.MouseDown += lblDuration_MouseDown;
         // 
         // EachEntry
         // 
@@ -93,21 +96,22 @@ partial class EachEntry
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
         Controls.Add(lblDuration);
-        Controls.Add(lblStart);
+        Controls.Add(lblTimeInOut);
         Controls.Add(btnToggleStartStop);
         Controls.Add(lblText);
         Margin = new Padding(1, 0, 1, 1);
         Name = "EachEntry";
         Size = new Size(247, 35);
+        MouseDown += EachEntry_MouseDown;
         ResumeLayout(false);
     }
 
     #endregion
 
-    private Label lblText;
+    private ZupLabel lblText;
     private Button btnToggleStartStop;
-    private Label lblStart;
+    private ZupLabel lblTimeInOut;
     private System.Windows.Forms.Timer tmr;
-    private Label lblDuration;
+    private ZupLabel lblDuration;
     private ToolTip toolTip;
 }

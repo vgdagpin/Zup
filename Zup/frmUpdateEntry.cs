@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Windows.Forms;
 
 using Zup.Entities;
 
@@ -11,8 +12,10 @@ public partial class frmUpdateEntry : Form
     private int? selectedNoteID;
 
     public delegate void OnDelete(int entryID);
+    public delegate void OnSaved(tbl_TimeLog log);
 
     public event OnDelete? OnDeleteEvent;
+    public event OnSaved? OnSavedEvent;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -36,9 +39,6 @@ public partial class frmUpdateEntry : Form
 
     public void ShowUpdateEntry(int entryID)
     {
-        rtbNote.Focus();
-
-
         var entry = p_DbContext.TimeLogs.Find(entryID);
 
         selectedEntryID = null;
@@ -53,7 +53,6 @@ public partial class frmUpdateEntry : Form
 
         selectedEntryID = entryID;
 
-        Text = entry.Task;
         txtTask.Text = entry.Task;
         dtFrom.Value = entry.StartedOn;
 
@@ -122,8 +121,30 @@ public partial class frmUpdateEntry : Form
         rtbNote.Clear();
     }
 
+    string GetNoteData()
+    {
+        if (string.IsNullOrWhiteSpace(rtbNote.Text) 
+            && !string.IsNullOrWhiteSpace(rtbNote.Rtf) 
+            && rtbNote.Rtf.Length > 500)
+        {
+            return "Image";
+        }
+
+        return rtbNote.Text;
+    }
+
+    string? GetRichTextNote()
+    {
+        return rtbNote.Rtf;
+    }
+
     void SaveChanges()
     {
+        var noteData = GetNoteData();
+        var rtfNoteData = GetRichTextNote();
+
+        // note entry selected?
+        // see if saving note as empty; if empty then delete note
         if (selectedNoteID != null)
         {
             var lll = lbNotes.Items.Cast<NoteSummary>().Single(a => a.ID == selectedNoteID);
@@ -131,30 +152,35 @@ public partial class frmUpdateEntry : Form
 
             if (existingNote != null)
             {
-                if (string.IsNullOrWhiteSpace(rtbNote.Text))
+                if (string.IsNullOrWhiteSpace(noteData))
                 {
                     DeleteNote();
                 }
                 else
                 {
-                    existingNote.Notes = rtbNote.Text;
+                    existingNote.Notes = noteData;
                     existingNote.UpdatedOn = DateTime.Now;
+                    existingNote.RTF = rtfNoteData!;
 
                     lll.Summary = NoteSummary.Parse(existingNote).Summary;
-                    lll.Note = rtbNote.Text;
+                    lll.Note = noteData;
 
                     p_DbContext.SaveChanges();
+
+                    lbNotes.Refresh();
                 }
             }
         }
+        // else if notes not empty then create new one
         else
         {
-            if (!string.IsNullOrWhiteSpace(rtbNote.Text))
+            if (!string.IsNullOrWhiteSpace(noteData))
             {
                 var newNote = new tbl_Note
                 {
                     LogID = selectedEntryID!.Value,
-                    Notes = rtbNote.Text,
+                    Notes = noteData,
+                    RTF = rtfNoteData!,
                     CreatedOn = DateTime.Now
                 };
 
@@ -162,11 +188,11 @@ public partial class frmUpdateEntry : Form
 
                 p_DbContext.SaveChanges();
 
-                lbNotes.Items.Add(NoteSummary.Parse(newNote));
-
-                rtbNote.Clear();
+                lbNotes.Items.Add(NoteSummary.Parse(newNote));                
             }
         }
+
+        rtbNote.Clear();
 
         selectedNoteID = null;
         btnDeleteNote.Enabled = false;
@@ -181,8 +207,23 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        rtbNote.Text = sel.Note;
-        selectedNoteID = sel.ID;
+        var note = p_DbContext.Notes.Find(sel.ID);
+
+        if (note == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(note.RTF))
+        {
+            rtbNote.Rtf = note.RTF;
+        }
+        else
+        {
+            rtbNote.Text = note.Notes;
+        }
+
+        selectedNoteID = note.ID;
 
         btnDeleteNote.Enabled = true;
     }
@@ -251,6 +292,8 @@ public partial class frmUpdateEntry : Form
         Activate();
 
         tmrFocus.Enabled = false;
+
+        rtbNote.Focus();
     }
 
     private void rtbNote_KeyDown(object sender, KeyEventArgs e)
@@ -283,30 +326,38 @@ public partial class frmUpdateEntry : Form
 
             p_DbContext.SaveChanges();
 
-            MessageBox.Show("Saved!");
+            if (OnSavedEvent != null)
+            {
+                OnSavedEvent(task);
+            }
         }
     }
-}
 
-public class NoteSummary
-{
-    public int ID { get; set; }
-    public DateTime CreatedOn { get; set; }
-
-    public string Summary { get; set; } = null!;
-
-    public string Note { get; set; } = null!;
-
-    public static NoteSummary Parse(tbl_Note newNote)
+    private void lbNotes_DrawItem(object sender, DrawItemEventArgs e)
     {
-        const int noteLen = 30;
-
-        return new NoteSummary
+        if (e.Index == -1)
         {
-            ID = newNote.ID,
-            CreatedOn = newNote.CreatedOn,
-            Note = newNote.Notes,
-            Summary = newNote.Notes.Length > noteLen ? newNote.Notes.Substring(0, noteLen).Trim() + ".." : newNote.Notes
-        };
+            return;
+        }
+
+        e.DrawBackground();
+
+        var item = (NoteSummary)lbNotes.Items[e.Index];
+
+        var bold = new Font(e.Font!.FontFamily, e.Font.Size, FontStyle.Bold);
+
+        e.Graphics.DrawString(item.CreatedOn.ToString("hh:mm:ss"), bold, Brushes.Black, e.Bounds);
+        e.Graphics.DrawString(item.Summary, e.Font, Brushes.Black, new PointF(e.Bounds.X + 55, e.Bounds.Y));
+
+        e.DrawFocusRectangle();
+    }
+
+    private void txtTask_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            e.SuppressKeyPress = true;
+            Close();
+        }
     }
 }

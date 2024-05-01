@@ -58,5 +58,77 @@ namespace Zup.Properties {
                 this["TimesheetsFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoFold {
+            get {
+                return ((bool)(this["AutoFold"]));
+            }
+            set {
+                this["AutoFold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int ItemsToShow {
+            get {
+                return ((int)(this["ItemsToShow"]));
+            }
+            set {
+                this["ItemsToShow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoOpenUpdateWindow {
+            get {
+                return ((bool)(this["AutoOpenUpdateWindow"]));
+            }
+            set {
+                this["AutoOpenUpdateWindow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.9")]
+        public double EntryListOpacity {
+            get {
+                return ((double)(this["EntryListOpacity"]));
+            }
+            set {
+                this["EntryListOpacity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DbPath {
+            get {
+                return ((string)(this["DbPath"]));
+            }
+            set {
+                this["DbPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14")]
+        public int TrimDaysToKeep {
+            get {
+                return ((int)(this["TrimDaysToKeep"]));
+            }
+            set {
+                this["TrimDaysToKeep"] = value;
+            }
+        }
     }
 }
