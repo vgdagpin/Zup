@@ -4,6 +4,6 @@
 
 Shortcuts:
 
-``Shift + Alt + J`` - New entry
-``Shift + Alt + K`` - Open current running task and update notes
-``Shift + Alt + L`` - Toggle last running task
+``Shift + Alt + J`` - New entry   
+``Shift + Alt + K`` - Open current running task and update notes   
+``Shift + Alt + L`` - Toggle last running task   
