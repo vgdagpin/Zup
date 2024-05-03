@@ -11,7 +11,7 @@ public partial class EachEntry : UserControl
 
     public bool IsStarted { get; private set; }
 
-    public delegate void OnResume(string entry);
+    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null);
     public delegate void OnStop(int id, DateTime endOn);
     public delegate void OnUpdate(int id);
     public delegate void OnStart(int id);
@@ -247,7 +247,8 @@ public partial class EachEntry : UserControl
         {
             if (OnResumeEvent != null)
             {
-                OnResumeEvent(Text);
+                // if shift is pressed, create a new entry running in parallel
+                OnResumeEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID);
 
                 return;
             }

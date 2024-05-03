@@ -242,7 +242,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry)
+    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null)
     {
         var newE = new tbl_TimeLog
         {
@@ -262,7 +262,7 @@ public partial class frmEntryList : Form
         eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
         eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-        AddEntryToFlowLayoutControl(eachEntry);
+        AddEntryToFlowLayoutControl(eachEntry, stopOtherTask);
 
         if (Properties.Settings.Default.AutoOpenUpdateWindow)
         {
@@ -282,7 +282,7 @@ public partial class frmEntryList : Form
         m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
-    private void AddEntryToFlowLayoutControl(EachEntry newEntry)
+    private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true)
     {
         flpTaskList.Controls.Add(newEntry);
 
@@ -294,15 +294,18 @@ public partial class frmEntryList : Form
             {
                 item.IsFirstItem = false;
 
-                if (item.IsStarted)
+                if (stopOthers)
                 {
-                    item.Stop();
-                }
+                    if (item.IsStarted)
+                    {
+                        item.Stop();
+                    }
 
-                if (Properties.Settings.Default.AutoFold)
-                {
-                    item.IsExpanded = false;
-                }
+                    if (Properties.Settings.Default.AutoFold)
+                    {
+                        item.IsExpanded = false;
+                    }
+                }                
             }
 
             newEntry.Start();

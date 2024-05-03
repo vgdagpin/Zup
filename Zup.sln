@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E717CDA2-2786-40C4-A04F-4A0329FDB08C}"
 	ProjectSection(SolutionItems) = preProject
 		cleanup.cmd = cleanup.cmd
+		Lightbulb.md = Lightbulb.md
 		README.md = README.md
 	EndProjectSection
 EndProject

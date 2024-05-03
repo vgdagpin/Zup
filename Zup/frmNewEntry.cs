@@ -5,22 +5,19 @@ public partial class frmNewEntry : Form
 {
     private AutoCompleteStringCollection SuggestionSource = new AutoCompleteStringCollection();
 
-    public delegate void OnNewEntry(string entry);
+    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null);
 
     public event OnNewEntry? OnNewEntryEvent;
 
     private string[]? Suggestions = null;
-    private readonly ZupDbContext dbContext;
 
-    public frmNewEntry(ZupDbContext dbContext)
+    public frmNewEntry()
     {
         InitializeComponent();
 
         txtEntry.AutoCompleteMode = AutoCompleteMode.None;
         txtEntry.AutoCompleteSource = AutoCompleteSource.CustomSource;
         txtEntry.AutoCompleteCustomSource = SuggestionSource;
-
-        this.dbContext = dbContext;
     }
 
     private void frmNewEntry_FormClosing(object sender, FormClosingEventArgs e)
@@ -53,10 +50,51 @@ public partial class frmNewEntry : Form
 
     private void txtEntry_KeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Control)
+        {
+            lbSuggestions.Enabled = false;
+        }
+
         if (e.KeyCode == Keys.Escape)
         {
             e.SuppressKeyPress = true;
             Close();
+        }
+        else if (e.KeyData == (Keys.Alt | Keys.Enter)
+            || e.KeyData == (Keys.Alt | Keys.Control | Keys.Enter))
+        {
+            return;
+
+            e.SuppressKeyPress = true;
+
+            var temp = GetSelectedItem(e.Control);
+
+            Close();
+
+            if (!string.IsNullOrWhiteSpace(temp))
+            {
+                if (OnNewEntryEvent != null)
+                {
+                    OnNewEntryEvent(temp, false, false);
+                }
+            }
+        }
+        else if (e.KeyData == (Keys.Shift | Keys.Enter)
+            || e.KeyData == (Keys.Shift | Keys.Control | Keys.Enter))
+        {
+            e.SuppressKeyPress = true;
+
+            var temp = GetSelectedItem(e.Control);
+
+            Close();
+
+            if (!string.IsNullOrWhiteSpace(temp))
+            {
+                if (OnNewEntryEvent != null)
+                {
+                    OnNewEntryEvent(temp, false, true);
+                }
+            }
         }
         else if (e.KeyCode == Keys.Enter)
         {
@@ -70,7 +108,7 @@ public partial class frmNewEntry : Form
             {
                 if (OnNewEntryEvent != null)
                 {
-                    OnNewEntryEvent(temp);
+                    OnNewEntryEvent(temp, true, true);
                 }
             }
         }
@@ -110,6 +148,11 @@ public partial class frmNewEntry : Form
         }
     }
 
+    private void txtEntry_KeyUp(object sender, KeyEventArgs e)
+    {
+        lbSuggestions.Enabled = true;
+    }
+
     public void ShowNewEntryDialog(params string[] suggestions)
     {
         if (Visible)
@@ -134,8 +177,6 @@ public partial class frmNewEntry : Form
             if (Suggestions != null && Suggestions.Length > 0)
             {
                 txtEntry.AutoCompleteCustomSource.AddRange(Suggestions);
-
-                // Suggestions = Suggestions.Reverse().ToArray();
 
                 lbSuggestions.DataSource = Suggestions;
             }
@@ -177,8 +218,8 @@ public partial class frmNewEntry : Form
         {
             if (OnNewEntryEvent != null)
             {
-                OnNewEntryEvent(temp);
+                OnNewEntryEvent(temp, true, true);
             }
         }
-    }
+    }    
 }
