@@ -1,11 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-
-using Zup.CustomControls;
 
 namespace Zup;
 
@@ -75,9 +73,11 @@ public partial class frmMain : Form
 
     public void SetIcon(int? queueCount = null)
     {
+        var inDarkMode = IsUsingDarkMode();
+
         var bitmapText = queueCount == null || queueCount == 0
-            ? new Bitmap(Properties.Resources.zup_black_3)
-            : new Bitmap(Properties.Resources.zup_black_2);
+            ? new Bitmap(inDarkMode ? Properties.Resources.zup_white_3 : Properties.Resources.zup_black_3)
+            : new Bitmap(inDarkMode ? Properties.Resources.zup_white_2 : Properties.Resources.zup_black_2);
 
         var g = Graphics.FromImage(bitmapText);
 
@@ -89,7 +89,7 @@ public partial class frmMain : Form
             var x = queueCount > 9 ? 8 : 9;
 
             var fontToUse = new Font("Segoe UI", 9, FontStyle.Regular, GraphicsUnit.Pixel);
-            var brushToUse = new SolidBrush(Color.Red);
+            var brushToUse = new SolidBrush(inDarkMode ? Color.Orange : Color.Red);
 
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
             g.DrawString(str, fontToUse, brushToUse, x, 2);
@@ -100,6 +100,25 @@ public partial class frmMain : Form
         notifIconZup.Icon = Icon.FromHandle(hIcon);
 
         DestroyIcon(hIcon);
+    }
+
+    private bool IsUsingDarkMode()
+    {
+        try
+        {
+            var res = (int?)Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1);
+
+            if (res == 0)
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            //Exception Handling     
+        }
+
+        return false;
     }
 
     private void FrmEntryList_OnListReadyEvent(int listCount)

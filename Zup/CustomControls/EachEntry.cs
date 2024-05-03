@@ -9,11 +9,11 @@ public partial class EachEntry : UserControl
 
     public bool IsStarted { get; private set; }
 
-    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false);
+    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
     public delegate void OnStop(int id, DateTime endOn);
     public delegate void OnUpdate(int id);
     public delegate void OnStart(int id);
-    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false);
+    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
 
     public event OnResume? OnResumeEvent;
     public event OnStop? OnStopEvent;
@@ -192,7 +192,7 @@ public partial class EachEntry : UserControl
         {
             if (OnStartQueueEvent != null)
             {
-                OnStartQueueEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID, true);
+                OnStartQueueEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID, true, true);
 
                 return;
             }

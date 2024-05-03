@@ -228,6 +228,18 @@ public partial class frmEntryList : Form
 
     private void FormUpdateEntry_OnDeleteEventHandler(int entryID)
     {
+        DeleteTimeLog(entryID);
+
+        ResizeForm();
+
+        if (OnQueueTaskUpdatedEvent != null)
+        {
+            OnQueueTaskUpdatedEvent(GetQueueCount(false));
+        }
+    }
+
+    private void DeleteTimeLog(int entryID)
+    {
         var entry = m_DbContext.TimeLogs.Find(entryID);
 
         if (entry != null)
@@ -245,7 +257,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false)
+    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false, bool bringNotes = false)
     {
         var newE = new tbl_TimeLog
         {
@@ -261,6 +273,23 @@ public partial class frmEntryList : Form
 
         m_DbContext.SaveChanges();
 
+        if (bringNotes && parentEntryID != null)
+        {
+            foreach (var note in m_DbContext.Notes.Where(a => a.LogID == parentEntryID).ToList())
+            {
+                m_DbContext.Notes.Add(new tbl_Note
+                {
+                    LogID = newE.ID,
+                    CreatedOn = note.CreatedOn,
+                    Notes = note.Notes,
+                    RTF = note.RTF,
+                    UpdatedOn = note.UpdatedOn
+                });
+            }
+
+            m_DbContext.SaveChanges();
+        }
+
         var eachEntry = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
 
         eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
@@ -274,7 +303,7 @@ public partial class frmEntryList : Form
 
         if (hideParent && parentEntryID != null)
         {
-            FormUpdateEntry_OnDeleteEventHandler(parentEntryID.Value);
+            DeleteTimeLog(parentEntryID.Value);
         }
 
         if (Properties.Settings.Default.AutoOpenUpdateWindow)
