@@ -30,25 +30,12 @@ public partial class frmSetting : Form
         ofdDbFile.InitialDirectory = path;
         ofdDbFile.Filter = "Database Files (*.db)|*.db";
 
-        cbAutoFold.Checked = Properties.Settings.Default.AutoFold;
         numTxtItemsToShow.Value = Properties.Settings.Default.ItemsToShow;
         cbAutoOpenUpdateWindow.Checked = Properties.Settings.Default.AutoOpenUpdateWindow;
         lblOpacityVal.Text = $"{Properties.Settings.Default.EntryListOpacity * 100}%";
         tbOpacity.Value = Convert.ToInt32(Properties.Settings.Default.EntryListOpacity * 100);
         txtDbPath.Text = Properties.Settings.Default.DbPath;
         numKeepDaysOfData.Value = Properties.Settings.Default.TrimDaysToKeep;
-    }
-
-    private void cbAutoFold_CheckedChanged(object sender, EventArgs e)
-    {
-
-        Properties.Settings.Default.AutoFold = cbAutoFold.Checked;
-        Properties.Settings.Default.Save();
-
-        if (OnSettingUpdatedEvent != null)
-        {
-            OnSettingUpdatedEvent("AutoFold", cbAutoFold.Checked);
-        }
     }
 
     private void numTxtItemsToShow_ValueChanged(object sender, EventArgs e)

@@ -54,18 +54,24 @@ public partial class frmUpdateEntry : Form
         selectedEntryID = entryID;
 
         txtTask.Text = entry.Task;
-        dtFrom.Value = entry.StartedOn;
+
+        dtFrom.Value = entry.StartedOn != null
+            ? entry.StartedOn.Value
+            : dtFrom.MinDate;
+
+        dtFrom.CustomFormat = entry.StartedOn != null
+            ? DateTimeCustomFormat
+            : " ";
 
 
-        if (entry.EndedOn != null)
-        {
-            dtTo.Value = entry.EndedOn.Value;
-            dtTo.CustomFormat = DateTimeCustomFormat;
-        }
-        else
-        {
-            dtTo.CustomFormat = " ";
-        }
+        dtTo.Value = entry.EndedOn != null
+            ? entry.EndedOn.Value
+            : dtTo.MinDate;
+
+        dtTo.CustomFormat = entry.EndedOn != null
+            ? DateTimeCustomFormat
+            : " ";
+
 
         foreach (var note in p_DbContext.Notes.Where(a => a.LogID == entryID).ToList())
         {
@@ -240,14 +246,6 @@ public partial class frmUpdateEntry : Form
         if (result == DialogResult.Cancel)
         {
             return;
-        }
-
-        var entry = p_DbContext.TimeLogs.Find(selectedEntryID);
-
-        if (entry != null)
-        {
-            p_DbContext.TimeLogs.Remove(entry);
-            p_DbContext.SaveChanges();
         }
 
         if (OnDeleteEvent != null)

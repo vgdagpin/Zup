@@ -1,25 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore.Sqlite.Storage.Json.Internal;
-
-namespace Zup.CustomControls;
+﻿namespace Zup.CustomControls;
 
 public partial class EachEntry : UserControl
 {
-    const string StartChar = "►";
-    const string StopChar = "■";
+    public const string StartChar = "►";
+    public const string StopChar = "■";
 
     Color RunningColor = Color.LightPink;
 
     public bool IsStarted { get; private set; }
 
-    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null);
+    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false);
     public delegate void OnStop(int id, DateTime endOn);
     public delegate void OnUpdate(int id);
     public delegate void OnStart(int id);
+    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false);
 
     public event OnResume? OnResumeEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
     public event OnStart? OnStartEvent;
+    public event OnStartQueue? OnStartQueueEvent;
 
     public event MouseEventHandler? TaskMouseDown;
 
@@ -109,7 +109,7 @@ public partial class EachEntry : UserControl
         WriteTime();
     }
 
-    public EachEntry(int entryID, string text, DateTime startedOn, DateTime? endedOn = null)
+    public EachEntry(int entryID, string text, DateTime? startedOn, DateTime? endedOn = null)
     {
         InitializeComponent();
 
@@ -125,72 +125,7 @@ public partial class EachEntry : UserControl
 
         VisibleChanged += EachEntry_VisibleChanged;
 
-        RegisterMouseDownAndDoubleClick();
-
-        IsExpanded = !Properties.Settings.Default.AutoFold;
-    }
-
-    private void RegisterMouseDownAndDoubleClick()
-    {
-        //MouseDown += (sender, args) =>
-        //{
-        //    if (args.Button == MouseButtons.Left)
-        //    {
-        //        if (args.Clicks == 1) // mousedown
-        //        {
-        //            TaskMouseDown?.Invoke(sender, args);
-        //        }
-        //        else // double click
-        //        {
-        //            OnUpdateEvent?.Invoke(EntryID);
-        //        }
-        //    }
-        //};
-
-        //lblText.MouseDown += (sender, args) =>
-        //{
-        //    if (args.Button == MouseButtons.Left)
-        //    {
-        //        if (args.Clicks == 1) // mousedown
-        //        {
-        //            TaskMouseDown?.Invoke(sender, args);
-        //        }
-        //        else // double click
-        //        {
-        //            OnUpdateEvent?.Invoke(EntryID);
-        //        }
-        //    }
-        //};
-
-        //lblTimeInOut.MouseDown += (sender, args) =>
-        //{
-        //    if (args.Button == MouseButtons.Left)
-        //    {
-        //        if (args.Clicks == 1) // mousedown
-        //        {
-        //            TaskMouseDown?.Invoke(sender, args);
-        //        }
-        //        else // double click
-        //        {
-        //            OnUpdateEvent?.Invoke(EntryID);
-        //        }
-        //    }
-        //};
-
-        //lblDuration.MouseDown += (sender, args) =>
-        //{
-        //    if (args.Button == MouseButtons.Left)
-        //    {
-        //        if (args.Clicks == 1) // mousedown
-        //        {
-        //            TaskMouseDown?.Invoke(sender, args);
-        //        }
-        //        else // double click
-        //        {
-        //            OnUpdateEvent?.Invoke(EntryID);
-        //        }
-        //    }
-        //};
+        IsExpanded = StartedOn != null;
     }
 
     private void EachEntry_VisibleChanged(object? sender, EventArgs e)
@@ -203,11 +138,15 @@ public partial class EachEntry : UserControl
 
     private void WriteTime()
     {
-        if (EndedOn == null)
+        if (StartedOn != null && EndedOn == null)
         {
             lblTimeInOut.Text = $"{StartedOn:hh:mmtt}";
             lblDuration.Text = "";
 
+            return;
+        }
+        else if (StartedOn == null || EndedOn == null)
+        {
             return;
         }
 
@@ -234,11 +173,6 @@ public partial class EachEntry : UserControl
         }
 
         BackColor = DefaultBackColor;
-
-        if (!IsFirstItem && Properties.Settings.Default.AutoFold)
-        {
-            IsExpanded = false;
-        }
     }
 
     public void Start()
@@ -256,7 +190,12 @@ public partial class EachEntry : UserControl
 
         if (StartedOn == null)
         {
-            StartedOn = DateTime.Now;
+            if (OnStartQueueEvent != null)
+            {
+                OnStartQueueEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID, true);
+
+                return;
+            }
         }
 
         tmr.Start();
@@ -296,6 +235,7 @@ public partial class EachEntry : UserControl
         lblDuration.Text = $"{diff.Hours:00}:{diff.Minutes:00}:{diff.Seconds:00}";
     }
 
+    #region Register Mouse DoubleClick
     private void lblText_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Left)
@@ -354,5 +294,6 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
-    }
+    } 
+    #endregion
 }

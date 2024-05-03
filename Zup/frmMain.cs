@@ -1,14 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+using Zup.CustomControls;
 
 namespace Zup;
 
 public partial class frmMain : Form
 {
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    extern static bool DestroyIcon(IntPtr handle);
+
+
     static class Constants
     {
         public const int ShowUpdateEntry = 1;
@@ -55,10 +61,45 @@ public partial class frmMain : Form
                 frmEntryList = m_ServiceProvider.GetRequiredService<frmEntryList>();
 
                 frmEntryList.OnListReadyEvent += FrmEntryList_OnListReadyEvent;
+                frmEntryList.OnQueueTaskUpdatedEvent += FrmEntryList_OnQueueTaskUpdatedEvent;
             }
 
             return frmEntryList;
         }
+    }
+
+    private void FrmEntryList_OnQueueTaskUpdatedEvent(int queueCount)
+    {
+        SetIcon(queueCount);
+    }
+
+    public void SetIcon(int? queueCount = null)
+    {
+        var bitmapText = queueCount == null || queueCount == 0
+            ? new Bitmap(Properties.Resources.zup_black_3)
+            : new Bitmap(Properties.Resources.zup_black_2);
+
+        var g = Graphics.FromImage(bitmapText);
+
+        IntPtr hIcon;
+
+        if (queueCount != null && queueCount > 0)
+        {
+            var str = queueCount > 9 ? "+" : queueCount.ToString();
+            var x = queueCount > 9 ? 8 : 9;
+
+            var fontToUse = new Font("Segoe UI", 9, FontStyle.Regular, GraphicsUnit.Pixel);
+            var brushToUse = new SolidBrush(Color.Red);
+
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+            g.DrawString(str, fontToUse, brushToUse, x, 2);
+        }
+
+        hIcon = bitmapText.GetHicon();
+
+        notifIconZup.Icon = Icon.FromHandle(hIcon);
+
+        DestroyIcon(hIcon);
     }
 
     private void FrmEntryList_OnListReadyEvent(int listCount)
@@ -128,6 +169,8 @@ public partial class frmMain : Form
         m_FormSetting.OnSettingUpdatedEvent += FormSetting_OnSettingUpdatedEvent;
         m_FormSetting.OnDbTrimEvent += FormSetting_OnDbTrimEvent;
         m_FormSetting.OnDbBackupEvent += FormSetting_OnDbBackupEvent;
+
+        SetIcon();
     }
 
     private void FormSetting_OnDbBackupEvent()
@@ -177,20 +220,7 @@ public partial class frmMain : Form
 
     private void FormSetting_OnSettingUpdatedEvent(string name, object value)
     {
-        if (name == "AutoFold" && value is bool autoFold)
-        {
-            if (!autoFold)
-            {
-                m_FormEntryList.SetExpand(true);
-            }
-            else
-            {
-                m_FormEntryList.SetExpand(false);
-            }
-
-            m_FormEntryList.ResizeForm();
-        }
-        else if (name == "ItemsToShow")
+        if (name == "ItemsToShow")
         {
             m_FormEntryList.ResizeForm();
         }

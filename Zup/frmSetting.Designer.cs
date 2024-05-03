@@ -29,7 +29,6 @@ partial class frmSetting
     private void InitializeComponent()
     {
         var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
-        cbAutoFold = new CheckBox();
         groupBox1 = new GroupBox();
         lblOpacityVal = new Label();
         label2 = new Label();
@@ -55,17 +54,6 @@ partial class frmSetting
         ((System.ComponentModel.ISupportInitialize)numKeepDaysOfData).BeginInit();
         SuspendLayout();
         // 
-        // cbAutoFold
-        // 
-        cbAutoFold.AutoSize = true;
-        cbAutoFold.Location = new Point(9, 28);
-        cbAutoFold.Name = "cbAutoFold";
-        cbAutoFold.Size = new Size(302, 19);
-        cbAutoFold.TabIndex = 1;
-        cbAutoFold.Text = "Auto fold (only expand running task or the first task)";
-        cbAutoFold.UseVisualStyleBackColor = true;
-        cbAutoFold.CheckedChanged += cbAutoFold_CheckedChanged;
-        // 
         // groupBox1
         // 
         groupBox1.Controls.Add(lblOpacityVal);
@@ -73,10 +61,9 @@ partial class frmSetting
         groupBox1.Controls.Add(tbOpacity);
         groupBox1.Controls.Add(numTxtItemsToShow);
         groupBox1.Controls.Add(label1);
-        groupBox1.Controls.Add(cbAutoFold);
         groupBox1.Location = new Point(13, 143);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(390, 138);
+        groupBox1.Size = new Size(390, 104);
         groupBox1.TabIndex = 2;
         groupBox1.TabStop = false;
         groupBox1.Text = "Entry List";
@@ -84,7 +71,7 @@ partial class frmSetting
         // lblOpacityVal
         // 
         lblOpacityVal.AutoSize = true;
-        lblOpacityVal.Location = new Point(346, 87);
+        lblOpacityVal.Location = new Point(346, 56);
         lblOpacityVal.Name = "lblOpacityVal";
         lblOpacityVal.Size = new Size(22, 15);
         lblOpacityVal.TabIndex = 6;
@@ -93,7 +80,7 @@ partial class frmSetting
         // label2
         // 
         label2.AutoSize = true;
-        label2.Location = new Point(7, 87);
+        label2.Location = new Point(7, 56);
         label2.Name = "label2";
         label2.Size = new Size(51, 15);
         label2.TabIndex = 5;
@@ -102,7 +89,7 @@ partial class frmSetting
         // tbOpacity
         // 
         tbOpacity.LargeChange = 10;
-        tbOpacity.Location = new Point(97, 85);
+        tbOpacity.Location = new Point(97, 54);
         tbOpacity.Maximum = 100;
         tbOpacity.Name = "tbOpacity";
         tbOpacity.Size = new Size(247, 45);
@@ -113,7 +100,7 @@ partial class frmSetting
         // 
         // numTxtItemsToShow
         // 
-        numTxtItemsToShow.Location = new Point(97, 55);
+        numTxtItemsToShow.Location = new Point(97, 24);
         numTxtItemsToShow.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
         numTxtItemsToShow.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         numTxtItemsToShow.Name = "numTxtItemsToShow";
@@ -126,7 +113,7 @@ partial class frmSetting
         // label1
         // 
         label1.AutoSize = true;
-        label1.Location = new Point(7, 57);
+        label1.Location = new Point(7, 26);
         label1.Name = "label1";
         label1.Size = new Size(84, 15);
         label1.TabIndex = 2;
@@ -135,7 +122,7 @@ partial class frmSetting
         // groupBox2
         // 
         groupBox2.Controls.Add(cbAutoOpenUpdateWindow);
-        groupBox2.Location = new Point(12, 287);
+        groupBox2.Location = new Point(12, 262);
         groupBox2.Name = "groupBox2";
         groupBox2.Size = new Size(390, 100);
         groupBox2.TabIndex = 3;
@@ -245,7 +232,7 @@ partial class frmSetting
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(415, 399);
+        ClientSize = new Size(415, 374);
         Controls.Add(btnTrimDb);
         Controls.Add(groupBox3);
         Controls.Add(groupBox2);
@@ -272,7 +259,6 @@ partial class frmSetting
     }
 
     #endregion
-    private CheckBox cbAutoFold;
     private GroupBox groupBox1;
     private Label label1;
     private NumericUpDown numTxtItemsToShow;

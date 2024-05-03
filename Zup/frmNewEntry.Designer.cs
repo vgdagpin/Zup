@@ -29,7 +29,7 @@ partial class frmNewEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
         txtEntry = new TextBox();
         tmrShowSuggest = new System.Windows.Forms.Timer(components);
         lbSuggestions = new ListBox();

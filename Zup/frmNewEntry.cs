@@ -5,7 +5,7 @@ public partial class frmNewEntry : Form
 {
     private AutoCompleteStringCollection SuggestionSource = new AutoCompleteStringCollection();
 
-    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null);
+    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false);
 
     public event OnNewEntry? OnNewEntryEvent;
 
@@ -63,8 +63,6 @@ public partial class frmNewEntry : Form
         else if (e.KeyData == (Keys.Alt | Keys.Enter)
             || e.KeyData == (Keys.Alt | Keys.Control | Keys.Enter))
         {
-            return;
-
             e.SuppressKeyPress = true;
 
             var temp = GetSelectedItem(e.Control);

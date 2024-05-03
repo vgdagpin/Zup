@@ -144,11 +144,11 @@ public partial class frmView : Form
 
             dgView.SelectedRows.Cast<DataGridViewRow>()
                 .Select(a => (TimeLogSummary)a.DataBoundItem)
-                .Where(a => a.Duration != null)
+                .Where(a => a.Duration != null && a.StartedOn != null)
                 .ToList()
                 .ForEach(a =>
                 {
-                    content.AppendLine($"{a.StartedOn.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
+                    content.AppendLine($"{a.StartedOn!.Value.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
                 });
 
             var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
