@@ -39,27 +39,31 @@ partial class frmUpdateEntry
         txtTask = new TextBox();
         dtFrom = new DateTimePicker();
         dtTo = new DateTimePicker();
-        panel1 = new Panel();
+        pnlNotes = new GroupBox();
         splitContainer1 = new SplitContainer();
         label7 = new Label();
         lbPreviousNotes = new ListBox();
         btnSaveChanges = new Button();
         btnDelete = new Button();
-        panel1.SuspendLayout();
+        groupBox1 = new GroupBox();
+        label3 = new Label();
+        label2 = new Label();
+        label1 = new Label();
+        pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
         splitContainer1.Panel2.SuspendLayout();
         splitContainer1.SuspendLayout();
+        groupBox1.SuspendLayout();
         SuspendLayout();
         // 
         // rtbNote
         // 
         rtbNote.AcceptsTab = true;
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        rtbNote.BorderStyle = BorderStyle.FixedSingle;
         rtbNote.Location = new Point(0, 0);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(572, 489);
+        rtbNote.Size = new Size(564, 377);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
@@ -70,14 +74,13 @@ partial class frmUpdateEntry
         // lbNotes
         // 
         lbNotes.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        lbNotes.BorderStyle = BorderStyle.FixedSingle;
         lbNotes.DisplayMember = "Summary";
         lbNotes.DrawMode = DrawMode.OwnerDrawFixed;
         lbNotes.FormattingEnabled = true;
         lbNotes.ItemHeight = 15;
         lbNotes.Location = new Point(0, 0);
         lbNotes.Name = "lbNotes";
-        lbNotes.Size = new Size(238, 152);
+        lbNotes.Size = new Size(238, 169);
         lbNotes.TabIndex = 4;
         lbNotes.DrawItem += lbNotes_DrawItem;
         lbNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -86,7 +89,7 @@ partial class frmUpdateEntry
         // btnDeleteNote
         // 
         btnDeleteNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnDeleteNote.Location = new Point(109, 492);
+        btnDeleteNote.Location = new Point(109, 380);
         btnDeleteNote.Name = "btnDeleteNote";
         btnDeleteNote.Size = new Size(105, 23);
         btnDeleteNote.TabIndex = 7;
@@ -98,7 +101,7 @@ partial class frmUpdateEntry
         // btnNewNote
         // 
         btnNewNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnNewNote.Location = new Point(3, 492);
+        btnNewNote.Location = new Point(3, 380);
         btnNewNote.Name = "btnNewNote";
         btnNewNote.Size = new Size(102, 23);
         btnNewNote.TabIndex = 8;
@@ -109,7 +112,7 @@ partial class frmUpdateEntry
         // btnSaveNote
         // 
         btnSaveNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        btnSaveNote.Location = new Point(443, 492);
+        btnSaveNote.Location = new Point(435, 380);
         btnSaveNote.Name = "btnSaveNote";
         btnSaveNote.Size = new Size(126, 23);
         btnSaveNote.TabIndex = 9;
@@ -125,47 +128,48 @@ partial class frmUpdateEntry
         // txtTask
         // 
         txtTask.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        txtTask.Location = new Point(7, 33);
+        txtTask.Font = new Font("Segoe UI", 11F);
+        txtTask.Location = new Point(106, 22);
         txtTask.Name = "txtTask";
-        txtTask.Size = new Size(817, 23);
+        txtTask.Size = new Size(702, 27);
         txtTask.TabIndex = 10;
         txtTask.KeyDown += txtTask_KeyDown;
         // 
         // dtFrom
         // 
-        dtFrom.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         dtFrom.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
         dtFrom.Format = DateTimePickerFormat.Custom;
-        dtFrom.Location = new Point(490, 62);
+        dtFrom.Location = new Point(106, 53);
         dtFrom.Name = "dtFrom";
         dtFrom.Size = new Size(164, 23);
         dtFrom.TabIndex = 11;
         // 
         // dtTo
         // 
-        dtTo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         dtTo.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
         dtTo.Format = DateTimePickerFormat.Custom;
-        dtTo.Location = new Point(660, 62);
+        dtTo.Location = new Point(106, 78);
         dtTo.Name = "dtTo";
         dtTo.Size = new Size(164, 23);
         dtTo.TabIndex = 12;
         dtTo.ValueChanged += dtTo_ValueChanged;
         // 
-        // panel1
+        // pnlNotes
         // 
-        panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        panel1.Controls.Add(splitContainer1);
-        panel1.Location = new Point(7, 91);
-        panel1.Name = "panel1";
-        panel1.Size = new Size(817, 518);
-        panel1.TabIndex = 13;
+        pnlNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        pnlNotes.Controls.Add(splitContainer1);
+        pnlNotes.Location = new Point(7, 128);
+        pnlNotes.Name = "pnlNotes";
+        pnlNotes.Size = new Size(815, 428);
+        pnlNotes.TabIndex = 13;
+        pnlNotes.TabStop = false;
+        pnlNotes.Text = "Notes";
         // 
         // splitContainer1
         // 
         splitContainer1.Dock = DockStyle.Fill;
         splitContainer1.FixedPanel = FixedPanel.Panel1;
-        splitContainer1.Location = new Point(0, 0);
+        splitContainer1.Location = new Point(3, 19);
         splitContainer1.Name = "splitContainer1";
         // 
         // splitContainer1.Panel1
@@ -180,7 +184,7 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.Controls.Add(btnNewNote);
         splitContainer1.Panel2.Controls.Add(btnSaveNote);
         splitContainer1.Panel2.Controls.Add(btnDeleteNote);
-        splitContainer1.Size = new Size(817, 518);
+        splitContainer1.Size = new Size(809, 406);
         splitContainer1.SplitterDistance = 241;
         splitContainer1.TabIndex = 0;
         // 
@@ -188,7 +192,7 @@ partial class frmUpdateEntry
         // 
         label7.AutoSize = true;
         label7.Font = new Font("Segoe UI", 6.75F);
-        label7.Location = new Point(0, 171);
+        label7.Location = new Point(0, 176);
         label7.Name = "label7";
         label7.Size = new Size(66, 12);
         label7.TabIndex = 11;
@@ -197,14 +201,13 @@ partial class frmUpdateEntry
         // lbPreviousNotes
         // 
         lbPreviousNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        lbPreviousNotes.BorderStyle = BorderStyle.FixedSingle;
         lbPreviousNotes.DisplayMember = "Summary";
         lbPreviousNotes.DrawMode = DrawMode.OwnerDrawFixed;
         lbPreviousNotes.FormattingEnabled = true;
         lbPreviousNotes.ItemHeight = 15;
-        lbPreviousNotes.Location = new Point(0, 186);
+        lbPreviousNotes.Location = new Point(0, 191);
         lbPreviousNotes.Name = "lbPreviousNotes";
-        lbPreviousNotes.Size = new Size(238, 302);
+        lbPreviousNotes.Size = new Size(238, 184);
         lbPreviousNotes.TabIndex = 10;
         lbPreviousNotes.DrawItem += lbNotes_DrawItem;
         lbPreviousNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -212,9 +215,9 @@ partial class frmUpdateEntry
         // btnSaveChanges
         // 
         btnSaveChanges.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnSaveChanges.Location = new Point(695, 4);
+        btnSaveChanges.Location = new Point(714, 80);
         btnSaveChanges.Name = "btnSaveChanges";
-        btnSaveChanges.Size = new Size(129, 23);
+        btnSaveChanges.Size = new Size(94, 23);
         btnSaveChanges.TabIndex = 14;
         btnSaveChanges.Text = "Save Changes";
         btnSaveChanges.UseVisualStyleBackColor = true;
@@ -223,7 +226,7 @@ partial class frmUpdateEntry
         // btnDelete
         // 
         btnDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnDelete.Location = new Point(614, 4);
+        btnDelete.Location = new Point(633, 80);
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(75, 23);
         btnDelete.TabIndex = 15;
@@ -231,32 +234,75 @@ partial class frmUpdateEntry
         btnDelete.UseVisualStyleBackColor = true;
         btnDelete.Click += btnDelete_Click;
         // 
+        // groupBox1
+        // 
+        groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        groupBox1.Controls.Add(label3);
+        groupBox1.Controls.Add(label2);
+        groupBox1.Controls.Add(label1);
+        groupBox1.Controls.Add(txtTask);
+        groupBox1.Controls.Add(btnDelete);
+        groupBox1.Controls.Add(dtFrom);
+        groupBox1.Controls.Add(btnSaveChanges);
+        groupBox1.Controls.Add(dtTo);
+        groupBox1.Location = new Point(7, 12);
+        groupBox1.Name = "groupBox1";
+        groupBox1.Size = new Size(815, 110);
+        groupBox1.TabIndex = 16;
+        groupBox1.TabStop = false;
+        groupBox1.Text = "Entry Details";
+        // 
+        // label3
+        // 
+        label3.AutoSize = true;
+        label3.Location = new Point(14, 81);
+        label3.Name = "label3";
+        label3.Size = new Size(59, 15);
+        label3.TabIndex = 18;
+        label3.Text = "Ended On";
+        // 
+        // label2
+        // 
+        label2.AutoSize = true;
+        label2.Location = new Point(14, 59);
+        label2.Name = "label2";
+        label2.Size = new Size(63, 15);
+        label2.TabIndex = 17;
+        label2.Text = "Started On";
+        // 
+        // label1
+        // 
+        label1.AutoSize = true;
+        label1.Location = new Point(14, 29);
+        label1.Name = "label1";
+        label1.Size = new Size(29, 15);
+        label1.TabIndex = 16;
+        label1.Text = "Task";
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(836, 614);
-        Controls.Add(btnDelete);
-        Controls.Add(btnSaveChanges);
-        Controls.Add(panel1);
-        Controls.Add(dtTo);
-        Controls.Add(dtFrom);
-        Controls.Add(txtTask);
+        ClientSize = new Size(834, 561);
+        Controls.Add(groupBox1);
+        Controls.Add(pnlNotes);
         Icon = (Icon)resources.GetObject("$this.Icon");
         MaximizeBox = false;
         MinimizeBox = false;
+        MinimumSize = new Size(850, 600);
         Name = "frmUpdateEntry";
         Text = "Update Entry";
         FormClosing += frmUpdateEntry_FormClosing;
         Load += frmUpdateEntry_Load;
-        panel1.ResumeLayout(false);
+        pnlNotes.ResumeLayout(false);
         splitContainer1.Panel1.ResumeLayout(false);
         splitContainer1.Panel1.PerformLayout();
         splitContainer1.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
         splitContainer1.ResumeLayout(false);
+        groupBox1.ResumeLayout(false);
+        groupBox1.PerformLayout();
         ResumeLayout(false);
-        PerformLayout();
     }
 
     #endregion
@@ -269,10 +315,14 @@ partial class frmUpdateEntry
     private TextBox txtTask;
     private DateTimePicker dtFrom;
     private DateTimePicker dtTo;
-    private Panel panel1;
+    private GroupBox pnlNotes;
     private SplitContainer splitContainer1;
     private ListBox lbPreviousNotes;
     private Label label7;
     private Button btnSaveChanges;
     private Button btnDelete;
+    private GroupBox groupBox1;
+    private Label label3;
+    private Label label2;
+    private Label label1;
 }
