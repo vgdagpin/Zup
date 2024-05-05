@@ -53,8 +53,14 @@ partial class frmView
         label3 = new Label();
         statusStrip1 = new StatusStrip();
         ttsPath = new ToolStripStatusLabel();
+        txtRowFormat = new TextBox();
+        label4 = new Label();
+        groupBox1 = new GroupBox();
+        btnRowFormatHelp = new Button();
+        btnRefresh = new Button();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         statusStrip1.SuspendLayout();
+        groupBox1.SuspendLayout();
         SuspendLayout();
         // 
         // dgView
@@ -69,7 +75,7 @@ partial class frmView
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(777, 384);
+        dgView.Size = new Size(761, 256);
         dgView.TabIndex = 1;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
@@ -132,7 +138,7 @@ partial class frmView
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(729, 427);
+        lblSelectedTotal.Location = new Point(713, 300);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(59, 23);
         lblSelectedTotal.TabIndex = 1;
@@ -141,9 +147,8 @@ partial class frmView
         // 
         // label1
         // 
-        label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         label1.AutoSize = true;
-        label1.Location = new Point(8, 466);
+        label1.Location = new Point(7, 57);
         label1.Name = "label1";
         label1.Size = new Size(105, 15);
         label1.TabIndex = 2;
@@ -155,20 +160,20 @@ partial class frmView
         // 
         // txtTimesheetFolder
         // 
-        txtTimesheetFolder.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        txtTimesheetFolder.Location = new Point(119, 463);
+        txtTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        txtTimesheetFolder.Location = new Point(122, 54);
         txtTimesheetFolder.Name = "txtTimesheetFolder";
-        txtTimesheetFolder.Size = new Size(389, 23);
+        txtTimesheetFolder.Size = new Size(326, 23);
         txtTimesheetFolder.TabIndex = 3;
         // 
         // btnBrowseTimesheetFolder
         // 
-        btnBrowseTimesheetFolder.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        btnBrowseTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         btnBrowseTimesheetFolder.FlatAppearance.BorderColor = Color.FromArgb(224, 224, 224);
         btnBrowseTimesheetFolder.FlatStyle = FlatStyle.Flat;
-        btnBrowseTimesheetFolder.Location = new Point(507, 463);
+        btnBrowseTimesheetFolder.Location = new Point(449, 54);
         btnBrowseTimesheetFolder.Name = "btnBrowseTimesheetFolder";
-        btnBrowseTimesheetFolder.Size = new Size(24, 23);
+        btnBrowseTimesheetFolder.Size = new Size(28, 23);
         btnBrowseTimesheetFolder.TabIndex = 4;
         btnBrowseTimesheetFolder.Text = "...";
         btnBrowseTimesheetFolder.UseVisualStyleBackColor = true;
@@ -176,10 +181,11 @@ partial class frmView
         // 
         // btnExportTimesheet
         // 
-        btnExportTimesheet.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        btnExportTimesheet.Location = new Point(692, 463);
+        btnExportTimesheet.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnExportTimesheet.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnExportTimesheet.Location = new Point(650, 54);
         btnExportTimesheet.Name = "btnExportTimesheet";
-        btnExportTimesheet.Size = new Size(96, 23);
+        btnExportTimesheet.Size = new Size(103, 23);
         btnExportTimesheet.TabIndex = 5;
         btnExportTimesheet.Text = "Export selected";
         btnExportTimesheet.UseVisualStyleBackColor = true;
@@ -187,10 +193,10 @@ partial class frmView
         // 
         // dtTimesheetDate
         // 
-        dtTimesheetDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        dtTimesheetDate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         dtTimesheetDate.CustomFormat = "MM-dd-yyyy";
         dtTimesheetDate.Format = DateTimePickerFormat.Custom;
-        dtTimesheetDate.Location = new Point(553, 463);
+        dtTimesheetDate.Location = new Point(503, 54);
         dtTimesheetDate.Name = "dtTimesheetDate";
         dtTimesheetDate.Size = new Size(96, 23);
         dtTimesheetDate.TabIndex = 6;
@@ -198,19 +204,20 @@ partial class frmView
         // 
         // txtExtension
         // 
-        txtExtension.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        txtExtension.Location = new Point(657, 463);
+        txtExtension.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        txtExtension.Location = new Point(603, 54);
         txtExtension.Name = "txtExtension";
-        txtExtension.Size = new Size(30, 23);
+        txtExtension.Size = new Size(41, 23);
         txtExtension.TabIndex = 7;
         txtExtension.Text = ".fd";
+        txtExtension.TextAlign = HorizontalAlignment.Center;
         txtExtension.TextChanged += txtExtension_TextChanged;
         // 
         // label2
         // 
-        label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        label2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         label2.AutoSize = true;
-        label2.Location = new Point(537, 467);
+        label2.Location = new Point(483, 58);
         label2.Name = "label2";
         label2.Size = new Size(12, 15);
         label2.TabIndex = 8;
@@ -241,36 +248,96 @@ partial class frmView
         // statusStrip1
         // 
         statusStrip1.Items.AddRange(new ToolStripItem[] { ttsPath });
-        statusStrip1.Location = new Point(0, 508);
+        statusStrip1.Location = new Point(0, 439);
         statusStrip1.Name = "statusStrip1";
-        statusStrip1.Size = new Size(800, 22);
+        statusStrip1.Size = new Size(784, 22);
         statusStrip1.TabIndex = 11;
         statusStrip1.Text = "statusStrip1";
         // 
         // ttsPath
         // 
+        ttsPath.DoubleClickEnabled = true;
+        ttsPath.Font = new Font("Segoe UI", 9F, FontStyle.Underline);
+        ttsPath.IsLink = true;
+        ttsPath.LinkColor = Color.FromArgb(64, 64, 64);
         ttsPath.Name = "ttsPath";
         ttsPath.Size = new Size(31, 17);
         ttsPath.Text = "Path";
+        ttsPath.Click += ttsPath_Click;
+        // 
+        // txtRowFormat
+        // 
+        txtRowFormat.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        txtRowFormat.Location = new Point(122, 22);
+        txtRowFormat.Name = "txtRowFormat";
+        txtRowFormat.Size = new Size(603, 23);
+        txtRowFormat.TabIndex = 15;
+        txtRowFormat.Text = "~StartedOnTicks~^~Task~^~Comments~^~TaskCode~^~Duration~^False^False";
+        // 
+        // label4
+        // 
+        label4.AutoSize = true;
+        label4.Location = new Point(6, 25);
+        label4.Name = "label4";
+        label4.Size = new Size(111, 15);
+        label4.TabIndex = 14;
+        label4.Text = "Export Row Format:";
+        // 
+        // groupBox1
+        // 
+        groupBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        groupBox1.Controls.Add(btnRowFormatHelp);
+        groupBox1.Controls.Add(txtRowFormat);
+        groupBox1.Controls.Add(label1);
+        groupBox1.Controls.Add(label4);
+        groupBox1.Controls.Add(txtTimesheetFolder);
+        groupBox1.Controls.Add(btnBrowseTimesheetFolder);
+        groupBox1.Controls.Add(btnExportTimesheet);
+        groupBox1.Controls.Add(dtTimesheetDate);
+        groupBox1.Controls.Add(label2);
+        groupBox1.Controls.Add(txtExtension);
+        groupBox1.Location = new Point(11, 341);
+        groupBox1.Name = "groupBox1";
+        groupBox1.Size = new Size(761, 86);
+        groupBox1.TabIndex = 16;
+        groupBox1.TabStop = false;
+        groupBox1.Text = "Export Settings";
+        // 
+        // btnRowFormatHelp
+        // 
+        btnRowFormatHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRowFormatHelp.Location = new Point(729, 22);
+        btnRowFormatHelp.Name = "btnRowFormatHelp";
+        btnRowFormatHelp.Size = new Size(24, 23);
+        btnRowFormatHelp.TabIndex = 17;
+        btnRowFormatHelp.Text = "?";
+        btnRowFormatHelp.UseVisualStyleBackColor = true;
+        // 
+        // btnRefresh
+        // 
+        btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRefresh.Location = new Point(697, 10);
+        btnRefresh.Name = "btnRefresh";
+        btnRefresh.Size = new Size(75, 23);
+        btnRefresh.TabIndex = 17;
+        btnRefresh.Text = "Refresh";
+        btnRefresh.UseVisualStyleBackColor = true;
+        btnRefresh.Click += btnRefresh_Click;
         // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(800, 530);
+        ClientSize = new Size(784, 461);
+        Controls.Add(btnRefresh);
+        Controls.Add(groupBox1);
         Controls.Add(statusStrip1);
         Controls.Add(label3);
         Controls.Add(txtSearch);
-        Controls.Add(label2);
-        Controls.Add(txtExtension);
-        Controls.Add(dtTimesheetDate);
-        Controls.Add(btnExportTimesheet);
-        Controls.Add(btnBrowseTimesheetFolder);
-        Controls.Add(txtTimesheetFolder);
-        Controls.Add(label1);
         Controls.Add(lblSelectedTotal);
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
+        MinimumSize = new Size(800, 500);
         Name = "frmView";
         Text = "View";
         Load += frmView_Load;
@@ -278,6 +345,8 @@ partial class frmView
         ((System.ComponentModel.ISupportInitialize)dgView).EndInit();
         statusStrip1.ResumeLayout(false);
         statusStrip1.PerformLayout();
+        groupBox1.ResumeLayout(false);
+        groupBox1.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -305,4 +374,9 @@ partial class frmView
     private Label label3;
     private StatusStrip statusStrip1;
     private ToolStripStatusLabel ttsPath;
+    private TextBox txtRowFormat;
+    private Label label4;
+    private GroupBox groupBox1;
+    private Button btnRowFormatHelp;
+    private Button btnRefresh;
 }

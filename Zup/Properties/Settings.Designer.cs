@@ -118,5 +118,29 @@ namespace Zup.Properties {
                 this["TrimDaysToKeep"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("~StartedOnTicks~^~Task~^~Comments~^~TaskCode~^~Duration~^False^False")]
+        public string ExportRowFormat {
+            get {
+                return ((string)(this["ExportRowFormat"]));
+            }
+            set {
+                this["ExportRowFormat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(".fd")]
+        public string ExportFileExtension {
+            get {
+                return ((string)(this["ExportFileExtension"]));
+            }
+            set {
+                this["ExportFileExtension"] = value;
+            }
+        }
     }
 }

@@ -26,5 +26,11 @@
     <Setting Name="TrimDaysToKeep" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">14</Value>
     </Setting>
+    <Setting Name="ExportRowFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">~StartedOnTicks~^~Task~^~Comments~^~TaskCode~^~Duration~^False^False</Value>
+    </Setting>
+    <Setting Name="ExportFileExtension" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.fd</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

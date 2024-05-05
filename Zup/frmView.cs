@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
 
 namespace Zup;
@@ -27,6 +28,9 @@ public partial class frmView : Form
             txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
         }
 
+        txtRowFormat.Text = Properties.Settings.Default.ExportRowFormat;
+        txtExtension.Text = Properties.Settings.Default.ExportFileExtension;
+
         SetLabelOutput();
     }
 
@@ -40,6 +44,11 @@ public partial class frmView : Form
 
     private void LoadListData(string? search = null)
     {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            search = null;
+        }
+
         dgView.DataSource = p_DbContext.TimeLogs
                 .AsNoTracking()
                 .Where(a => search == null || a.Task.Contains(search))
@@ -111,7 +120,7 @@ public partial class frmView : Form
 
             SetLabelOutput();
         }
-    }   
+    }
 
     private void SetLabelOutput()
     {
@@ -148,7 +157,7 @@ public partial class frmView : Form
         {
             var path = GetOutputPath();
 
-            var content = GetContent();
+            var content = GetContent(txtRowFormat.Text);
 
             var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
 
@@ -161,6 +170,11 @@ public partial class frmView : Form
                     OnExportedEvent();
                 }
             }
+
+            Properties.Settings.Default.ExportRowFormat = txtRowFormat.Text;
+            Properties.Settings.Default.ExportFileExtension = txtExtension.Text;
+
+            Properties.Settings.Default.Save();
         }
         catch (Exception ex)
         {
@@ -168,8 +182,10 @@ public partial class frmView : Form
         }
     }
 
-    private string GetContent()
+    private string GetContent(string format)
     {
+        var dicAction = GetActions();
+
         var content = new StringBuilder();
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
@@ -178,10 +194,30 @@ public partial class frmView : Form
             .ToList()
             .ForEach(a =>
             {
-                content.AppendLine($"{a.StartedOn!.Value.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
+                var data = format;
+
+                foreach (var action in dicAction)
+                {
+                    data = data.Replace(action.Key, action.Value(a));
+                }
+
+                content.AppendLine(data);
             });
 
         return content.ToString();
+    }
+
+    private Dictionary<string, Func<TimeLogSummary, string>> GetActions()
+    {
+        var dicAction = new Dictionary<string, Func<TimeLogSummary, string>>();
+
+        dicAction.Add("~StartedOnTicks~", dicAction => dicAction.StartedOn!.Value.Ticks.ToString());
+        dicAction.Add("~Task~", dicAction => dicAction.Task);
+        dicAction.Add("~Comments~", dicAction => ExtractComments(dicAction.ID));
+        dicAction.Add("~TaskCode~", dicAction => GetClients(dicAction.ID));
+        dicAction.Add("~Duration~", dicAction => dicAction.DurationString!);
+
+        return dicAction;
     }
 
     private string ExtractComments(int taskID)
@@ -238,6 +274,44 @@ public partial class frmView : Form
     {
         LoadListData(txtSearch.Text);
         tmrSearch.Enabled = false;
+    }
+
+    private void OpenFolder(string folderPath)
+    {
+        if (Directory.Exists(folderPath))
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = folderPath,
+                FileName = "explorer.exe"
+            };
+
+            Process.Start(startInfo);
+        }
+        else
+        {
+            MessageBox.Show(string.Format("{0} Directory does not exist!", folderPath));
+        }
+    }
+
+    private void ttsPath_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ttsPath.Text))
+        {
+            return;
+        }
+
+        if (Path.Exists(ttsPath.Text))
+        {
+            var dir = Path.GetDirectoryName(ttsPath.Text);
+
+            OpenFolder(dir);
+        }
+    }
+
+    private void btnRefresh_Click(object sender, EventArgs e)
+    {
+        LoadListData(txtSearch.Text);
     }
 
     /*
