@@ -1,5 +1,7 @@
-﻿using System.Data;
-using System.Windows.Forms;
+﻿using Microsoft.EntityFrameworkCore;
+
+using System.Data;
+using System.Diagnostics;
 
 using Zup.Entities;
 
@@ -44,6 +46,7 @@ public partial class frmUpdateEntry : Form
         selectedEntryID = null;
         selectedNoteID = null;
         lbNotes.Items.Clear();
+        lbPreviousNotes.Items.Clear();
         rtbNote.Clear();
 
         if (entry == null)
@@ -78,9 +81,30 @@ public partial class frmUpdateEntry : Form
             lbNotes.Items.Add(NoteSummary.Parse(note));
         }
 
+        LoadPreviousNotes();
+
         tmrFocus.Enabled = true;
 
         Show();
+    }
+
+    private void LoadPreviousNotes()
+    {
+        var allIDs = p_DbContext.TimeLogs
+            .Where(a => a.Task == txtTask.Text && a.ID != selectedEntryID)
+            .OrderByDescending(a => a.StartedOn)
+            .Select(a => a.ID)
+            .ToArray();
+
+        foreach (var note in p_DbContext.Notes
+            .Where(a => allIDs.Contains(a.LogID))
+            .OrderByDescending(a => a.CreatedOn)
+            .Take(50)
+            .AsNoTracking()
+            .ToList())
+        {
+            lbPreviousNotes.Items.Add(NoteSummary.Parse(note));
+        }
     }
 
     private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -88,6 +112,8 @@ public partial class frmUpdateEntry : Form
         if (e.KeyData == (Keys.Control | Keys.S))
         {
             e.IsInputKey = true;
+
+            btnDeleteNote.Visible = false;
 
             SaveChanges();
         }
@@ -98,6 +124,7 @@ public partial class frmUpdateEntry : Form
 
             selectedNoteID = null;
             rtbNote.Clear();
+            btnDeleteNote.Visible = false;
         }
     }
 
@@ -122,18 +149,18 @@ public partial class frmUpdateEntry : Form
             p_DbContext.SaveChanges();
         }
 
-        btnDeleteNote.Enabled = false;
+        btnDeleteNote.Visible = false;
         selectedNoteID = null;
         rtbNote.Clear();
     }
 
     string GetNoteData()
     {
-        if (string.IsNullOrWhiteSpace(rtbNote.Text) 
-            && !string.IsNullOrWhiteSpace(rtbNote.Rtf) 
+        if (string.IsNullOrWhiteSpace(rtbNote.Text)
+            && !string.IsNullOrWhiteSpace(rtbNote.Rtf)
             && rtbNote.Rtf.Length > 500)
         {
-            return "Image";
+            return NoteSummary.ImageContent;
         }
 
         return rtbNote.Text;
@@ -194,19 +221,38 @@ public partial class frmUpdateEntry : Form
 
                 p_DbContext.SaveChanges();
 
-                lbNotes.Items.Add(NoteSummary.Parse(newNote));                
+                lbNotes.Items.Add(NoteSummary.Parse(newNote));
             }
         }
 
         rtbNote.Clear();
 
         selectedNoteID = null;
-        btnDeleteNote.Enabled = false;
+        btnDeleteNote.Visible = false;
     }
 
+    #region lbNotes and lvPreviousNotes
     private void lbNotes_SelectedIndexChanged(object sender, EventArgs e)
     {
-        var sel = lbNotes.SelectedItem as NoteSummary;
+        var control = (ListBox)sender;        
+
+        selectedNoteID = null;        
+
+        if (control.SelectedIndex == -1)
+        {
+            return;
+        }
+
+        if (control.Name == lbNotes.Name && lbPreviousNotes.SelectedIndex > -1)
+        {
+            lbPreviousNotes.ClearSelected();
+        }
+        else if (control.Name == lbPreviousNotes.Name && lbNotes.SelectedIndex > -1)
+        {
+            lbNotes.ClearSelected();
+        }
+
+        var sel = control.SelectedItem as NoteSummary;
 
         if (sel == null)
         {
@@ -229,19 +275,51 @@ public partial class frmUpdateEntry : Form
             rtbNote.Text = note.Notes;
         }
 
-        selectedNoteID = note.ID;
+        if (control.Name == lbNotes.Name)
+        {
+            selectedNoteID = note.ID;
 
-        btnDeleteNote.Enabled = true;
+            btnDeleteNote.Visible = true;
+        }
+        else
+        {
+            btnDeleteNote.Visible = false;
+        }
     }
 
-    private void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
+    private void lbNotes_KeyDown(object sender, KeyEventArgs e)
     {
-        DeleteEntry();
+        if (e.KeyData == Keys.Delete)
+        {
+            DeleteNote();
+        }
     }
 
-    private void DeleteEntry()
+    private void lbNotes_DrawItem(object sender, DrawItemEventArgs e)
     {
-        var result = MessageBox.Show(Text, "Delete Entry", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+        if (e.Index == -1)
+        {
+            return;
+        }
+
+        var control = (ListBox)sender;
+
+        e.DrawBackground();
+
+        var item = (NoteSummary)control.Items[e.Index];
+
+        var bold = new Font(e.Font!.FontFamily, e.Font.Size, FontStyle.Bold);
+
+        e.Graphics.DrawString(item.CreatedOn.ToString("hh:mm:ss"), bold, Brushes.Black, e.Bounds);
+        e.Graphics.DrawString(item.Summary, e.Font, Brushes.Black, new PointF(e.Bounds.X + 55, e.Bounds.Y));
+
+        e.DrawFocusRectangle();
+    }
+    #endregion
+
+    private void btnDelete_Click(object sender, EventArgs e)
+    {
+        var result = MessageBox.Show("Delete this entry?", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         if (result == DialogResult.Cancel)
         {
@@ -261,18 +339,13 @@ public partial class frmUpdateEntry : Form
         DeleteNote();
     }
 
-    private void lbNotes_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.KeyData == Keys.Delete)
-        {
-            DeleteNote();
-        }
-    }
 
     private void btnNewNote_Click(object sender, EventArgs e)
     {
         selectedNoteID = null;
         rtbNote.Clear();
+        lbNotes.SelectedIndex = -1;
+        lbPreviousNotes.SelectedIndex = -1;
     }
 
     private void btnSaveNote_Click(object sender, EventArgs e)
@@ -282,7 +355,7 @@ public partial class frmUpdateEntry : Form
 
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
     {
-        btnSaveNote.Enabled = rtbNote.Text.Trim().Length > 0;
+        btnSaveNote.Visible = rtbNote.Text.Trim().Length > 0;
     }
 
     private void tmrFocus_Tick(object sender, EventArgs e)
@@ -301,10 +374,6 @@ public partial class frmUpdateEntry : Form
             e.SuppressKeyPress = true;
             Close();
         }
-        else if (e.KeyCode == Keys.Delete)
-        {
-            DeleteEntry();
-        }
     }
 
     private void dtTo_ValueChanged(object sender, EventArgs e)
@@ -312,15 +381,15 @@ public partial class frmUpdateEntry : Form
         dtTo.CustomFormat = DateTimeCustomFormat;
     }
 
-    private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+    private void btnSaveChanges_Click(object sender, EventArgs e)
     {
         var task = p_DbContext.TimeLogs.Find(selectedEntryID);
 
         if (task != null)
         {
             task.Task = txtTask.Text;
-            task.StartedOn = dtFrom.Value;
-            task.EndedOn = dtTo.Value;
+            task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
+            task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
 
             p_DbContext.SaveChanges();
 
@@ -331,24 +400,6 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    private void lbNotes_DrawItem(object sender, DrawItemEventArgs e)
-    {
-        if (e.Index == -1)
-        {
-            return;
-        }
-
-        e.DrawBackground();
-
-        var item = (NoteSummary)lbNotes.Items[e.Index];
-
-        var bold = new Font(e.Font!.FontFamily, e.Font.Size, FontStyle.Bold);
-
-        e.Graphics.DrawString(item.CreatedOn.ToString("hh:mm:ss"), bold, Brushes.Black, e.Bounds);
-        e.Graphics.DrawString(item.Summary, e.Font, Brushes.Black, new PointF(e.Bounds.X + 55, e.Bounds.Y));
-
-        e.DrawFocusRectangle();
-    }
 
     private void txtTask_KeyDown(object sender, KeyEventArgs e)
     {
@@ -357,5 +408,10 @@ public partial class frmUpdateEntry : Form
             e.SuppressKeyPress = true;
             Close();
         }
+    }
+
+    private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
+    {
+        Process.Start("explorer.exe", e.LinkText!);
     }
 }

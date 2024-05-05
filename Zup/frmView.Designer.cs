@@ -28,6 +28,7 @@ partial class frmView
     /// </summary>
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
         var dataGridViewCellStyle1 = new DataGridViewCellStyle();
         var dataGridViewCellStyle2 = new DataGridViewCellStyle();
         var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
@@ -47,8 +48,13 @@ partial class frmView
         dtTimesheetDate = new DateTimePicker();
         txtExtension = new TextBox();
         label2 = new Label();
-        lblOutput = new Label();
+        txtSearch = new TextBox();
+        tmrSearch = new System.Windows.Forms.Timer(components);
+        label3 = new Label();
+        statusStrip1 = new StatusStrip();
+        ttsPath = new ToolStripStatusLabel();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
+        statusStrip1.SuspendLayout();
         SuspendLayout();
         // 
         // dgView
@@ -59,12 +65,12 @@ partial class frmView
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString });
-        dgView.Location = new Point(11, 85);
+        dgView.Location = new Point(11, 41);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(777, 382);
-        dgView.TabIndex = 0;
+        dgView.Size = new Size(777, 384);
+        dgView.TabIndex = 1;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
         // 
@@ -126,7 +132,7 @@ partial class frmView
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(725, 474);
+        lblSelectedTotal.Location = new Point(729, 427);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(59, 23);
         lblSelectedTotal.TabIndex = 1;
@@ -135,8 +141,9 @@ partial class frmView
         // 
         // label1
         // 
+        label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         label1.AutoSize = true;
-        label1.Location = new Point(10, 14);
+        label1.Location = new Point(8, 466);
         label1.Name = "label1";
         label1.Size = new Size(105, 15);
         label1.TabIndex = 2;
@@ -148,39 +155,42 @@ partial class frmView
         // 
         // txtTimesheetFolder
         // 
-        txtTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        txtTimesheetFolder.Location = new Point(121, 11);
+        txtTimesheetFolder.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        txtTimesheetFolder.Location = new Point(119, 463);
         txtTimesheetFolder.Name = "txtTimesheetFolder";
-        txtTimesheetFolder.Size = new Size(447, 23);
+        txtTimesheetFolder.Size = new Size(389, 23);
         txtTimesheetFolder.TabIndex = 3;
         // 
         // btnBrowseTimesheetFolder
         // 
-        btnBrowseTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnBrowseTimesheetFolder.Location = new Point(574, 11);
+        btnBrowseTimesheetFolder.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        btnBrowseTimesheetFolder.FlatAppearance.BorderColor = Color.FromArgb(224, 224, 224);
+        btnBrowseTimesheetFolder.FlatStyle = FlatStyle.Flat;
+        btnBrowseTimesheetFolder.Location = new Point(507, 463);
         btnBrowseTimesheetFolder.Name = "btnBrowseTimesheetFolder";
-        btnBrowseTimesheetFolder.Size = new Size(61, 23);
+        btnBrowseTimesheetFolder.Size = new Size(24, 23);
         btnBrowseTimesheetFolder.TabIndex = 4;
-        btnBrowseTimesheetFolder.Text = "Browse";
+        btnBrowseTimesheetFolder.Text = "...";
         btnBrowseTimesheetFolder.UseVisualStyleBackColor = true;
         btnBrowseTimesheetFolder.Click += btnBrowseTimesheetFolder_Click;
         // 
         // btnExportTimesheet
         // 
-        btnExportTimesheet.Location = new Point(12, 56);
+        btnExportTimesheet.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        btnExportTimesheet.Location = new Point(692, 463);
         btnExportTimesheet.Name = "btnExportTimesheet";
-        btnExportTimesheet.Size = new Size(115, 23);
+        btnExportTimesheet.Size = new Size(96, 23);
         btnExportTimesheet.TabIndex = 5;
-        btnExportTimesheet.Text = "Export selected to";
+        btnExportTimesheet.Text = "Export selected";
         btnExportTimesheet.UseVisualStyleBackColor = true;
         btnExportTimesheet.Click += btnExportTimesheet_Click;
         // 
         // dtTimesheetDate
         // 
-        dtTimesheetDate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        dtTimesheetDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         dtTimesheetDate.CustomFormat = "MM-dd-yyyy";
         dtTimesheetDate.Format = DateTimePickerFormat.Custom;
-        dtTimesheetDate.Location = new Point(655, 11);
+        dtTimesheetDate.Location = new Point(553, 463);
         dtTimesheetDate.Name = "dtTimesheetDate";
         dtTimesheetDate.Size = new Size(96, 23);
         dtTimesheetDate.TabIndex = 6;
@@ -188,8 +198,8 @@ partial class frmView
         // 
         // txtExtension
         // 
-        txtExtension.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        txtExtension.Location = new Point(759, 11);
+        txtExtension.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        txtExtension.Location = new Point(657, 463);
         txtExtension.Name = "txtExtension";
         txtExtension.Size = new Size(30, 23);
         txtExtension.TabIndex = 7;
@@ -198,29 +208,59 @@ partial class frmView
         // 
         // label2
         // 
-        label2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         label2.AutoSize = true;
-        label2.Location = new Point(639, 15);
+        label2.Location = new Point(537, 467);
         label2.Name = "label2";
         label2.Size = new Size(12, 15);
         label2.TabIndex = 8;
         label2.Text = "/";
         // 
-        // lblOutput
+        // txtSearch
         // 
-        lblOutput.AutoSize = true;
-        lblOutput.Location = new Point(130, 60);
-        lblOutput.Name = "lblOutput";
-        lblOutput.Size = new Size(31, 15);
-        lblOutput.TabIndex = 9;
-        lblOutput.Text = "Path";
+        txtSearch.Location = new Point(60, 9);
+        txtSearch.Name = "txtSearch";
+        txtSearch.Size = new Size(277, 23);
+        txtSearch.TabIndex = 0;
+        txtSearch.TextChanged += txtSearch_TextChanged;
+        // 
+        // tmrSearch
+        // 
+        tmrSearch.Interval = 500;
+        tmrSearch.Tick += tmrSearch_Tick;
+        // 
+        // label3
+        // 
+        label3.AutoSize = true;
+        label3.Location = new Point(11, 15);
+        label3.Name = "label3";
+        label3.Size = new Size(45, 15);
+        label3.TabIndex = 10;
+        label3.Text = "Search:";
+        // 
+        // statusStrip1
+        // 
+        statusStrip1.Items.AddRange(new ToolStripItem[] { ttsPath });
+        statusStrip1.Location = new Point(0, 508);
+        statusStrip1.Name = "statusStrip1";
+        statusStrip1.Size = new Size(800, 22);
+        statusStrip1.TabIndex = 11;
+        statusStrip1.Text = "statusStrip1";
+        // 
+        // ttsPath
+        // 
+        ttsPath.Name = "ttsPath";
+        ttsPath.Size = new Size(31, 17);
+        ttsPath.Text = "Path";
         // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(800, 502);
-        Controls.Add(lblOutput);
+        ClientSize = new Size(800, 530);
+        Controls.Add(statusStrip1);
+        Controls.Add(label3);
+        Controls.Add(txtSearch);
         Controls.Add(label2);
         Controls.Add(txtExtension);
         Controls.Add(dtTimesheetDate);
@@ -236,6 +276,8 @@ partial class frmView
         Load += frmView_Load;
         VisibleChanged += frmView_VisibleChanged;
         ((System.ComponentModel.ISupportInitialize)dgView).EndInit();
+        statusStrip1.ResumeLayout(false);
+        statusStrip1.PerformLayout();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -258,5 +300,9 @@ partial class frmView
     private DataGridViewTextBoxColumn DurationString;
     private TextBox txtExtension;
     private Label label2;
-    private Label lblOutput;
+    private TextBox txtSearch;
+    private System.Windows.Forms.Timer tmrSearch;
+    private Label label3;
+    private StatusStrip statusStrip1;
+    private ToolStripStatusLabel ttsPath;
 }

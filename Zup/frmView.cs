@@ -9,21 +9,40 @@ public partial class frmView : Form
     private readonly ZupDbContext p_DbContext;
 
     public delegate void OnSelectedItem(int entryID);
+    public delegate void OnExported();
 
     public event OnSelectedItem? OnSelectedItemEvent;
+    public event OnExported? OnExportedEvent;
 
     public frmView(ZupDbContext dbContext)
     {
         InitializeComponent();
-        p_DbContext = dbContext;        
+        p_DbContext = dbContext;
+    }
+
+    private void frmView_Load(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.TimesheetsFolder))
+        {
+            txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
+        }
+
+        SetLabelOutput();
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
     {
         if (Visible)
         {
-            dgView.DataSource = p_DbContext.TimeLogs
+            LoadListData();
+        }
+    }
+
+    private void LoadListData(string? search = null)
+    {
+        dgView.DataSource = p_DbContext.TimeLogs
                 .AsNoTracking()
+                .Where(a => search == null || a.Task.Contains(search))
                 .OrderByDescending(a => a.ID)
                 .ToList()
                 .Select(a =>
@@ -35,7 +54,7 @@ public partial class frmView : Form
                     {
                         durationData = a.EndedOn!.Value - a.StartedOn;
 
-                        duration = $"{durationData.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
+                        duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
                     }
 
                     return new TimeLogSummary
@@ -49,7 +68,6 @@ public partial class frmView : Form
                     };
                 })
                 .ToList();
-        }
     }
 
     private void dgView_DoubleClick(object sender, EventArgs e)
@@ -93,27 +111,17 @@ public partial class frmView : Form
 
             SetLabelOutput();
         }
-    }
-
-    private void frmView_Load(object sender, EventArgs e)
-    {
-        if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.TimesheetsFolder))
-        {
-            txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
-        }
-
-        SetLabelOutput();
-    }
+    }   
 
     private void SetLabelOutput()
     {
         try
         {
-            lblOutput.Text = GetOutputPath();
+            ttsPath.Text = GetOutputPath();
         }
         catch (Exception ex)
         {
-            lblOutput.Text = ex.Message;
+            ttsPath.Text = ex.Message;
         }
     }
 
@@ -140,28 +148,40 @@ public partial class frmView : Form
         {
             var path = GetOutputPath();
 
-            var content = new StringBuilder();
-
-            dgView.SelectedRows.Cast<DataGridViewRow>()
-                .Select(a => (TimeLogSummary)a.DataBoundItem)
-                .Where(a => a.Duration != null && a.StartedOn != null)
-                .ToList()
-                .ForEach(a =>
-                {
-                    content.AppendLine($"{a.StartedOn!.Value.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
-                });
+            var content = GetContent();
 
             var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
 
             if (confirm == DialogResult.OK)
             {
-                File.WriteAllText(path, content.ToString());
+                File.WriteAllText(path, content);
+
+                if (OnExportedEvent != null)
+                {
+                    OnExportedEvent();
+                }
             }
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message);
         }
+    }
+
+    private string GetContent()
+    {
+        var content = new StringBuilder();
+
+        dgView.SelectedRows.Cast<DataGridViewRow>()
+            .Select(a => (TimeLogSummary)a.DataBoundItem)
+            .Where(a => a.Duration != null && a.StartedOn != null)
+            .ToList()
+            .ForEach(a =>
+            {
+                content.AppendLine($"{a.StartedOn!.Value.Ticks}^{a.Task}^{ExtractComments(a.ID)}^{GetClients(a.ID)}^{a.DurationString}^False^False");
+            });
+
+        return content.ToString();
     }
 
     private string ExtractComments(int taskID)
@@ -177,7 +197,12 @@ public partial class frmView : Form
 
         foreach (var note in notes)
         {
-            str.Add(NoteSummary.CleanNotes(note.Notes, 100));
+            var n = NoteSummary.CleanNotes(note.Notes, 100);
+
+            if (!string.IsNullOrWhiteSpace(n))
+            {
+                str.Add(n);
+            }
         }
 
         if (!str.Any())
@@ -185,7 +210,7 @@ public partial class frmView : Form
             return string.Empty;
         }
 
-        return string.Join(';', str.Where(a => !string.IsNullOrWhiteSpace(a)));
+        return string.Join(';', str);
     }
 
     private string GetClients(int taskID)
@@ -201,6 +226,18 @@ public partial class frmView : Form
     private void dtTimesheetDate_ValueChanged(object sender, EventArgs e)
     {
         SetLabelOutput();
+    }
+
+    private void txtSearch_TextChanged(object sender, EventArgs e)
+    {
+        tmrSearch.Enabled = false;
+        tmrSearch.Enabled = true;
+    }
+
+    private void tmrSearch_Tick(object sender, EventArgs e)
+    {
+        LoadListData(txtSearch.Text);
+        tmrSearch.Enabled = false;
     }
 
     /*

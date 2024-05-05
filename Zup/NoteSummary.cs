@@ -4,6 +4,8 @@ namespace Zup;
 
 public class NoteSummary
 {
+    public const string ImageContent = "Image";
+
     public int ID { get; set; }
     public DateTime CreatedOn { get; set; }
 
@@ -27,6 +29,11 @@ public class NoteSummary
     public static string CleanNotes(string notes, int elipsCharCount)
     {
         if (notes == null)
+        {
+            return string.Empty;
+        }
+
+        if (notes == ImageContent)
         {
             return string.Empty;
         }
