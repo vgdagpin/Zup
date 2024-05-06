@@ -50,7 +50,6 @@ partial class frmView
         label2 = new Label();
         txtSearch = new TextBox();
         tmrSearch = new System.Windows.Forms.Timer(components);
-        label3 = new Label();
         statusStrip1 = new StatusStrip();
         ttsPath = new ToolStripStatusLabel();
         txtRowFormat = new TextBox();
@@ -58,6 +57,7 @@ partial class frmView
         groupBox1 = new GroupBox();
         btnRowFormatHelp = new Button();
         btnRefresh = new Button();
+        lbWeek = new ListBox();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         statusStrip1.SuspendLayout();
         groupBox1.SuspendLayout();
@@ -71,11 +71,12 @@ partial class frmView
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString });
-        dgView.Location = new Point(11, 41);
+        dgView.Location = new Point(208, 41);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
+        dgView.RowHeadersVisible = false;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(761, 256);
+        dgView.Size = new Size(564, 406);
         dgView.TabIndex = 1;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
@@ -138,7 +139,7 @@ partial class frmView
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(713, 300);
+        lblSelectedTotal.Location = new Point(713, 450);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(59, 23);
         lblSelectedTotal.TabIndex = 1;
@@ -225,9 +226,9 @@ partial class frmView
         // 
         // txtSearch
         // 
-        txtSearch.Location = new Point(60, 9);
+        txtSearch.Location = new Point(208, 10);
         txtSearch.Name = "txtSearch";
-        txtSearch.Size = new Size(277, 23);
+        txtSearch.Size = new Size(483, 23);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += txtSearch_TextChanged;
         // 
@@ -236,19 +237,10 @@ partial class frmView
         tmrSearch.Interval = 500;
         tmrSearch.Tick += tmrSearch_Tick;
         // 
-        // label3
-        // 
-        label3.AutoSize = true;
-        label3.Location = new Point(11, 15);
-        label3.Name = "label3";
-        label3.Size = new Size(45, 15);
-        label3.TabIndex = 10;
-        label3.Text = "Search:";
-        // 
         // statusStrip1
         // 
         statusStrip1.Items.AddRange(new ToolStripItem[] { ttsPath });
-        statusStrip1.Location = new Point(0, 439);
+        statusStrip1.Location = new Point(0, 589);
         statusStrip1.Name = "statusStrip1";
         statusStrip1.Size = new Size(784, 22);
         statusStrip1.TabIndex = 11;
@@ -296,7 +288,7 @@ partial class frmView
         groupBox1.Controls.Add(dtTimesheetDate);
         groupBox1.Controls.Add(label2);
         groupBox1.Controls.Add(txtExtension);
-        groupBox1.Location = new Point(11, 341);
+        groupBox1.Location = new Point(11, 491);
         groupBox1.Name = "groupBox1";
         groupBox1.Size = new Size(761, 86);
         groupBox1.TabIndex = 16;
@@ -324,20 +316,32 @@ partial class frmView
         btnRefresh.UseVisualStyleBackColor = true;
         btnRefresh.Click += btnRefresh_Click;
         // 
+        // lbWeek
+        // 
+        lbWeek.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+        lbWeek.FormattingEnabled = true;
+        lbWeek.ItemHeight = 15;
+        lbWeek.Location = new Point(8, 41);
+        lbWeek.Name = "lbWeek";
+        lbWeek.SelectionMode = SelectionMode.MultiExtended;
+        lbWeek.Size = new Size(194, 409);
+        lbWeek.TabIndex = 18;
+        lbWeek.SelectedIndexChanged += lbWeek_SelectedIndexChanged;
+        // 
         // frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(784, 461);
+        ClientSize = new Size(784, 611);
+        Controls.Add(lbWeek);
         Controls.Add(btnRefresh);
         Controls.Add(groupBox1);
         Controls.Add(statusStrip1);
-        Controls.Add(label3);
         Controls.Add(txtSearch);
         Controls.Add(lblSelectedTotal);
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
-        MinimumSize = new Size(800, 500);
+        MinimumSize = new Size(800, 650);
         Name = "frmView";
         Text = "View";
         Load += frmView_Load;
@@ -371,7 +375,6 @@ partial class frmView
     private Label label2;
     private TextBox txtSearch;
     private System.Windows.Forms.Timer tmrSearch;
-    private Label label3;
     private StatusStrip statusStrip1;
     private ToolStripStatusLabel ttsPath;
     private TextBox txtRowFormat;
@@ -379,4 +382,5 @@ partial class frmView
     private GroupBox groupBox1;
     private Button btnRowFormatHelp;
     private Button btnRefresh;
+    private ListBox lbWeek;
 }

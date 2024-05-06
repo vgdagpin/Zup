@@ -230,7 +230,7 @@ partial class frmUpdateEntry
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(75, 23);
         btnDelete.TabIndex = 15;
-        btnDelete.Text = "Delete";
+        btnDelete.Text = "Delete Task";
         btnDelete.UseVisualStyleBackColor = true;
         btnDelete.Click += btnDelete_Click;
         // 
@@ -250,7 +250,7 @@ partial class frmUpdateEntry
         groupBox1.Size = new Size(815, 110);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
-        groupBox1.Text = "Entry Details";
+        groupBox1.Text = "Task Detail";
         // 
         // label3
         // 

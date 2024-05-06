@@ -3,6 +3,7 @@ using Microsoft.Win32;
 
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace Zup;
@@ -194,31 +195,15 @@ public partial class frmMain : Form
 
     private void FormSetting_OnDbBackupEvent()
     {
-        var backupDir = m_DbContext.BackupDb();
+        m_DbContext.BackupDb();
 
-        OpenFolder(backupDir!);
-    }
-
-    private void OpenFolder(string folderPath)
-    {
-        if (Directory.Exists(folderPath))
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                Arguments = folderPath,
-                FileName = "explorer.exe"
-            };
-
-            Process.Start(startInfo);
-        }
-        else
-        {
-            MessageBox.Show(string.Format("{0} Directory does not exist!", folderPath));
-        }
+        MessageBox.Show("Backup done!", "Zup");
     }
 
     private void FormSetting_OnDbTrimEvent(int daysToKeep)
     {
+        m_DbContext.BackupDb();
+
         var keepDate = DateTime.Now.AddDays(-daysToKeep);
 
         var toDel = m_DbContext.TimeLogs
@@ -234,7 +219,7 @@ public partial class frmMain : Form
 
         m_DbContext.SaveChanges();
 
-        MessageBox.Show($"Trimmed {toDel.Count} record/s.");
+        MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
     }
 
     private void FormSetting_OnSettingUpdatedEvent(string name, object value)
@@ -264,6 +249,21 @@ public partial class frmMain : Form
         m_FormEntryList.ShowUpdateEntry(entryID);
     }
 
+    protected bool IsNewWeek()
+    {
+        var lastRow = m_DbContext.TimeLogs.Where(a => a.StartedOn != null).OrderByDescending(x => x.ID).FirstOrDefault();
+
+        if (lastRow == null)
+        {
+            return false;
+        }
+
+        var lastRowWeekNum = Utility.GetWeekNumber(lastRow.StartedOn!.Value);
+        var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
+
+        return lastRowWeekNum < weekNumNow;
+    }
+
     protected override void WndProc(ref Message m)
     {
         if (m.Msg == 0x0312)
@@ -272,7 +272,7 @@ public partial class frmMain : Form
                 || m.WParam.ToInt32() == Constants.UpdateCurrentRunningTask
                 || m.WParam.ToInt32() == Constants.ToggleLastRunningTask)
             {
-                if (!m_DbContext.IsThisWeekDb())
+                if (IsNewWeek())
                 {
                     m_DbContext.BackupDb();
                 }

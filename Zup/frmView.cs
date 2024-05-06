@@ -15,6 +15,8 @@ public partial class frmView : Form
     public event OnSelectedItem? OnSelectedItemEvent;
     public event OnExported? OnExportedEvent;
 
+    private IEnumerable<WeekData> WeekDataList = null!;
+
     public frmView(ZupDbContext dbContext)
     {
         InitializeComponent();
@@ -38,11 +40,35 @@ public partial class frmView : Form
     {
         if (Visible)
         {
-            LoadListData();
+            LoadWeekData();
         }
     }
 
-    private void LoadListData(string? search = null)
+    private (DateTime Start, DateTime End) LoadWeekData()
+    {
+        var curWeekNum = Utility.GetWeekNumber(DateTime.Now);
+
+        if (WeekDataList == null || WeekDataList.Skip(1).First().Start.Year != DateTime.Now.Year)
+        {
+            WeekDataList = Utility.GetWeekData(DateTime.Now.Year)
+                .OrderByDescending(a => a.WeekNumber);
+
+            lbWeek.DataSource = WeekDataList.Where(a => a.WeekNumber <= curWeekNum).ToArray();
+        }
+
+        var curWeekData = WeekDataList.Single(a => a.WeekNumber == curWeekNum);
+
+        if (lbWeek.SelectedIndices.Count > 0)
+        {
+            var selData = lbWeek.SelectedItems.Cast<WeekData>().ToArray();
+
+            return (selData.Min(a => a.Start), selData.Max(a => a.End));
+        }
+
+        return (curWeekData.Start, curWeekData.End);
+    }
+
+    private void LoadListData(DateTime from, DateTime to, string? search = null)
     {
         if (string.IsNullOrWhiteSpace(search))
         {
@@ -51,7 +77,9 @@ public partial class frmView : Form
 
         dgView.DataSource = p_DbContext.TimeLogs
                 .AsNoTracking()
-                .Where(a => search == null || a.Task.Contains(search))
+                .Where(a => 
+                        ((from <= a.StartedOn && a.StartedOn <= to) || a.StartedOn == null) // between the date range or not yet started
+                        && (search == null || a.Task.Contains(search))) // search filter                    
                 .OrderByDescending(a => a.ID)
                 .ToList()
                 .Select(a =>
@@ -159,7 +187,7 @@ public partial class frmView : Form
 
             var content = GetContent(txtRowFormat.Text);
 
-            var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Export", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+            var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
 
             if (confirm == DialogResult.OK)
             {
@@ -178,7 +206,7 @@ public partial class frmView : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message);
+            MessageBox.Show(ex.Message, "Zup");
         }
     }
 
@@ -272,7 +300,9 @@ public partial class frmView : Form
 
     private void tmrSearch_Tick(object sender, EventArgs e)
     {
-        LoadListData(txtSearch.Text);
+        var currentWeekData = LoadWeekData();
+
+        LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
         tmrSearch.Enabled = false;
     }
 
@@ -311,7 +341,16 @@ public partial class frmView : Form
 
     private void btnRefresh_Click(object sender, EventArgs e)
     {
-        LoadListData(txtSearch.Text);
+        var currentWeekData = LoadWeekData();
+
+        LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
+    }
+
+    private void lbWeek_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        var currentWeekData = LoadWeekData();
+
+        LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
     }
 
     /*

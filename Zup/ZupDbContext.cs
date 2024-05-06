@@ -11,27 +11,13 @@ namespace Zup;
 
 public class ZupDbContext : DbContext
 {
-    public int WeekNumber { get; private set; }
-
     public DbSet<tbl_TimeLog> TimeLogs { get; set; }
     public DbSet<tbl_Note> Notes { get; set; }
 
     public ZupDbContext(DbContextOptions<ZupDbContext> dbContextOptions) : base(dbContextOptions)
     {
-        WeekNumber = GetWeekNumber(DateTime.Now);
-    }
 
-    public static int GetWeekNumber(DateTime date)
-    {
-        CultureInfo ci = CultureInfo.CurrentCulture;
-        Calendar cal = ci.Calendar;
-        CalendarWeekRule cwr = ci.DateTimeFormat.CalendarWeekRule;
-        DayOfWeek dow = ci.DateTimeFormat.FirstDayOfWeek;
-
-        return cal.GetWeekOfYear(date, cwr, dow);
-    }
-
-    public bool IsThisWeekDb() => GetWeekNumber(DateTime.Now) == WeekNumber;
+    }    
 
     public string? BackupDb()
     {
