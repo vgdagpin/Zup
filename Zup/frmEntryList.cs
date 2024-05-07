@@ -16,8 +16,8 @@ public partial class frmEntryList : Form
     private bool p_OnLoad = true;
     private readonly ZupDbContext m_DbContext;
 
-    private int? CurrentRunningTaskID;
-    private int? LastRunningTaskID;
+    private Guid? CurrentRunningTaskID;
+    private Guid? LastRunningTaskID;
 
     public bool ListIsReady { get; set; }
 
@@ -154,7 +154,12 @@ public partial class frmEntryList : Form
         var count = 0;
         var queueCount = 0;
 
-        foreach (var task in m_DbContext.TimeLogs.ToList())
+        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+
+        foreach (var task in m_DbContext.TaskEntries
+            .Where(a => a.StartedOn >= minDate || a.StartedOn == null)
+            .OrderBy(a => a.StartedOn)
+            .ToList())
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.StartedOn, task.EndedOn);
 
@@ -207,7 +212,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void FormUpdateEntry_OnSavedEventHandler(tbl_TimeLog log)
+    private void FormUpdateEntry_OnSavedEventHandler(tbl_TaskEntry log)
     {
         foreach (var entry in flpTaskList.Controls.Cast<EachEntry>())
         {
@@ -220,13 +225,13 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_OnStartEvent(int id)
+    private void EachEntry_OnStartEvent(Guid id)
     {
         CurrentRunningTaskID = id;
         LastRunningTaskID = id;
     }
 
-    private void FormUpdateEntry_OnDeleteEventHandler(int entryID)
+    private void FormUpdateEntry_OnDeleteEventHandler(Guid entryID)
     {
         DeleteTimeLog(entryID);
 
@@ -238,13 +243,13 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void DeleteTimeLog(int entryID)
+    private void DeleteTimeLog(Guid entryID)
     {
-        var entry = m_DbContext.TimeLogs.Find(entryID);
+        var entry = m_DbContext.TaskEntries.Find(entryID);
 
         if (entry != null)
         {
-            m_DbContext.TimeLogs.Remove(entry);
+            m_DbContext.TaskEntries.Remove(entry);
             m_DbContext.SaveChanges();
         }
 
@@ -257,10 +262,11 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false, bool bringNotes = false)
+    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false)
     {
-        var newE = new tbl_TimeLog
+        var newE = new tbl_TaskEntry
         {
+            ID = Guid.NewGuid(),
             Task = entry
         };
 
@@ -269,26 +275,25 @@ public partial class frmEntryList : Form
             newE.StartedOn = DateTime.Now;
         }
 
-        m_DbContext.TimeLogs.Add(newE);
-
-        m_DbContext.SaveChanges();
+        m_DbContext.TaskEntries.Add(newE);
 
         if (bringNotes && parentEntryID != null)
         {
-            foreach (var note in m_DbContext.Notes.Where(a => a.LogID == parentEntryID).ToList())
+            foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntryID).ToList())
             {
-                m_DbContext.Notes.Add(new tbl_Note
+                m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
                 {
-                    LogID = newE.ID,
+                    ID = Guid.NewGuid(),
+                    TaskID = newE.ID,
                     CreatedOn = note.CreatedOn,
                     Notes = note.Notes,
                     RTF = note.RTF,
                     UpdatedOn = note.UpdatedOn
                 });
-            }
-
-            m_DbContext.SaveChanges();
+            }            
         }
+
+        m_DbContext.SaveChanges();
 
         var eachEntry = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
 
@@ -324,17 +329,17 @@ public partial class frmEntryList : Form
         return flpTaskList.Controls.Cast<EachEntry>().Count(a => a.StartedOn == null && (a.Visible || includeHidden));
     }
 
-    private void EachEntry_OnUpdateEvent(int id)
+    private void EachEntry_OnUpdateEvent(Guid id)
     {
         ShowUpdateEntry(id);
     }
 
-    public void ShowUpdateEntry(int entryID)
+    public void ShowUpdateEntry(Guid entryID)
     {
         m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
-    private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, int? parentEntryID = null, bool hideParent = false)
+    private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)
     {
         flpTaskList.Controls.Add(newEntry);
 
@@ -376,9 +381,9 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_OnStopEventHandler(int id, DateTime endOn)
+    private void EachEntry_OnStopEventHandler(Guid id, DateTime endOn)
     {
-        var existingE = m_DbContext.TimeLogs.Find(id);
+        var existingE = m_DbContext.TaskEntries.Find(id);
 
         if (existingE != null)
         {

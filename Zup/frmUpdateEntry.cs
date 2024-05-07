@@ -10,11 +10,11 @@ namespace Zup;
 public partial class frmUpdateEntry : Form
 {
     private readonly ZupDbContext p_DbContext;
-    private int? selectedEntryID;
-    private int? selectedNoteID;
+    private Guid? selectedEntryID;
+    private Guid? selectedNoteID;
 
-    public delegate void OnDelete(int entryID);
-    public delegate void OnSaved(tbl_TimeLog log);
+    public delegate void OnDelete(Guid entryID);
+    public delegate void OnSaved(tbl_TaskEntry log);
 
     public event OnDelete? OnDeleteEvent;
     public event OnSaved? OnSavedEvent;
@@ -39,9 +39,9 @@ public partial class frmUpdateEntry : Form
         Hide();
     }
 
-    public void ShowUpdateEntry(int entryID)
+    public void ShowUpdateEntry(Guid entryID)
     {
-        var entry = p_DbContext.TimeLogs.Find(entryID);
+        var entry = p_DbContext.TaskEntries.Find(entryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -76,7 +76,7 @@ public partial class frmUpdateEntry : Form
             : " ";
 
 
-        foreach (var note in p_DbContext.Notes.Where(a => a.LogID == entryID).ToList())
+        foreach (var note in p_DbContext.TaskEntryNotes.Where(a => a.TaskID == entryID).ToList())
         {
             lbNotes.Items.Add(NoteSummary.Parse(note));
         }
@@ -90,14 +90,14 @@ public partial class frmUpdateEntry : Form
 
     private void LoadPreviousNotes()
     {
-        var allIDs = p_DbContext.TimeLogs
+        var allIDs = p_DbContext.TaskEntries
             .Where(a => a.Task == txtTask.Text && a.ID != selectedEntryID)
             .OrderByDescending(a => a.StartedOn)
             .Select(a => a.ID)
             .ToArray();
 
-        foreach (var note in p_DbContext.Notes
-            .Where(a => allIDs.Contains(a.LogID))
+        foreach (var note in p_DbContext.TaskEntryNotes
+            .Where(a => allIDs.Contains(a.TaskID))
             .OrderByDescending(a => a.CreatedOn)
             .Take(50)
             .AsNoTracking()
@@ -138,11 +138,11 @@ public partial class frmUpdateEntry : Form
         }
 
         var lll = lbNotes.Items.Cast<NoteSummary>().Single(a => a.ID == selectedNoteID);
-        var existingNote = p_DbContext.Notes.Find(selectedNoteID);
+        var existingNote = p_DbContext.TaskEntryNotes.Find(selectedNoteID);
 
         if (existingNote != null)
         {
-            p_DbContext.Notes.Remove(existingNote);
+            p_DbContext.TaskEntryNotes.Remove(existingNote);
 
             lbNotes.Items.Remove(lll);
 
@@ -181,7 +181,7 @@ public partial class frmUpdateEntry : Form
         if (selectedNoteID != null)
         {
             var lll = lbNotes.Items.Cast<NoteSummary>().Single(a => a.ID == selectedNoteID);
-            var existingNote = p_DbContext.Notes.Find(selectedNoteID);
+            var existingNote = p_DbContext.TaskEntryNotes.Find(selectedNoteID);
 
             if (existingNote != null)
             {
@@ -209,15 +209,16 @@ public partial class frmUpdateEntry : Form
         {
             if (!string.IsNullOrWhiteSpace(noteData))
             {
-                var newNote = new tbl_Note
+                var newNote = new tbl_TaskEntryNote
                 {
-                    LogID = selectedEntryID!.Value,
+                    ID = Guid.NewGuid(),
+                    TaskID = selectedEntryID!.Value,
                     Notes = noteData,
                     RTF = rtfNoteData!,
                     CreatedOn = DateTime.Now
                 };
 
-                p_DbContext.Notes.Add(newNote);
+                p_DbContext.TaskEntryNotes.Add(newNote);
 
                 p_DbContext.SaveChanges();
 
@@ -259,7 +260,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        var note = p_DbContext.Notes.Find(sel.ID);
+        var note = p_DbContext.TaskEntryNotes.Find(sel.ID);
 
         if (note == null)
         {
@@ -308,10 +309,15 @@ public partial class frmUpdateEntry : Form
 
         var item = (NoteSummary)control.Items[e.Index];
 
-        var bold = new Font(e.Font!.FontFamily, e.Font.Size, FontStyle.Bold);
+        var createdOnStr = item.CreatedOn.ToString("hh:mm:ss");
 
-        e.Graphics.DrawString(item.CreatedOn.ToString("hh:mm:ss"), bold, Brushes.Black, e.Bounds);
-        e.Graphics.DrawString(item.Summary, e.Font, Brushes.Black, new PointF(e.Bounds.X + 55, e.Bounds.Y));
+        if (control.Name == lbPreviousNotes.Name)
+        {
+            createdOnStr = item.CreatedOn.ToString("MM/dd/yy");
+        }
+
+        e.Graphics.DrawString(createdOnStr, e.Font!, Brushes.Gray, e.Bounds);
+        e.Graphics.DrawString(item.Summary, e.Font!, Brushes.Black, new PointF(e.Bounds.X + 50, e.Bounds.Y));
 
         e.DrawFocusRectangle();
     }
@@ -383,7 +389,7 @@ public partial class frmUpdateEntry : Form
 
     private void btnSaveChanges_Click(object sender, EventArgs e)
     {
-        var task = p_DbContext.TimeLogs.Find(selectedEntryID);
+        var task = p_DbContext.TaskEntries.Find(selectedEntryID);
 
         if (task != null)
         {

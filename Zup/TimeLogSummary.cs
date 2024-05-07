@@ -4,7 +4,7 @@ namespace Zup;
 
 public class TimeLogSummary
 {
-    public int ID { get; set; }
+    public Guid ID { get; set; }
 
     [MaxLength(255)]
     public string Task { get; set; } = null!;

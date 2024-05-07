@@ -29,7 +29,7 @@ partial class frmUpdateEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         btnDeleteNote = new Button();
@@ -128,10 +128,10 @@ partial class frmUpdateEntry
         // txtTask
         // 
         txtTask.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        txtTask.Font = new Font("Segoe UI", 11F);
+        txtTask.Font = new Font("Segoe UI", 10F);
         txtTask.Location = new Point(106, 22);
         txtTask.Name = "txtTask";
-        txtTask.Size = new Size(702, 27);
+        txtTask.Size = new Size(702, 25);
         txtTask.TabIndex = 10;
         txtTask.KeyDown += txtTask_KeyDown;
         // 

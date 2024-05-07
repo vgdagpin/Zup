@@ -9,7 +9,7 @@ public partial class frmView : Form
 {
     private readonly ZupDbContext p_DbContext;
 
-    public delegate void OnSelectedItem(int entryID);
+    public delegate void OnSelectedItem(Guid entryID);
     public delegate void OnExported();
 
     public event OnSelectedItem? OnSelectedItemEvent;
@@ -75,12 +75,12 @@ public partial class frmView : Form
             search = null;
         }
 
-        dgView.DataSource = p_DbContext.TimeLogs
+        dgView.DataSource = p_DbContext.TaskEntries
                 .AsNoTracking()
                 .Where(a => 
                         ((from <= a.StartedOn && a.StartedOn <= to) || a.StartedOn == null) // between the date range or not yet started
                         && (search == null || a.Task.Contains(search))) // search filter                    
-                .OrderByDescending(a => a.ID)
+                .OrderByDescending(a => a.StartedOn)
                 .ToList()
                 .Select(a =>
                 {
@@ -248,9 +248,9 @@ public partial class frmView : Form
         return dicAction;
     }
 
-    private string ExtractComments(int taskID)
+    private string ExtractComments(Guid taskID)
     {
-        var notes = p_DbContext.Notes.Where(a => a.LogID == taskID).ToList();
+        var notes = p_DbContext.TaskEntryNotes.Where(a => a.TaskID == taskID).ToList();
 
         if (!notes.Any())
         {
@@ -277,7 +277,7 @@ public partial class frmView : Form
         return string.Join(';', str);
     }
 
-    private string GetClients(int taskID)
+    private string GetClients(Guid taskID)
     {
         return string.Empty;
     }

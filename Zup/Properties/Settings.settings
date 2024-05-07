@@ -32,5 +32,8 @@
     <Setting Name="ExportFileExtension" Type="System.String" Scope="User">
       <Value Profile="(Default)">.fd</Value>
     </Setting>
+    <Setting Name="NumDaysOfDataToLoad" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">14</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

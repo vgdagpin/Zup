@@ -6,14 +6,14 @@ public class NoteSummary
 {
     public const string ImageContent = "Image";
 
-    public int ID { get; set; }
+    public Guid ID { get; set; }
     public DateTime CreatedOn { get; set; }
 
     public string Summary { get; set; } = null!;
 
     public string Note { get; set; } = null!;
 
-    public static NoteSummary Parse(tbl_Note newNote)
+    public static NoteSummary Parse(tbl_TaskEntryNote newNote)
     {
         var cleanNote = CleanNotes(newNote.Notes, 30);
 

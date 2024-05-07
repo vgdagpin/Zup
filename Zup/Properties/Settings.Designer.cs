@@ -142,5 +142,17 @@ namespace Zup.Properties {
                 this["ExportFileExtension"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14")]
+        public int NumDaysOfDataToLoad {
+            get {
+                return ((int)(this["NumDaysOfDataToLoad"]));
+            }
+            set {
+                this["NumDaysOfDataToLoad"] = value;
+            }
+        }
     }
 }

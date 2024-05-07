@@ -5,7 +5,7 @@ public partial class frmNewEntry : Form
 {
     private AutoCompleteStringCollection SuggestionSource = new AutoCompleteStringCollection();
 
-    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, int? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
+    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
 
     public event OnNewEntry? OnNewEntryEvent;
 

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Zup.Entities;
 
 namespace Zup;
 
@@ -195,6 +196,36 @@ public partial class frmMain : Form
 
     private void FormSetting_OnDbBackupEvent()
     {
+        //foreach (var log in m_DbContext.TimeLogs)
+        //{
+        //    var task = new tbl_TaskEntry
+        //    {
+        //        ID = Guid.NewGuid(),
+        //        Task = log.Task,
+        //        StartedOn = log.StartedOn,
+        //        EndedOn = log.EndedOn
+        //    };
+
+        //    m_DbContext.TaskEntries.Add(task);
+
+        //    foreach (var note in m_DbContext.Notes.Where(a => a.LogID == log.ID))
+        //    {
+        //        var taskNote = new tbl_TaskEntryNote
+        //        {
+        //            ID = Guid.NewGuid(),
+        //            TaskID = task.ID,
+        //            Notes = note.Notes,
+        //            CreatedOn = note.CreatedOn,
+        //            UpdatedOn = note.UpdatedOn,
+        //            RTF = note.RTF
+        //        };
+
+        //        m_DbContext.TaskEntryNotes.Add(taskNote);
+        //    }
+        //}
+
+        //m_DbContext.SaveChanges();
+
         m_DbContext.BackupDb();
 
         MessageBox.Show("Backup done!", "Zup");
@@ -206,16 +237,16 @@ public partial class frmMain : Form
 
         var keepDate = DateTime.Now.AddDays(-daysToKeep);
 
-        var toDel = m_DbContext.TimeLogs
+        var toDel = m_DbContext.TaskEntries
             .Where(a => a.StartedOn < keepDate)
             .ToList();
 
-        var toDelNotes = m_DbContext.Notes
-            .Where(a => toDel.Select(b => b.ID).Contains(a.LogID))
+        var toDelNotes = m_DbContext.TaskEntryNotes
+            .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
             .ToList();
 
-        m_DbContext.Notes.RemoveRange(toDelNotes);
-        m_DbContext.TimeLogs.RemoveRange(toDel);
+        m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
+        m_DbContext.TaskEntries.RemoveRange(toDel);
 
         m_DbContext.SaveChanges();
 
@@ -244,14 +275,14 @@ public partial class frmMain : Form
         }
     }
 
-    private void FormView_OnSelectedItemEvent(int entryID)
+    private void FormView_OnSelectedItemEvent(Guid entryID)
     {
         m_FormEntryList.ShowUpdateEntry(entryID);
     }
 
     protected bool IsNewWeek()
     {
-        var lastRow = m_DbContext.TimeLogs.Where(a => a.StartedOn != null).OrderByDescending(x => x.ID).FirstOrDefault();
+        var lastRow = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault();
 
         if (lastRow == null)
         {
