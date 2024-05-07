@@ -28,7 +28,7 @@ partial class frmSetting
     /// </summary>
     private void InitializeComponent()
     {
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
         groupBox1 = new GroupBox();
         nMaxDaysDataToLoad = new NumericUpDown();
         label4 = new Label();
@@ -76,11 +76,11 @@ partial class frmSetting
         // nMaxDaysDataToLoad
         // 
         nMaxDaysDataToLoad.Location = new Point(138, 42);
-        nMaxDaysDataToLoad.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+        nMaxDaysDataToLoad.Maximum = new decimal(new int[] { 365, 0, 0, 0 });
         nMaxDaysDataToLoad.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         nMaxDaysDataToLoad.Name = "nMaxDaysDataToLoad";
         nMaxDaysDataToLoad.Size = new Size(40, 23);
-        nMaxDaysDataToLoad.TabIndex = 8;
+        nMaxDaysDataToLoad.TabIndex = 4;
         nMaxDaysDataToLoad.TextAlign = HorizontalAlignment.Right;
         nMaxDaysDataToLoad.Value = new decimal(new int[] { 3, 0, 0, 0 });
         nMaxDaysDataToLoad.ValueChanged += nMaxDaysDataToLoad_ValueChanged;
@@ -120,7 +120,7 @@ partial class frmSetting
         tbOpacity.Name = "tbOpacity";
         tbOpacity.Size = new Size(247, 45);
         tbOpacity.SmallChange = 5;
-        tbOpacity.TabIndex = 4;
+        tbOpacity.TabIndex = 6;
         tbOpacity.TickFrequency = 5;
         tbOpacity.Scroll += tbOpacity_Scroll;
         // 
@@ -131,7 +131,7 @@ partial class frmSetting
         numTxtItemsToShow.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         numTxtItemsToShow.Name = "numTxtItemsToShow";
         numTxtItemsToShow.Size = new Size(40, 23);
-        numTxtItemsToShow.TabIndex = 3;
+        numTxtItemsToShow.TabIndex = 5;
         numTxtItemsToShow.TextAlign = HorizontalAlignment.Right;
         numTxtItemsToShow.Value = new decimal(new int[] { 3, 0, 0, 0 });
         numTxtItemsToShow.ValueChanged += numTxtItemsToShow_ValueChanged;
@@ -161,7 +161,7 @@ partial class frmSetting
         cbAutoOpenUpdateWindow.Location = new Point(9, 28);
         cbAutoOpenUpdateWindow.Name = "cbAutoOpenUpdateWindow";
         cbAutoOpenUpdateWindow.Size = new Size(239, 19);
-        cbAutoOpenUpdateWindow.TabIndex = 2;
+        cbAutoOpenUpdateWindow.TabIndex = 7;
         cbAutoOpenUpdateWindow.Text = "Auto open update window on new entry";
         cbAutoOpenUpdateWindow.UseVisualStyleBackColor = true;
         cbAutoOpenUpdateWindow.CheckedChanged += cbAutoOpenUpdateWindow_CheckedChanged;
@@ -177,7 +177,7 @@ partial class frmSetting
         groupBox3.Location = new Point(12, 9);
         groupBox3.Name = "groupBox3";
         groupBox3.Size = new Size(390, 120);
-        groupBox3.TabIndex = 4;
+        groupBox3.TabIndex = 1;
         groupBox3.TabStop = false;
         groupBox3.Text = "Database";
         // 
@@ -197,7 +197,7 @@ partial class frmSetting
         numKeepDaysOfData.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         numKeepDaysOfData.Name = "numKeepDaysOfData";
         numKeepDaysOfData.Size = new Size(50, 23);
-        numKeepDaysOfData.TabIndex = 4;
+        numKeepDaysOfData.TabIndex = 3;
         numKeepDaysOfData.TextAlign = HorizontalAlignment.Right;
         numKeepDaysOfData.Value = new decimal(new int[] { 14, 0, 0, 0 });
         numKeepDaysOfData.ValueChanged += numKeepDaysOfData_ValueChanged;
@@ -207,7 +207,7 @@ partial class frmSetting
         btnBackupDb.Location = new Point(9, 55);
         btnBackupDb.Name = "btnBackupDb";
         btnBackupDb.Size = new Size(75, 23);
-        btnBackupDb.TabIndex = 3;
+        btnBackupDb.TabIndex = 0;
         btnBackupDb.Text = "Backup";
         btnBackupDb.TextAlign = ContentAlignment.MiddleLeft;
         btnBackupDb.UseVisualStyleBackColor = true;
@@ -218,7 +218,7 @@ partial class frmSetting
         btnDbBrowse.Location = new Point(350, 26);
         btnDbBrowse.Name = "btnDbBrowse";
         btnDbBrowse.Size = new Size(34, 23);
-        btnDbBrowse.TabIndex = 2;
+        btnDbBrowse.TabIndex = 1;
         btnDbBrowse.Text = "...";
         btnDbBrowse.UseVisualStyleBackColor = true;
         btnDbBrowse.Click += btnDbBrowse_Click;
@@ -227,8 +227,9 @@ partial class frmSetting
         // 
         txtDbPath.Location = new Point(48, 26);
         txtDbPath.Name = "txtDbPath";
+        txtDbPath.ReadOnly = true;
         txtDbPath.Size = new Size(296, 23);
-        txtDbPath.TabIndex = 1;
+        txtDbPath.TabIndex = 2;
         // 
         // label3
         // 
@@ -248,7 +249,8 @@ partial class frmSetting
         btnTrimDb.Location = new Point(22, 93);
         btnTrimDb.Name = "btnTrimDb";
         btnTrimDb.Size = new Size(75, 23);
-        btnTrimDb.TabIndex = 4;
+        btnTrimDb.TabIndex = 2;
+        btnTrimDb.TabStop = false;
         btnTrimDb.Text = "Trim";
         btnTrimDb.TextAlign = ContentAlignment.MiddleLeft;
         btnTrimDb.UseVisualStyleBackColor = true;

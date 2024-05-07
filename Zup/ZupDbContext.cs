@@ -9,9 +9,6 @@ namespace Zup;
 
 public class ZupDbContext : DbContext
 {
-    public DbSet<tbl_TimeLog> TimeLogs { get; set; }
-    public DbSet<tbl_Note> Notes { get; set; }
-
     public DbSet<tbl_TaskEntry> TaskEntries { get; set; }
     public DbSet<tbl_TaskEntryNote> TaskEntryNotes { get; set; }
 
@@ -59,7 +56,7 @@ class MigrationContextHelper : IDesignTimeDbContextFactory<ZupDbContext>
         {
             options.UseSqlite
             (
-                connectionString: $"Filename={Program.DbPath}",
+                connectionString: $"Filename={Utility.DbPath}",
                 sqliteOptionsAction: opt =>
                 {
                     opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);

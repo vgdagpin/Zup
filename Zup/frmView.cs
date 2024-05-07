@@ -48,6 +48,7 @@ public partial class frmView : Form
     {
         var curWeekNum = Utility.GetWeekNumber(DateTime.Now);
 
+        // if weekdata list is not yet initialized or its not for this year
         if (WeekDataList == null || WeekDataList.Skip(1).First().Start.Year != DateTime.Now.Year)
         {
             WeekDataList = Utility.GetWeekData(DateTime.Now.Year)

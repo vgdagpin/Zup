@@ -71,12 +71,12 @@ partial class frmView
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString });
-        dgView.Location = new Point(208, 41);
+        dgView.Location = new Point(158, 41);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
         dgView.RowHeadersVisible = false;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(564, 406);
+        dgView.Size = new Size(614, 406);
         dgView.TabIndex = 1;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
@@ -226,9 +226,9 @@ partial class frmView
         // 
         // txtSearch
         // 
-        txtSearch.Location = new Point(208, 10);
+        txtSearch.Location = new Point(158, 10);
         txtSearch.Name = "txtSearch";
-        txtSearch.Size = new Size(483, 23);
+        txtSearch.Size = new Size(533, 23);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += txtSearch_TextChanged;
         // 
@@ -324,7 +324,7 @@ partial class frmView
         lbWeek.Location = new Point(8, 41);
         lbWeek.Name = "lbWeek";
         lbWeek.SelectionMode = SelectionMode.MultiExtended;
-        lbWeek.Size = new Size(194, 409);
+        lbWeek.Size = new Size(144, 409);
         lbWeek.TabIndex = 18;
         lbWeek.SelectedIndexChanged += lbWeek_SelectedIndexChanged;
         // 

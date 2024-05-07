@@ -8,36 +8,6 @@ namespace Zup;
 
 internal static class Program
 {
-    internal static string DbPath
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.DbPath))
-            {
-                var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                var path = Path.Combine(myDoc, "Zup");
-
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                Properties.Settings.Default.DbPath = Path.Combine(path, $"Zup.db");
-
-                Properties.Settings.Default.Save();
-            }
-
-            var dir = Path.GetDirectoryName(Properties.Settings.Default.DbPath)!;
-
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-
-            return Properties.Settings.Default.DbPath;
-        }
-    }
-
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
     static IHostBuilder CreateHostBuilder()
@@ -56,7 +26,7 @@ internal static class Program
                 {
                     optionsAction.UseSqlite
                     (
-                        connectionString: $"Filename={DbPath}",
+                        connectionString: $"Filename={Utility.DbPath}",
                         sqliteOptionsAction: opt =>
                         {
                             opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);

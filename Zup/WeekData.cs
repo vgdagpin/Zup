@@ -14,6 +14,6 @@ public class WeekData
 
     public override string ToString()
     {
-        return $"{WeekNumber:00}: {Start:MM/dd/yyyy} - {End:MM/dd/yyyy}";
+        return $"{Start:MM/dd/yy} - {End:MM/dd/yy}";
     }
 }
