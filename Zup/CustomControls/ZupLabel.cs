@@ -15,16 +15,20 @@ public class ZupLabel : Label
 
             base.WndProc(ref m);
 
-            if (clipImg != null)
+            try
             {
-                Clipboard.SetImage(clipImg);
-                return;
-            }
+                if (clipImg != null)
+                {
+                    Clipboard.SetImage(clipImg);
+                    return;
+                }
 
-            if (!string.IsNullOrEmpty(clipTxt))
-            {
-                Clipboard.SetText(clipTxt);
+                if (!string.IsNullOrEmpty(clipTxt))
+                {
+                    Clipboard.SetText(clipTxt);
+                }
             }
+            catch { }
         }
         else
         {

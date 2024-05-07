@@ -33,7 +33,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i,
-                        End = i.AddDays(6)
+                        End = i.AddDays(7).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Monday:
@@ -41,7 +41,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-1),
-                        End = i.AddDays(5)
+                        End = i.AddDays(6).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Tuesday:
@@ -49,7 +49,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-2),
-                        End = i.AddDays(4)
+                        End = i.AddDays(5).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Wednesday:
@@ -57,7 +57,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-3),
-                        End = i.AddDays(3)
+                        End = i.AddDays(4).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Thursday:
@@ -65,7 +65,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-4),
-                        End = i.AddDays(2)
+                        End = i.AddDays(3).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Friday:
@@ -73,7 +73,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-5),
-                        End = i.AddDays(1)
+                        End = i.AddDays(2).AddSeconds(-1)
                     };
                     break;
                 case DayOfWeek.Saturday:
@@ -81,7 +81,7 @@ public static class Utility
                     {
                         WeekNumber = wn,
                         Start = i.AddDays(-6),
-                        End = i
+                        End = i.AddDays(1).AddSeconds(-1)
                     };
                     break;
             }

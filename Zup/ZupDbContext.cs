@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
-
-using System.Globalization;
 using System.Reflection;
 
 using Zup.Entities;
@@ -13,6 +11,9 @@ public class ZupDbContext : DbContext
 {
     public DbSet<tbl_TimeLog> TimeLogs { get; set; }
     public DbSet<tbl_Note> Notes { get; set; }
+
+    public DbSet<tbl_TaskEntry> TaskEntries { get; set; }
+    public DbSet<tbl_TaskEntryNote> TaskEntryNotes { get; set; }
 
     public ZupDbContext(DbContextOptions<ZupDbContext> dbContextOptions) : base(dbContextOptions)
     {
