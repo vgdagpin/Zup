@@ -331,12 +331,16 @@ public partial class frmView : Form
             return;
         }
 
-        if (Path.Exists(ttsPath.Text))
+        try
         {
             var dir = Path.GetDirectoryName(ttsPath.Text);
 
-            OpenFolder(dir);
+            if (Directory.Exists(dir))
+            {
+                OpenFolder(dir);
+            }
         }
+        catch { }
     }
 
     private void btnRefresh_Click(object sender, EventArgs e)

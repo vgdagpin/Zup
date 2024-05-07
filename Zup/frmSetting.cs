@@ -36,6 +36,18 @@ public partial class frmSetting : Form
         tbOpacity.Value = Convert.ToInt32(Properties.Settings.Default.EntryListOpacity * 100);
         txtDbPath.Text = Properties.Settings.Default.DbPath;
         numKeepDaysOfData.Value = Properties.Settings.Default.TrimDaysToKeep;
+        nMaxDaysDataToLoad.Value = Properties.Settings.Default.NumDaysOfDataToLoad;
+    }
+
+    private void nMaxDaysDataToLoad_ValueChanged(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.NumDaysOfDataToLoad = Convert.ToInt32(nMaxDaysDataToLoad.Value);
+        Properties.Settings.Default.Save();
+
+        if (OnSettingUpdatedEvent != null)
+        {
+            OnSettingUpdatedEvent(nameof(Properties.Settings.Default.NumDaysOfDataToLoad), Convert.ToInt32(nMaxDaysDataToLoad.Value));
+        }
     }
 
     private void numTxtItemsToShow_ValueChanged(object sender, EventArgs e)
@@ -97,7 +109,7 @@ public partial class frmSetting : Form
         if (OnDbBackupEvent != null)
         {
             OnDbBackupEvent();
-        }        
+        }
     }
 
     private void numKeepDaysOfData_ValueChanged(object sender, EventArgs e)
@@ -114,5 +126,5 @@ public partial class frmSetting : Form
         {
             OnDbTrimEvent(Convert.ToInt32(numKeepDaysOfData.Value));
         }
-    }
+    }   
 }

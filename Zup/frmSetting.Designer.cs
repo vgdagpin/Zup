@@ -28,8 +28,10 @@ partial class frmSetting
     /// </summary>
     private void InitializeComponent()
     {
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
         groupBox1 = new GroupBox();
+        nMaxDaysDataToLoad = new NumericUpDown();
+        label4 = new Label();
         lblOpacityVal = new Label();
         label2 = new Label();
         tbOpacity = new TrackBar();
@@ -47,6 +49,7 @@ partial class frmSetting
         ofdDbFile = new OpenFileDialog();
         btnTrimDb = new Button();
         groupBox1.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).BeginInit();
         ((System.ComponentModel.ISupportInitialize)tbOpacity).BeginInit();
         ((System.ComponentModel.ISupportInitialize)numTxtItemsToShow).BeginInit();
         groupBox2.SuspendLayout();
@@ -56,6 +59,8 @@ partial class frmSetting
         // 
         // groupBox1
         // 
+        groupBox1.Controls.Add(nMaxDaysDataToLoad);
+        groupBox1.Controls.Add(label4);
         groupBox1.Controls.Add(lblOpacityVal);
         groupBox1.Controls.Add(label2);
         groupBox1.Controls.Add(tbOpacity);
@@ -63,15 +68,36 @@ partial class frmSetting
         groupBox1.Controls.Add(label1);
         groupBox1.Location = new Point(13, 143);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(390, 104);
+        groupBox1.Size = new Size(390, 167);
         groupBox1.TabIndex = 2;
         groupBox1.TabStop = false;
         groupBox1.Text = "Entry List";
         // 
+        // nMaxDaysDataToLoad
+        // 
+        nMaxDaysDataToLoad.Location = new Point(138, 42);
+        nMaxDaysDataToLoad.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+        nMaxDaysDataToLoad.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
+        nMaxDaysDataToLoad.Name = "nMaxDaysDataToLoad";
+        nMaxDaysDataToLoad.Size = new Size(40, 23);
+        nMaxDaysDataToLoad.TabIndex = 8;
+        nMaxDaysDataToLoad.TextAlign = HorizontalAlignment.Right;
+        nMaxDaysDataToLoad.Value = new decimal(new int[] { 3, 0, 0, 0 });
+        nMaxDaysDataToLoad.ValueChanged += nMaxDaysDataToLoad_ValueChanged;
+        // 
+        // label4
+        // 
+        label4.AutoSize = true;
+        label4.Location = new Point(6, 44);
+        label4.Name = "label4";
+        label4.Size = new Size(126, 15);
+        label4.TabIndex = 7;
+        label4.Text = "Max days data to load:";
+        // 
         // lblOpacityVal
         // 
         lblOpacityVal.AutoSize = true;
-        lblOpacityVal.Location = new Point(346, 56);
+        lblOpacityVal.Location = new Point(349, 101);
         lblOpacityVal.Name = "lblOpacityVal";
         lblOpacityVal.Size = new Size(22, 15);
         lblOpacityVal.TabIndex = 6;
@@ -80,7 +106,7 @@ partial class frmSetting
         // label2
         // 
         label2.AutoSize = true;
-        label2.Location = new Point(7, 56);
+        label2.Location = new Point(6, 101);
         label2.Name = "label2";
         label2.Size = new Size(51, 15);
         label2.TabIndex = 5;
@@ -89,7 +115,7 @@ partial class frmSetting
         // tbOpacity
         // 
         tbOpacity.LargeChange = 10;
-        tbOpacity.Location = new Point(97, 54);
+        tbOpacity.Location = new Point(96, 99);
         tbOpacity.Maximum = 100;
         tbOpacity.Name = "tbOpacity";
         tbOpacity.Size = new Size(247, 45);
@@ -100,7 +126,7 @@ partial class frmSetting
         // 
         // numTxtItemsToShow
         // 
-        numTxtItemsToShow.Location = new Point(97, 24);
+        numTxtItemsToShow.Location = new Point(96, 69);
         numTxtItemsToShow.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
         numTxtItemsToShow.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         numTxtItemsToShow.Name = "numTxtItemsToShow";
@@ -113,7 +139,7 @@ partial class frmSetting
         // label1
         // 
         label1.AutoSize = true;
-        label1.Location = new Point(7, 26);
+        label1.Location = new Point(6, 71);
         label1.Name = "label1";
         label1.Size = new Size(84, 15);
         label1.TabIndex = 2;
@@ -122,9 +148,9 @@ partial class frmSetting
         // groupBox2
         // 
         groupBox2.Controls.Add(cbAutoOpenUpdateWindow);
-        groupBox2.Location = new Point(12, 262);
+        groupBox2.Location = new Point(12, 354);
         groupBox2.Name = "groupBox2";
-        groupBox2.Size = new Size(390, 100);
+        groupBox2.Size = new Size(390, 62);
         groupBox2.TabIndex = 3;
         groupBox2.TabStop = false;
         groupBox2.Text = "Update Entry";
@@ -232,7 +258,7 @@ partial class frmSetting
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(415, 374);
+        ClientSize = new Size(415, 428);
         Controls.Add(btnTrimDb);
         Controls.Add(groupBox3);
         Controls.Add(groupBox2);
@@ -248,6 +274,7 @@ partial class frmSetting
         Load += frmSetting_Load;
         groupBox1.ResumeLayout(false);
         groupBox1.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).EndInit();
         ((System.ComponentModel.ISupportInitialize)tbOpacity).EndInit();
         ((System.ComponentModel.ISupportInitialize)numTxtItemsToShow).EndInit();
         groupBox2.ResumeLayout(false);
@@ -276,4 +303,6 @@ partial class frmSetting
     private Button btnTrimDb;
     private Label lblKeepDaysData;
     private NumericUpDown numKeepDaysOfData;
+    private NumericUpDown nMaxDaysDataToLoad;
+    private Label label4;
 }
