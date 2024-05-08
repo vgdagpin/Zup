@@ -140,6 +140,7 @@ public partial class frmEntryList : Form
         m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
 
         LoadListToControl();
+        ReorderQueuedTask();
 
         p_OnLoad = false;
 
@@ -157,11 +158,11 @@ public partial class frmEntryList : Form
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
         foreach (var task in m_DbContext.TaskEntries
-            .Where(a => a.StartedOn >= minDate || a.StartedOn == null)
+            .Where(a => a.StartedOn >= minDate)
             .OrderBy(a => a.StartedOn)
-            .ToList())
+            .Take(10))
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.StartedOn, task.EndedOn);
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
 
             eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -173,11 +174,39 @@ public partial class frmEntryList : Form
             AddEntryToFlowLayoutControl(eachEntry);
 
             count++;
+        }
 
-            if (eachEntry.StartedOn == null)
-            {
-                queueCount++;
-            }
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
+        {
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
+
+            eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
+            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+            eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
+            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+
+            AddEntryToFlowLayoutControl(eachEntry);
+
+            count++;
+            queueCount++;
+        }
+
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn != null && a.EndedOn == null))
+        {
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
+
+            eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
+            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+            eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
+            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+
+            AddEntryToFlowLayoutControl(eachEntry);
+
+            count++;
         }
 
         ListIsReady = true;
@@ -192,6 +221,29 @@ public partial class frmEntryList : Form
             OnQueueTaskUpdatedEvent(queueCount);
         }
     }
+
+    private void ReorderQueuedTask()
+    {
+        var queue = new Queue<EachEntry>();
+
+        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null))
+        {
+            queue.Enqueue(item);
+        }
+
+        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
+        {
+            queue.Enqueue(item);
+        }
+
+        var startIx = flpTaskList.Controls.Count - queue.Count;
+
+        for (int i = startIx; i < flpTaskList.Controls.Count; i++)
+        {
+            //flpTaskList.Controls.SetChildIndex(queue.Dequeue(), i);
+        }        
+    }
+
     public void ResizeForm()
     {
         int totalHeight = EachEntry.ExpandedHeight * Properties.Settings.Default.ItemsToShow;
@@ -267,7 +319,8 @@ public partial class frmEntryList : Form
         var newE = new tbl_TaskEntry
         {
             ID = Guid.NewGuid(),
-            Task = entry
+            Task = entry,
+            CreatedOn = DateTime.Now
         };
 
         if (startNow)
@@ -295,7 +348,7 @@ public partial class frmEntryList : Form
 
         m_DbContext.SaveChanges();
 
-        var eachEntry = new EachEntry(newE.ID, newE.Task, newE.StartedOn, null);
+        var eachEntry = new EachEntry(newE.ID, newE.Task, newE.CreatedOn, newE.StartedOn, null);
 
         eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -305,6 +358,8 @@ public partial class frmEntryList : Form
         eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
         AddEntryToFlowLayoutControl(eachEntry, stopOtherTask, startNow, parentEntryID, hideParent);
+
+        ReorderQueuedTask();
 
         if (hideParent && parentEntryID != null)
         {
@@ -344,13 +399,15 @@ public partial class frmEntryList : Form
         flpTaskList.Controls.Add(newEntry);
 
         // if want it to only queue and there's nothing running
-        // go to the bottom of the queue
-        if (!startNow && CurrentRunningTaskID != null)
+        // send it to the bottom of the queue
+        if (!startNow)
         {
-            flpTaskList.Controls.SetChildIndex(newEntry, flpTaskList.Controls.Count - GetQueueCount(true) - 1);
+            var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
+
+            flpTaskList.Controls.SetChildIndex(newEntry, newIx);
         }
 
-        ActiveControl = newEntry;
+        ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
 
         if (!p_OnLoad)
         {

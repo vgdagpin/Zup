@@ -12,3 +12,4 @@
 
 #### Update entry window
 
+1. Add tags

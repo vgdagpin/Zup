@@ -75,23 +75,31 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
-
-        foreach (var note in p_DbContext.TaskEntryNotes.Where(a => a.TaskID == entryID).ToList())
-        {
-            lbNotes.Items.Add(NoteSummary.Parse(note));
-        }
-
-        LoadPreviousNotes();
+        LoadNotes(entry);
+        LoadPreviousNotes(entry);
 
         tmrFocus.Enabled = true;
 
         Show();
     }
 
-    private void LoadPreviousNotes()
+    private void LoadNotes(tbl_TaskEntry currentTaskEntry)
     {
+        foreach (var note in p_DbContext.TaskEntryNotes.Where(a => a.TaskID == currentTaskEntry.ID).ToList())
+        {
+            lbNotes.Items.Add(NoteSummary.Parse(note));
+        }
+    }
+
+    private void LoadPreviousNotes(tbl_TaskEntry currentTaskEntry)
+    {
+        if (currentTaskEntry == null)
+        {
+            return;
+        }
+
         var allIDs = p_DbContext.TaskEntries
-            .Where(a => a.Task == txtTask.Text && a.ID != selectedEntryID)
+            .Where(a => a.Task == txtTask.Text && a.ID != currentTaskEntry.ID && a.StartedOn < currentTaskEntry.StartedOn)
             .OrderByDescending(a => a.StartedOn)
             .Select(a => a.ID)
             .ToArray();
@@ -316,8 +324,17 @@ public partial class frmUpdateEntry : Form
             createdOnStr = item.CreatedOn.ToString("MM/dd/yy");
         }
 
-        e.Graphics.DrawString(createdOnStr, e.Font!, Brushes.Gray, e.Bounds);
-        e.Graphics.DrawString(item.Summary, e.Font!, Brushes.Black, new PointF(e.Bounds.X + 50, e.Bounds.Y));
+        var dateBrush = Brushes.Gray;
+        var textBrush = Brushes.Black;
+
+        if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+        {
+            dateBrush = Brushes.LightGray;
+            textBrush = Brushes.White;
+        }
+
+        e.Graphics.DrawString(createdOnStr, e.Font!, dateBrush, e.Bounds);
+        e.Graphics.DrawString(item.Summary, e.Font!, textBrush, new PointF(e.Bounds.X + 50, e.Bounds.Y));
 
         e.DrawFocusRectangle();
     }

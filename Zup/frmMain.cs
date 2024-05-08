@@ -2,10 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using Zup.Entities;
 
 namespace Zup;
 
@@ -20,6 +17,7 @@ public partial class frmMain : Form
         public const int ShowUpdateEntry = 1;
         public const int UpdateCurrentRunningTask = 2;
         public const int ToggleLastRunningTask = 3;
+        public const int ShowViewAll = 4;
     }
 
     IServiceProvider? serviceProvider;
@@ -167,7 +165,7 @@ public partial class frmMain : Form
         }
     }
 
-    
+
 
     public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting)
     {
@@ -183,6 +181,7 @@ public partial class frmMain : Form
         RegisterHotKey(this.Handle, Constants.ShowUpdateEntry, 5, (int)Keys.J);
         RegisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask, 5, (int)Keys.K);
         RegisterHotKey(this.Handle, Constants.ToggleLastRunningTask, 5, (int)Keys.L);
+        RegisterHotKey(this.Handle, Constants.ShowViewAll, 5, (int)Keys.P);
 
         p_ServiceProvider = serviceProvider;
         m_FormSetting = frmSetting;
@@ -301,7 +300,8 @@ public partial class frmMain : Form
         {
             if (m.WParam.ToInt32() == Constants.ShowUpdateEntry
                 || m.WParam.ToInt32() == Constants.UpdateCurrentRunningTask
-                || m.WParam.ToInt32() == Constants.ToggleLastRunningTask)
+                || m.WParam.ToInt32() == Constants.ToggleLastRunningTask
+                || m.WParam.ToInt32() == Constants.ShowViewAll)
             {
                 if (IsNewWeek())
                 {
@@ -322,8 +322,18 @@ public partial class frmMain : Form
                     case Constants.ToggleLastRunningTask:
                         m_FormEntryList.ToggleLastRunningTask();
                         break;
+                    case Constants.ShowViewAll:
+                        if (m_FormView.Visible)
+                        {
+                            m_FormView.Activate();
+
+                            return;
+                        }
+
+                        m_FormView.Show();
+                        break;
                 }
-            }            
+            }
         }
 
         base.WndProc(ref m);
@@ -334,6 +344,7 @@ public partial class frmMain : Form
         UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
         UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
         UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ShowViewAll);
 
         base.OnClosing(e);
     }

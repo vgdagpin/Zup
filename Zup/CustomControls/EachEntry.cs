@@ -70,6 +70,8 @@ public partial class EachEntry : UserControl
 
     public Guid EntryID { get; set; }
 
+    public DateTime CreatedOn { get; set; }
+
     DateTime? startedOn;
     public DateTime? StartedOn
     {
@@ -109,12 +111,13 @@ public partial class EachEntry : UserControl
         WriteTime();
     }
 
-    public EachEntry(Guid entryID, string text, DateTime? startedOn, DateTime? endedOn = null)
+    public EachEntry(Guid entryID, string text, DateTime createdOn, DateTime? startedOn, DateTime? endedOn = null)
     {
         InitializeComponent();
 
         EntryID = entryID;
         Text = text;
+        CreatedOn = createdOn;
         StartedOn = startedOn;
         EndedOn = endedOn;
 
@@ -151,6 +154,8 @@ public partial class EachEntry : UserControl
         }
 
         lblTimeInOut.Text = $"{StartedOn:hh:mmtt} - {EndedOn:hh:mmtt}";
+
+        toolTip.SetToolTip(lblTimeInOut, $"{StartedOn:MM/dd/yy hh:mm:tt} - {EndedOn:MM/dd/yy hh:mm:tt}");
 
         var diff = EndedOn.Value - StartedOn!.Value;
 

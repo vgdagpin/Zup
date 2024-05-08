@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text;
+using Zup.Entities;
 
 namespace Zup;
 
@@ -76,11 +78,18 @@ public partial class frmView : Form
             search = null;
         }
 
+        // between the date range or not yet started
+        Expression<Func<tbl_TaskEntry, bool>> filter = a => (from <= a.StartedOn && a.StartedOn <= to) || a.StartedOn == null;
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            // search filter, if search provided then ignore date range
+            filter = a => a.Task.ToLower().Contains(search.ToLower());
+        }
+
         dgView.DataSource = p_DbContext.TaskEntries
                 .AsNoTracking()
-                .Where(a => 
-                        ((from <= a.StartedOn && a.StartedOn <= to) || a.StartedOn == null) // between the date range or not yet started
-                        && (search == null || a.Task.Contains(search))) // search filter                    
+                .Where(filter)
                 .OrderByDescending(a => a.StartedOn)
                 .ToList()
                 .Select(a =>
@@ -356,6 +365,15 @@ public partial class frmView : Form
         var currentWeekData = LoadWeekData();
 
         LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
+    }
+
+    private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            e.SuppressKeyPress = true;
+            Close();
+        }
     }
 
     /*

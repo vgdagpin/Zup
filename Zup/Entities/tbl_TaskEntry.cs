@@ -9,7 +9,7 @@ public class tbl_TaskEntry
     [MaxLength(255)]
     public string Task { get; set; } = null!;
 
-
+    public DateTime CreatedOn { get; set; }
     public DateTime? StartedOn { get; set; }
     public DateTime? EndedOn { get; set; }
 }

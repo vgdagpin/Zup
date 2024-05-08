@@ -29,9 +29,9 @@ partial class frmView
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var dataGridViewCellStyle1 = new DataGridViewCellStyle();
-        var dataGridViewCellStyle2 = new DataGridViewCellStyle();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
+        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
         dgView = new DataGridView();
         ID = new DataGridViewTextBoxColumn();
         Task = new DataGridViewTextBoxColumn();
@@ -231,6 +231,7 @@ partial class frmView
         txtSearch.Size = new Size(533, 23);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += txtSearch_TextChanged;
+        txtSearch.KeyDown += txtSearch_KeyDown;
         // 
         // tmrSearch
         // 
