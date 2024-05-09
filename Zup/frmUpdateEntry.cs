@@ -82,7 +82,7 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
-        LoadTags(entry);
+        _ = LoadTags(entry);
         _ = LoadNotes(entry);
         _ = LoadPreviousNotes(entry);
 
@@ -108,7 +108,7 @@ public partial class frmUpdateEntry : Form
     }
 
 
-    private void LoadTags(tbl_TaskEntry currentTaskEntry)
+    private async Task LoadTags(tbl_TaskEntry currentTaskEntry)
     {
         var query = from tet in p_DbContext.TaskEntryTags
                     join t in p_DbContext.Tags
@@ -117,7 +117,7 @@ public partial class frmUpdateEntry : Form
                     orderby tet.CreatedOn
                     select t.Name;
 
-        foreach (var tag in query.ToArray())
+        foreach (var tag in await query.ToArrayAsync())
         {
             tokenBoxTags.AddToken(tag);
         }
@@ -463,7 +463,7 @@ public partial class frmUpdateEntry : Form
 
     private void SaveTags(Guid taskID, string[] tags)
     {
-        if (tags == null || tags.Length == 0)
+        if (tags == null)
         {
             return;
         }

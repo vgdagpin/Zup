@@ -6,15 +6,7 @@ namespace Zup.CustomControls;
 
 public partial class Token : Control
 {
-    public event NotifyParentDelegate NotifyParentEvent;
-    private int m_BorderWidth = 0;
-    private Color foreColorHovered;
-    private Color backgroundColorHovered;
-    private Color backgroundColor;
-    private Font fontHovered;
-    private Color borderColor;
-    private Color borderColorHovered;
-    private bool showsX = true;
+    public event NotifyParentDelegate? NotifyParentEvent;
     private Rectangle rCloseX = new Rectangle(0, 0, 0, 0);
     private Rectangle rText = new Rectangle(0, 0, 0, 0);
     private Size sizeIcon = new Size(16, 16);
@@ -33,35 +25,11 @@ public partial class Token : Control
         {
             return base.BackColor;
         }
-
-
     }
 
-    public int BorderWidth
-    {
-        get
-        {
-            return m_BorderWidth;
-        }
+    public int BorderWidth { get; set; }
 
-        set
-        {
-            m_BorderWidth = value;
-        }
-    }
-
-    public bool ShowsX
-    {
-        get
-        {
-            return showsX;
-        }
-
-        set
-        {
-            showsX = value;
-        }
-    }
+    public bool ShowsX { get; set; } = true;
 
     public override string Text
     {
@@ -95,85 +63,17 @@ public partial class Token : Control
         }
     }
 
-    public Font FontHovered
-    {
-        get
-        {
-            return fontHovered;
-        }
+    public Font FontHovered { get; set; }
 
-        set
-        {
-            fontHovered = value;
-        }
-    }
+    public Color ForeColorHovered { get; set; }
 
-    public Color ForeColorHovered
-    {
-        get
-        {
-            return foreColorHovered;
-        }
+    public Color TokenColorHovered { get; set; }
 
-        set
-        {
-            foreColorHovered = value;
-        }
-    }
+    public Color TokenColor { get; set; }
 
+    public Color BorderColor { get; set; }
 
-
-    public Color TokenColorHovered
-    {
-        get
-        {
-            return backgroundColorHovered;
-        }
-
-        set
-        {
-            backgroundColorHovered = value;
-        }
-    }
-
-    public Color TokenColor
-    {
-        get
-        {
-            return backgroundColor;
-        }
-
-        set
-        {
-            backgroundColor = value;
-        }
-    }
-
-    public Color BorderColor
-    {
-        get
-        {
-            return borderColor;
-        }
-
-        set
-        {
-            borderColor = value;
-        }
-    }
-
-    public Color BorderColorHovered
-    {
-        get
-        {
-            return borderColorHovered;
-        }
-
-        set
-        {
-            borderColorHovered = value;
-        }
-    }
+    public Color BorderColorHovered { get; set; }
 
     #endregion Properties
 
@@ -204,14 +104,9 @@ public partial class Token : Control
     protected override void OnPaint(PaintEventArgs pe)
     {
         base.OnPaint(pe);
-        // BEWARE, ORDER IN WICH ELEMENTS ARE PROCESSED HERE AFFECTS THE VISIBILIVTY. DEEPER LAYERS FIRST.
-        //1.BACKGROUND
-        //2.BORDER
-        //3.ICON (if any)
-        //4.TEXT
-        //5.CROSS (if any)
-        Rectangle rFondo = this.DisplayRectangle; //ESTE ES TODO EL ÁREA DEL CONTROL
-                                                  //rect = this.ClientRectangle; //ESTE ES LA PARTE VISIBLE SOLO (UN PANEL CON SCROLL BARS SOLO MUESTRA CLIENTRECTANGLE)
+       
+        Rectangle rFondo = this.DisplayRectangle; 
+        
         rFondo.X += 1;
         rFondo.Y += 1;
         rFondo.Width -= 2;
@@ -235,11 +130,10 @@ public partial class Token : Control
             fontText = Font;
         }
 
-        using (GraphicsPath bb = GetPathRoundCorners(rFondo, Radius))
+        using (var bb = GetPathRoundCorners(rFondo, Radius))
         {
-
             //BACKGROUND
-            using (Brush br = new SolidBrush(colorBgToken))
+            using (var br = new SolidBrush(colorBgToken))
             {
                 pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
                 pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -255,6 +149,7 @@ public partial class Token : Control
                 pe.Graphics.DrawPath(new Pen(br, BorderWidth), bb);
             }
         }
+
         //TEXT
         pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
         pe.Graphics.DrawString(this.Text, fontText, new SolidBrush(colorText), rText);
@@ -337,7 +232,7 @@ public partial class Token : Control
     protected override void OnMouseClick(MouseEventArgs e)
     {
         base.OnMouseClick(e);
-        int indexOfThisToken = Parent.Controls.IndexOf(this);
+        int indexOfThisToken = Parent!.Controls.IndexOf(this);
         if (rCloseX.Contains(e.Location) && e.Button == MouseButtons.Left)
         {
             Parent.Controls.RemoveAt(indexOfThisToken);
