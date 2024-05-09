@@ -58,18 +58,11 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// Returns a List of Tokens in the TokenBox.
     /// </summary>
-    public List<Token> Tokens
+    public IEnumerable<Token> Tokens
     {
         get
         {
-            ControlCollection todosControles = this.Controls;
-
-            if (todosControles.Count > 0)
-            {
-                todosControles.RemoveAt(todosControles.Count - 1);
-            }
-
-            return new List<Token>(todosControles.Cast<Token>());
+            return Controls.OfType<Token>();
         }
 
     }

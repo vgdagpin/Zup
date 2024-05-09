@@ -81,7 +81,7 @@ public partial class Token : Control
 
             var initialRectangle = new Point(3, 3);
 
-            var sizeDisplayedText = new Size((int)sizeText.Width + 1, (int)sizeText.Height + 1);
+            var sizeDisplayedText = new Size((int)sizeText.Width + 3, (int)sizeText.Height + 1);
             var offsetCenterVerticalText = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
             rText = new Rectangle(new Point(3, initialRectangle.Y + offsetCenterVerticalText + 2), sizeDisplayedText);
 

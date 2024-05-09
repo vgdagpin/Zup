@@ -31,9 +31,7 @@ public partial class frmUpdateEntry : Form
 
     private void frmUpdateEntry_Load(object sender, EventArgs e)
     {
-        tokenBoxTags.AddToken("Test1");
-        tokenBoxTags.AddToken("Test2");
-        tokenBoxTags.AddToken("Test3");
+        
     }
 
     private void frmUpdateEntry_FormClosing(object sender, FormClosingEventArgs e)
@@ -56,6 +54,7 @@ public partial class frmUpdateEntry : Form
         lbNotes.Items.Clear();
         lbPreviousNotes.Items.Clear();
         rtbNote.Clear();
+        tokenBoxTags.RemoveAllTokens();
 
         if (entry == null)
         {
@@ -83,6 +82,7 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
+        LoadTags(entry);
         _ = LoadNotes(entry);
         _ = LoadPreviousNotes(entry);
 
@@ -104,6 +104,22 @@ public partial class frmUpdateEntry : Form
         {
             lbNotes.BackColor = Color.LightGray;
             lbPreviousNotes.BackColor = Color.LightGray;
+        }
+    }
+
+
+    private void LoadTags(tbl_TaskEntry currentTaskEntry)
+    {
+        var query = from tet in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                        on tet.TagID equals t.ID
+                    where tet.TaskID == currentTaskEntry.ID
+                    orderby tet.CreatedOn
+                    select t.Name;
+
+        foreach (var tag in query.ToArray())
+        {
+            tokenBoxTags.AddToken(tag);
         }
     }
 
@@ -434,6 +450,8 @@ public partial class frmUpdateEntry : Form
             task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
             task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
 
+            SaveTags(task.ID, tokenBoxTags.Tokens.Select(a => a.Text).ToArray());
+
             p_DbContext.SaveChanges();
 
             if (OnSavedEvent != null)
@@ -441,6 +459,95 @@ public partial class frmUpdateEntry : Form
                 OnSavedEvent(task);
             }
         }
+    }
+
+    private void SaveTags(Guid taskID, string[] tags)
+    {
+        if (tags == null || tags.Length == 0)
+        {
+            return;
+        }
+
+        var allTagsNameIDDictionary = p_DbContext.Tags.Where(a => tags.Contains(a.Name))
+            .ToList()
+            .ToDictionary(a => a.Name, a => a.ID);
+
+        var query = from tet in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                        on tet.TagID equals t.ID
+                    where tet.TaskID == taskID
+                    orderby tet.CreatedOn
+                    select new
+                    {
+                        t.ID,
+                        t.Name
+                    };
+
+        var existing = query.ToArray();
+
+
+        #region Tags to remove
+        var tagIDsToRemove = new List<Guid>();
+
+        foreach (var item in existing)
+        {
+            if (!tags.Contains(item.Name))
+            {
+                tagIDsToRemove.Add(item.ID);
+            }
+        }
+
+        if (tagIDsToRemove.Any())
+        {
+            var tagEToRem = p_DbContext.TaskEntryTags.Where(a => a.TaskID == taskID && tagIDsToRemove.Contains(a.TagID))
+            .ToList();
+
+            p_DbContext.TaskEntryTags.RemoveRange(tagEToRem);
+        }
+        #endregion
+
+        #region Tags to add
+        var tagNamesToAdd = new List<string>();
+
+        foreach (var newTag in tags)
+        {
+            if (!existing.Any(a => a.Name == newTag))
+            {
+                tagNamesToAdd.Add(newTag);
+            }
+        }
+
+
+        foreach (var tag in tagNamesToAdd.Distinct())
+        {
+            if (allTagsNameIDDictionary.ContainsKey(tag))
+            {
+                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = allTagsNameIDDictionary[tag],
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+            else
+            {
+                var newTag = new tbl_Tag
+                {
+                    ID = Guid.NewGuid(),
+                    Name = tag
+                };
+
+                p_DbContext.Tags.Add(newTag);
+
+                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = newTag.ID,
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+        } 
+        #endregion
     }
 
     private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)

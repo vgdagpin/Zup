@@ -7,6 +7,8 @@ public partial class tbl_TaskEntryTag
 {
     public Guid TaskID { get; set; }
     public Guid TagID { get; set; }
+
+    public DateTime CreatedOn { get; set; }
 }
 
 public partial class tbl_TaskEntryTag : IEntityTypeConfiguration<tbl_TaskEntryTag>
