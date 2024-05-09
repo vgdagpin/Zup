@@ -1,61 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.Design;
+﻿using System.ComponentModel;
 
 namespace Zup.CustomControls;
 
-class TokenBoxDesigner : ControlDesigner
-{
-    public override void Initialize(IComponent comp)
-    {
-        base.Initialize(comp);
-
-    }
-}
-
-partial class TokenBox
-{
-    private System.ComponentModel.IContainer components = null;
-
-    /// <summary> 
-    /// Limpiar los recursos que se estén usando.
-    /// </summary>
-    /// <param name="disposing">true si los recursos administrados se deben desechar; false en caso contrario.</param>
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing && (components != null))
-        {
-            components.Dispose();
-        }
-        base.Dispose(disposing);
-    }
-
-    private void InitializeComponent()
-    {
-        this.SuspendLayout();
-        // 
-        // TokenBox
-        // 
-        //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-        //this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.Name = "TokenBox";
-        this.Size = new System.Drawing.Size(200, 25);
-        this.ResumeLayout(false);
-
-    }
-}
-
-// [Designer(typeof(TokenBoxDesigner))]   // Note: custom designer
 public partial class TokenBox : FlowLayoutPanel
 {
     AutoCompleteTextBox tb = new AutoCompleteTextBox();
     bool showAutoComplete = true;
-    //Dictionary<String, String> dicContactosRecordados = new Dictionary<string, string>();
-    private List<String> autoCompleteList = new List<string>();
+    private List<string> autoCompleteList = new List<string>();
     private bool canAddTokenByText = true;
     private bool canDeleteTokensWithBackspace = true;
     private bool canWriteInTokenBox = true;

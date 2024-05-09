@@ -4,45 +4,16 @@ public delegate void NotifyParentDelegate(TokenEventArgs customEventArgs);
 
 public class TokenEventArgs : EventArgs
 {
-    private string _name;
-    private MouseButtons _mb;
-    private int _index;
-    public TokenEventArgs(string Name, int PositionInTokenBox, MouseButtons Mb)
+    public TokenEventArgs(string text, int positionInTokenBox, MouseButtons mouseButton)
     {
-        _index = PositionInTokenBox;
-        _name = Name;
-        _mb = Mb;
+        Text = text;
+        Index = positionInTokenBox;
+        Button = mouseButton;
     }
 
-    public string Text
-    {
-        get { return _name; }
-        set { _name = value; }
-    }
+    public string Text { get; set; }
 
-    public MouseButtons Button
-    {
-        get
-        {
-            return _mb;
-        }
+    public MouseButtons Button { get; set; }
 
-        set
-        {
-            _mb = value;
-        }
-    }
-
-    public int Index
-    {
-        get
-        {
-            return _index;
-        }
-
-        set
-        {
-            _index = value;
-        }
-    }
+    public int Index { get; set; }
 }

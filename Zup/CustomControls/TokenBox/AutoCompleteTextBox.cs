@@ -108,7 +108,7 @@ public class AutoCompleteTextBox : TextBox
 
     private void _listBox_MouseClick(object sender, MouseEventArgs e)
     {
-        String seleccionado = ((ListBox)sender).SelectedItem.ToString();
+        string seleccionado = ((ListBox)sender).SelectedItem.ToString();
         //MessageBox.Show(((ListBox)sender).SelectedItem.ToString());
         introduceToken(seleccionado, true);
         this.Focus();
