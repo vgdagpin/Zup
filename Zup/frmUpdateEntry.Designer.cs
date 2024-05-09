@@ -49,6 +49,7 @@ partial class frmUpdateEntry
         label3 = new Label();
         label2 = new Label();
         label1 = new Label();
+        label4 = new Label();
         pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
@@ -63,7 +64,7 @@ partial class frmUpdateEntry
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.Location = new Point(0, 0);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(564, 377);
+        rtbNote.Size = new Size(564, 329);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
@@ -88,7 +89,7 @@ partial class frmUpdateEntry
         // btnDeleteNote
         // 
         btnDeleteNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnDeleteNote.Location = new Point(109, 380);
+        btnDeleteNote.Location = new Point(109, 332);
         btnDeleteNote.Name = "btnDeleteNote";
         btnDeleteNote.Size = new Size(105, 23);
         btnDeleteNote.TabIndex = 7;
@@ -100,7 +101,7 @@ partial class frmUpdateEntry
         // btnNewNote
         // 
         btnNewNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnNewNote.Location = new Point(3, 380);
+        btnNewNote.Location = new Point(3, 332);
         btnNewNote.Name = "btnNewNote";
         btnNewNote.Size = new Size(102, 23);
         btnNewNote.TabIndex = 8;
@@ -111,7 +112,7 @@ partial class frmUpdateEntry
         // btnSaveNote
         // 
         btnSaveNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        btnSaveNote.Location = new Point(435, 380);
+        btnSaveNote.Location = new Point(435, 332);
         btnSaveNote.Name = "btnSaveNote";
         btnSaveNote.Size = new Size(126, 23);
         btnSaveNote.TabIndex = 9;
@@ -156,9 +157,9 @@ partial class frmUpdateEntry
         // 
         pnlNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         pnlNotes.Controls.Add(splitContainer1);
-        pnlNotes.Location = new Point(7, 128);
+        pnlNotes.Location = new Point(7, 176);
         pnlNotes.Name = "pnlNotes";
-        pnlNotes.Size = new Size(815, 428);
+        pnlNotes.Size = new Size(815, 380);
         pnlNotes.TabIndex = 13;
         pnlNotes.TabStop = false;
         pnlNotes.Text = "Notes";
@@ -182,7 +183,7 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.Controls.Add(btnNewNote);
         splitContainer1.Panel2.Controls.Add(btnSaveNote);
         splitContainer1.Panel2.Controls.Add(btnDeleteNote);
-        splitContainer1.Size = new Size(809, 406);
+        splitContainer1.Size = new Size(809, 358);
         splitContainer1.SplitterDistance = 241;
         splitContainer1.TabIndex = 0;
         // 
@@ -205,7 +206,7 @@ partial class frmUpdateEntry
         lbPreviousNotes.ItemHeight = 15;
         lbPreviousNotes.Location = new Point(0, 191);
         lbPreviousNotes.Name = "lbPreviousNotes";
-        lbPreviousNotes.Size = new Size(238, 184);
+        lbPreviousNotes.Size = new Size(238, 124);
         lbPreviousNotes.TabIndex = 10;
         lbPreviousNotes.DrawItem += lbNotes_DrawItem;
         lbPreviousNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -235,6 +236,7 @@ partial class frmUpdateEntry
         // groupBox1
         // 
         groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        groupBox1.Controls.Add(label4);
         groupBox1.Controls.Add(label3);
         groupBox1.Controls.Add(label2);
         groupBox1.Controls.Add(label1);
@@ -245,7 +247,7 @@ partial class frmUpdateEntry
         groupBox1.Controls.Add(dtTo);
         groupBox1.Location = new Point(7, 12);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(815, 110);
+        groupBox1.Size = new Size(815, 158);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
         groupBox1.Text = "Task Detail";
@@ -276,6 +278,15 @@ partial class frmUpdateEntry
         label1.Size = new Size(29, 15);
         label1.TabIndex = 16;
         label1.Text = "Task";
+        // 
+        // label4
+        // 
+        label4.AutoSize = true;
+        label4.Location = new Point(15, 110);
+        label4.Name = "label4";
+        label4.Size = new Size(30, 15);
+        label4.TabIndex = 19;
+        label4.Text = "Tags";
         // 
         // frmUpdateEntry
         // 
@@ -325,4 +336,5 @@ partial class frmUpdateEntry
     private Label label3;
     private Label label2;
     private Label label1;
+    private Label label4;
 }
