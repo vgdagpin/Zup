@@ -9,6 +9,8 @@ namespace Zup;
 
 public class ZupDbContext : DbContext
 {
+    public DbSet<tbl_Tag> Tags { get; set; }
+    public DbSet<tbl_TaskEntryTag> TaskEntryTags { get; set; }
     public DbSet<tbl_TaskEntry> TaskEntries { get; set; }
     public DbSet<tbl_TaskEntryNote> TaskEntryNotes { get; set; }
 

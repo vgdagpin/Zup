@@ -29,7 +29,7 @@ partial class frmUpdateEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         btnDeleteNote = new Button();
@@ -67,7 +67,6 @@ partial class frmUpdateEntry
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
-        rtbNote.KeyDown += rtbNote_KeyDown;
         rtbNote.KeyPress += rtbNote_KeyPress;
         rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
         // 
@@ -133,7 +132,6 @@ partial class frmUpdateEntry
         txtTask.Name = "txtTask";
         txtTask.Size = new Size(702, 25);
         txtTask.TabIndex = 10;
-        txtTask.KeyDown += txtTask_KeyDown;
         // 
         // dtFrom
         // 
@@ -287,6 +285,7 @@ partial class frmUpdateEntry
         Controls.Add(groupBox1);
         Controls.Add(pnlNotes);
         Icon = (Icon)resources.GetObject("$this.Icon");
+        KeyPreview = true;
         MaximizeBox = false;
         MinimizeBox = false;
         MinimumSize = new Size(850, 600);
@@ -294,6 +293,7 @@ partial class frmUpdateEntry
         Text = "Update Entry";
         FormClosing += frmUpdateEntry_FormClosing;
         Load += frmUpdateEntry_Load;
+        KeyDown += frmUpdateEntry_KeyDown;
         pnlNotes.ResumeLayout(false);
         splitContainer1.Panel1.ResumeLayout(false);
         splitContainer1.Panel1.PerformLayout();

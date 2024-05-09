@@ -126,5 +126,13 @@ public partial class frmSetting : Form
         {
             OnDbTrimEvent(Convert.ToInt32(numKeepDaysOfData.Value));
         }
-    }   
+    }
+
+    private void frmSetting_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            Close();
+        }
+    }
 }

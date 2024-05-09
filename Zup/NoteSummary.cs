@@ -15,7 +15,7 @@ public class NoteSummary
 
     public static NoteSummary Parse(tbl_TaskEntryNote newNote)
     {
-        var cleanNote = CleanNotes(newNote.Notes, 30);
+        var cleanNote = CleanNotes(newNote.Notes, 30, true);
 
         return new NoteSummary
         {
@@ -26,14 +26,14 @@ public class NoteSummary
         };
     }
 
-    public static string CleanNotes(string notes, int elipsCharCount)
+    public static string CleanNotes(string notes, int elipsCharCount, bool includeImageTag = true)
     {
         if (notes == null)
         {
             return string.Empty;
         }
 
-        if (notes == ImageContent)
+        if (notes == ImageContent && !includeImageTag)
         {
             return string.Empty;
         }

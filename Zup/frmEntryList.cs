@@ -389,9 +389,9 @@ public partial class frmEntryList : Form
         ShowUpdateEntry(id);
     }
 
-    public void ShowUpdateEntry(Guid entryID)
+    public async void ShowUpdateEntry(Guid entryID)
     {
-        m_FormUpdateEntry.ShowUpdateEntry(entryID);
+        await m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)

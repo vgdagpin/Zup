@@ -29,9 +29,9 @@ partial class frmView
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
+        var dataGridViewCellStyle1 = new DataGridViewCellStyle();
+        var dataGridViewCellStyle2 = new DataGridViewCellStyle();
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
         dgView = new DataGridView();
         ID = new DataGridViewTextBoxColumn();
         Task = new DataGridViewTextBoxColumn();
@@ -231,7 +231,6 @@ partial class frmView
         txtSearch.Size = new Size(533, 23);
         txtSearch.TabIndex = 0;
         txtSearch.TextChanged += txtSearch_TextChanged;
-        txtSearch.KeyDown += txtSearch_KeyDown;
         // 
         // tmrSearch
         // 
@@ -342,11 +341,13 @@ partial class frmView
         Controls.Add(lblSelectedTotal);
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
+        KeyPreview = true;
         MinimumSize = new Size(800, 650);
         Name = "frmView";
         Text = "View";
         Load += frmView_Load;
         VisibleChanged += frmView_VisibleChanged;
+        KeyDown += frmView_KeyDown;
         ((System.ComponentModel.ISupportInitialize)dgView).EndInit();
         statusStrip1.ResumeLayout(false);
         statusStrip1.PerformLayout();

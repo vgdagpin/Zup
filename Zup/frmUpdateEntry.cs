@@ -25,6 +25,8 @@ public partial class frmUpdateEntry : Form
     {
         InitializeComponent();
         p_DbContext = dbContext;
+
+        SetControlsEnable(false);
     }
 
     private void frmUpdateEntry_Load(object sender, EventArgs e)
@@ -34,14 +36,18 @@ public partial class frmUpdateEntry : Form
 
     private void frmUpdateEntry_FormClosing(object sender, FormClosingEventArgs e)
     {
+        SetControlsEnable(false);
+
         e.Cancel = true;
 
         Hide();
     }
 
-    public void ShowUpdateEntry(Guid entryID)
+    public async Task ShowUpdateEntry(Guid entryID)
     {
-        var entry = p_DbContext.TaskEntries.Find(entryID);
+        Show();
+
+        var entry = await p_DbContext.TaskEntries.FindAsync(entryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -75,44 +81,65 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
-        LoadNotes(entry);
-        LoadPreviousNotes(entry);
+        _ = LoadNotes(entry);
+        _ = LoadPreviousNotes(entry);
 
         tmrFocus.Enabled = true;
 
-        Show();
+        SetControlsEnable(true);
     }
 
-    private void LoadNotes(tbl_TaskEntry currentTaskEntry)
+    private void SetControlsEnable(bool value)
     {
-        foreach (var note in p_DbContext.TaskEntryNotes.Where(a => a.TaskID == currentTaskEntry.ID).ToList())
+        txtTask.Enabled = value;
+        dtFrom.Enabled = value;
+        dtTo.Enabled = value;
+        btnDelete.Enabled = value;
+        btnSaveChanges.Enabled = value;
+        rtbNote.Enabled = value;
+
+        if (!value)
         {
-            lbNotes.Items.Add(NoteSummary.Parse(note));
+            lbNotes.BackColor = Color.LightGray;
+            lbPreviousNotes.BackColor = Color.LightGray;
         }
     }
 
-    private void LoadPreviousNotes(tbl_TaskEntry currentTaskEntry)
+
+    private async Task LoadNotes(tbl_TaskEntry currentTaskEntry)
+    {
+        foreach (var note in await p_DbContext.TaskEntryNotes.Where(a => a.TaskID == currentTaskEntry.ID).ToListAsync())
+        {
+            lbNotes.Items.Add(NoteSummary.Parse(note));
+        }
+
+        lbNotes.BackColor = Color.White;
+    }
+
+    private async Task LoadPreviousNotes(tbl_TaskEntry currentTaskEntry)
     {
         if (currentTaskEntry == null)
         {
             return;
         }
 
-        var allIDs = p_DbContext.TaskEntries
+        var allIDs = await p_DbContext.TaskEntries
             .Where(a => a.Task == txtTask.Text && a.ID != currentTaskEntry.ID && a.StartedOn < currentTaskEntry.StartedOn)
             .OrderByDescending(a => a.StartedOn)
             .Select(a => a.ID)
-            .ToArray();
+            .ToArrayAsync();
 
-        foreach (var note in p_DbContext.TaskEntryNotes
+        foreach (var note in await p_DbContext.TaskEntryNotes
             .Where(a => allIDs.Contains(a.TaskID))
             .OrderByDescending(a => a.CreatedOn)
             .Take(50)
             .AsNoTracking()
-            .ToList())
+            .ToListAsync())
         {
             lbPreviousNotes.Items.Add(NoteSummary.Parse(note));
         }
+
+        lbPreviousNotes.BackColor = Color.White;
     }
 
     private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -243,9 +270,9 @@ public partial class frmUpdateEntry : Form
     #region lbNotes and lvPreviousNotes
     private void lbNotes_SelectedIndexChanged(object sender, EventArgs e)
     {
-        var control = (ListBox)sender;        
+        var control = (ListBox)sender;
 
-        selectedNoteID = null;        
+        selectedNoteID = null;
 
         if (control.SelectedIndex == -1)
         {
@@ -390,15 +417,6 @@ public partial class frmUpdateEntry : Form
         rtbNote.Focus();
     }
 
-    private void rtbNote_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Escape)
-        {
-            e.SuppressKeyPress = true;
-            Close();
-        }
-    }
-
     private void dtTo_ValueChanged(object sender, EventArgs e)
     {
         dtTo.CustomFormat = DateTimeCustomFormat;
@@ -423,18 +441,16 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-
-    private void txtTask_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Escape)
-        {
-            e.SuppressKeyPress = true;
-            Close();
-        }
-    }
-
     private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
     {
         Process.Start("explorer.exe", e.LinkText!);
+    }
+
+    private void frmUpdateEntry_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            Close();
+        }
     }
 }

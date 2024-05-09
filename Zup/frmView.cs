@@ -367,11 +367,10 @@ public partial class frmView : Form
         LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
     }
 
-    private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+    private void frmView_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape)
         {
-            e.SuppressKeyPress = true;
             Close();
         }
     }
