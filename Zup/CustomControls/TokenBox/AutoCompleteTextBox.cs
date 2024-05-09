@@ -168,18 +168,18 @@ public class AutoCompleteTextBox : TextBox
     #endregion Events
 
     #region Methods
-    public void ShowExternalSuggestionList(SuggestionItem[] sil)
+    public void ShowExternalSuggestionList(string[] sil)
     {
         SizeF sizeText;
         int widthListBox = _listBox.Width;
         using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
         {
-            foreach (SuggestionItem si in sil)
+            foreach (var si in sil)
             {
-                sizeText = g.MeasureString(si.Text, this._listBox.Font);
+                sizeText = g.MeasureString(si, this._listBox.Font);
                 if (sizeText.Width > widthListBox) widthListBox = (int)sizeText.Width;
                 //I might as well just add it here...
-                _listBox.Items.Add(si.Text);
+                _listBox.Items.Add(si);
             }
         }
         _listBox.Width = widthListBox;

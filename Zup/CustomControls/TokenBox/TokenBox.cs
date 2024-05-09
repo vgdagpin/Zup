@@ -407,7 +407,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
-    public void ShowSuggestionList(SuggestionItem[] ListSuggestions)
+    public void ShowSuggestionList(string[] ListSuggestions)
     {
 
         this.tb.ShowExternalSuggestionList(ListSuggestions);

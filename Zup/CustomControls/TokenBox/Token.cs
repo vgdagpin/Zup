@@ -15,10 +15,8 @@ public partial class Token : Control
     private Color borderColor;
     private Color borderColorHovered;
     private bool showsX = true;
-    private Size sizeDisplayedText = new Size();
     private Rectangle rCloseX = new Rectangle(0, 0, 0, 0);
     private Rectangle rText = new Rectangle(0, 0, 0, 0);
-    private Point inicioRectangulos = new Point(3, 3);
     private Size sizeIcon = new Size(16, 16);
     private bool isBeingHovered = false;
     #region Properties
@@ -80,12 +78,14 @@ public partial class Token : Control
             {
                 sizeText = g.MeasureString(base.Text, this.Font);
             }
-            
-            sizeDisplayedText = new Size((int)sizeText.Width + 1, (int)sizeText.Height + 1);
-            int offsetCentradoVerticalTexto = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
-            rText = new Rectangle(new Point(1, inicioRectangulos.Y + offsetCentradoVerticalTexto), sizeDisplayedText);
 
-            rCloseX.Location = new Point(rText.Right + 1, inicioRectangulos.Y);
+            var initialRectangle = new Point(3, 3);
+
+            var sizeDisplayedText = new Size((int)sizeText.Width + 1, (int)sizeText.Height + 1);
+            var offsetCenterVerticalText = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
+            rText = new Rectangle(new Point(3, initialRectangle.Y + offsetCenterVerticalText + 2), sizeDisplayedText);
+
+            rCloseX.Location = new Point(rText.Right + 1, initialRectangle.Y);
             if (this.ShowsX)
             {
                 rCloseX.Size = sizeIcon;
@@ -179,14 +179,11 @@ public partial class Token : Control
 
     #region Constructors
 
-    public Token() : this(null, true)
-    {
-    }
 
-
-    public Token(string? textToDisplay, bool showX = true)
+    public Token(string textToDisplay, bool showX = true)
     {
         InitializeComponent();
+
         //Set default property values for the button during start up
         this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
         this.BackColor = Color.Transparent;
