@@ -4,8 +4,6 @@ using Zup.Properties;
 
 namespace Zup.CustomControls;
 
-enum AlignmentInRectangle { Right, Center, Left }
-
 public partial class Token : Control
 {
     public event NotifyParentDelegate NotifyParentEvent;
@@ -355,34 +353,5 @@ public partial class Token : Control
                 NotifyParentEvent(tokenEventArgs);
             }
         }
-    }
-
-
-    private PointF CenterTextHorizontallyInRectangle(Rectangle Container, Size sizeOfText, AlignmentInRectangle air)
-    {
-        float x = 0;
-        float y = 0;
-        if (Container.Contains(new Rectangle(new Point(0, 0), sizeOfText)))
-        {
-            y = (Container.Height - sizeOfText.Height) / 2f;
-            switch (air)
-            {
-                case AlignmentInRectangle.Right:
-                    x = Container.Width - sizeOfText.Width;
-                    break;
-                case AlignmentInRectangle.Center:
-                    x = (Container.Width - sizeOfText.Width) / 2f;
-                    break;
-                case AlignmentInRectangle.Left:
-                    x = 0;
-                    break;
-            }
-        }
-        else
-        {
-            //throw new ArgumentOutOfRangeException("sizeOfText", "Text out of bounds of container Rectangle.");
-
-        }
-        return new PointF(x, y);
     }
 }
