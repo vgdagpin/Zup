@@ -31,7 +31,9 @@ public partial class frmUpdateEntry : Form
 
     private void frmUpdateEntry_Load(object sender, EventArgs e)
     {
-
+        tokenBoxTags.AddToken("Test1");
+        tokenBoxTags.AddToken("Test2");
+        tokenBoxTags.AddToken("Test3");
     }
 
     private void frmUpdateEntry_FormClosing(object sender, FormClosingEventArgs e)

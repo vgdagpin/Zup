@@ -49,7 +49,7 @@ partial class TokenBox
     }
 }
 
-[Designer(typeof(TokenBoxDesigner))]   // Note: custom designer
+// [Designer(typeof(TokenBoxDesigner))]   // Note: custom designer
 public partial class TokenBox : FlowLayoutPanel
 {
     AutoCompleteTextBox tb = new AutoCompleteTextBox();
@@ -59,7 +59,6 @@ public partial class TokenBox : FlowLayoutPanel
     private bool canAddTokenByText = true;
     private bool canDeleteTokensWithBackspace = true;
     private bool canWriteInTokenBox = true;
-    private bool showFileIconInTokens = false;
     private bool showDeleteCross = true;
 
     private Color defaultTokenBorderColor = Color.DarkGray;
@@ -113,7 +112,12 @@ public partial class TokenBox : FlowLayoutPanel
         get
         {
             ControlCollection todosControles = this.Controls;
-            todosControles.RemoveAt(todosControles.Count - 1);
+
+            if (todosControles.Count > 0)
+            {
+                todosControles.RemoveAt(todosControles.Count - 1);
+            }
+
             return new List<Token>(todosControles.Cast<Token>());
         }
 
@@ -209,19 +213,6 @@ public partial class TokenBox : FlowLayoutPanel
         set
         {
             showDeleteCross = value;
-        }
-    }
-
-    public bool ShowFileIconInTokens
-    {
-        get
-        {
-            return showFileIconInTokens;
-        }
-
-        set
-        {
-            showFileIconInTokens = value;
         }
     }
 
@@ -337,7 +328,17 @@ public partial class TokenBox : FlowLayoutPanel
     #region Constructors
     public TokenBox()
     {
-        InitializeComponent();
+        this.SuspendLayout();
+        // 
+        // TokenBox
+        // 
+        //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+        //this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+        this.Name = "TokenBox";
+        this.Size = new System.Drawing.Size(200, 25);
+        this.ResumeLayout(false);
+
+
         this.tb.Margin = new Padding(4, 7, 2, 4);
         this.Controls.Add(tb);
         this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
@@ -369,11 +370,11 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// Adds a Token to the TokenBox.
     /// </summary>
-    /// <param name="Text">Text that will be shown in the Token.</param>
+    /// <param name="text">Text that will be shown in the Token.</param>
     /// <param name="Item">Object with information associated with this Token. It can be a filename, a SMTP address, a Contact object,...</param>
-    public void AddToken(String Text, Object Item = null)
+    public void AddToken(string text)
     {
-        Token newToken = new Token(Text, ShowDeleteCross, ShowFileIconInTokens, Item);
+        Token newToken = new Token(text, ShowDeleteCross);
         newToken.TokenColor = DefaultTokenBackgroundColor;
         newToken.TokenColorHovered = DefaultTokenBackgroundColorHovered;
         newToken.ForeColor = DefaultTokenForeColor;

@@ -1,44 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Drawing.Drawing2D;
 
 using Zup.Properties;
 
 namespace Zup.CustomControls;
 
+enum AlignmentInRectangle { Right, Center, Left }
+
 public partial class Token : Control
 {
     public event NotifyParentDelegate NotifyParentEvent;
-    private int m_Radius = 4;
     private int m_BorderWidth = 0;
-    //private Color foreColorNormal;// = Color.Black; //color del texto
-    private Color foreColorHovered;// = Color.Blue;
-                                   // foreColor provided by base control.
-                                   //private Color tokenColorNormal;// = Color.LightGray;
-    private Color backgroundColorHovered;// = Color.DarkGray;
-    private Color backgroundColor;// = Color.LightGray;
-                                  //private Font fontNormal;// = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular);
-    private Font fontHovered;// = new Font("Microsoft Sans Serif", 8F, FontStyle.Underline);
+    private Color foreColorHovered;
+    private Color backgroundColorHovered;
+    private Color backgroundColor;
+    private Font fontHovered;
     private Color borderColor;
     private Color borderColorHovered;
     private bool showsX = true;
     private Size sizeDisplayedText = new Size();
-    private Size sizeDisplayedX = new Size();
-    private bool showFileIcon = true;
-    private Rectangle rIcon = new Rectangle(0, 0, 0, 0);
     private Rectangle rCloseX = new Rectangle(0, 0, 0, 0);
     private Rectangle rText = new Rectangle(0, 0, 0, 0);
-    private string fileExtensionToShow = null;
     private Point inicioRectangulos = new Point(3, 3);
     private Size sizeIcon = new Size(16, 16);
-    private object additionalInfo = null;
     private bool isBeingHovered = false;
     #region Properties
 
@@ -46,18 +29,7 @@ public partial class Token : Control
     /// How rounded token corners will be.
     /// 0 --> Square corners, 10 --> Very round. Default 4.
     /// </summary>
-    public int Radius
-    {
-        get
-        {
-            return m_Radius;
-        }
-
-        set
-        {
-            m_Radius = value;
-        }
-    }
+    public int Radius { get; set; } = 4;
 
     public override Color BackColor
     {
@@ -92,21 +64,7 @@ public partial class Token : Control
         set
         {
             showsX = value;
-            if (showsX)
-            {
-                sizeDisplayedX = Resources.CrossRed.Size;// TextRenderer.MeasureText("x", fontX, new Size(1, 1), TextFormatFlags.SingleLine);
-            }
-            else
-            {
-                sizeDisplayedX = new Size(0, 0);
-            }
         }
-    }
-
-    public bool ShowFileIcon
-    {
-        get { return showFileIcon; }
-        set { showFileIcon = value; }
     }
 
     public override string Text
@@ -124,16 +82,10 @@ public partial class Token : Control
             {
                 sizeText = g.MeasureString(base.Text, this.Font);
             }
-            FileExtensionToShow = Path.GetExtension(value);
-            rIcon.Location = inicioRectangulos;
-            if (this.ShowFileIcon)
-            {
-                rIcon.Size = sizeIcon;
-            }
-
+            
             sizeDisplayedText = new Size((int)sizeText.Width + 1, (int)sizeText.Height + 1);
             int offsetCentradoVerticalTexto = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
-            rText = new Rectangle(new Point(rIcon.Right + 1, inicioRectangulos.Y + offsetCentradoVerticalTexto), sizeDisplayedText);
+            rText = new Rectangle(new Point(1, inicioRectangulos.Y + offsetCentradoVerticalTexto), sizeDisplayedText);
 
             rCloseX.Location = new Point(rText.Right + 1, inicioRectangulos.Y);
             if (this.ShowsX)
@@ -142,32 +94,6 @@ public partial class Token : Control
             }
 
             this.Size = new Size(rCloseX.Right + 1, sizeIcon.Height + 6);
-        }
-    }
-
-    public string FileExtensionToShow
-    {
-        get
-        {
-            return fileExtensionToShow;
-        }
-
-        set
-        {
-            fileExtensionToShow = value;
-        }
-    }
-
-    public object TokenItem
-    {
-        get
-        {
-            return additionalInfo;
-        }
-
-        set
-        {
-            additionalInfo = value;
         }
     }
 
@@ -255,23 +181,19 @@ public partial class Token : Control
 
     #region Constructors
 
-    public Token() : this(null, true, false, null)
+    public Token() : this(null, true)
     {
     }
 
 
-    public Token(String TextToDisplay, bool ShowX = true, bool ShowIcon = false, Object Item = null)
+    public Token(string? textToDisplay, bool showX = true)
     {
         InitializeComponent();
         //Set default property values for the button during start up
         this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
         this.BackColor = Color.Transparent;
-        //SetTokenNormal();
-        //this.fontX =  this.Font;//TODO: cambiar x en texto por líneas (y círculo rojo al mousehover)
-        this.ShowsX = ShowX;
-        this.ShowFileIcon = ShowIcon;
-        this.Text = TextToDisplay;
-        this.TokenItem = Item;
+        this.ShowsX = showX;
+        this.Text = textToDisplay;
         this.Margin = new Padding(1, 0, 1, 0);
     }
 
@@ -338,27 +260,6 @@ public partial class Token : Control
                 pe.Graphics.DrawPath(new Pen(br, BorderWidth), bb);
             }
         }
-        //ICON
-        //if (this.ShowFileIcon)
-        //{
-        //    try
-        //    {
-        //        if (FileExtensionToShow == string.Empty)
-        //        {
-        //            pe.Graphics.DrawIcon(Resources.unknownFile, rIcon);
-        //        }
-        //        else
-        //        {
-        //            Icon ic = ShellIcon.GetSmallIconFromExtension(FileExtensionToShow);
-        //            pe.Graphics.DrawIcon(ic, rIcon);
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        pe.Graphics.DrawIcon(Resources.unknownFile, rIcon);
-        //    }
-
-        //}
         //TEXT
         pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
         pe.Graphics.DrawString(this.Text, fontText, new SolidBrush(colorText), rText);
@@ -377,7 +278,6 @@ public partial class Token : Control
         this.Cursor = Cursors.Hand;
         this.isBeingHovered = true;
         this.Refresh();
-        //SetTokenHovered();
     }
 
     /// <summary>
@@ -388,7 +288,6 @@ public partial class Token : Control
     protected override void OnMouseHover(EventArgs e)
     {
         base.OnMouseHover(e);
-        //SetTokenHovered();
     }
 
     /// <summary>
@@ -452,7 +351,7 @@ public partial class Token : Control
         {
             if (NotifyParentEvent != null)
             {
-                TokenEventArgs tokenEventArgs = new TokenEventArgs(this.Text, indexOfThisToken, this.TokenItem, e.Button);
+                TokenEventArgs tokenEventArgs = new TokenEventArgs(this.Text, indexOfThisToken, e.Button);
                 NotifyParentEvent(tokenEventArgs);
             }
         }

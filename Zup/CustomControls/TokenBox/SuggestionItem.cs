@@ -12,29 +12,7 @@ public class SuggestionItem
 
     }
 
-    public string Text
-    {
-        get
-        {
-            return text;
-        }
+    public string Text { get; set; }
 
-        set
-        {
-            text = value;
-        }
-    }
-
-    public object Item
-    {
-        get
-        {
-            return item;
-        }
-
-        set
-        {
-            item = value;
-        }
-    }
+    public object Item { get; set; }
 }

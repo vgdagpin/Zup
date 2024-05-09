@@ -36,7 +36,7 @@ public class AutoCompleteTextBox : TextBox
         }
     }
 
-    public String[] Values
+    public string[] Values
     {
         get
         {
@@ -48,12 +48,12 @@ public class AutoCompleteTextBox : TextBox
         }
     }
 
-    public List<String> SelectedValues
+    public List<string> SelectedValues
     {
         get
         {
-            String[] result = Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            return new List<String>(result);
+            var result = Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            return new List<string>(result);
         }
     }
     #endregion //Properties
@@ -233,7 +233,7 @@ public class AutoCompleteTextBox : TextBox
     {
         if (_listBox.Visible)
         {
-            String seleccionado = (String)_listBox.SelectedItem;
+            var seleccionado = (string)_listBox.SelectedItem!;
             introduceToken(seleccionado, true);
             _formerValue = Text;
             this.Focus();
@@ -255,11 +255,11 @@ public class AutoCompleteTextBox : TextBox
     {
         if (Text == _formerValue) return;
         _formerValue = Text;
-        String word = GetWord();
+        var word = GetWord();
 
         if (_values != null && word.Length > 0)
         {
-            String[] matches = Array.FindAll(_values,
+            var matches = Array.FindAll(_values,
              x => (x.StartsWith(word, StringComparison.OrdinalIgnoreCase) && !SelectedValues.Contains(x)));
             if (matches.Length > 0)
             {
@@ -295,71 +295,18 @@ public class AutoCompleteTextBox : TextBox
         }
     }
 
-    private String GetWord()
+    private string GetWord()
     {
-        String text = Text;
         int pos = SelectionStart;
 
-        int posStart = text.LastIndexOf(' ', (pos < 1) ? 0 : pos - 1);
+        int posStart = Text.LastIndexOf(' ', (pos < 1) ? 0 : pos - 1);
         posStart = (posStart == -1) ? 0 : posStart + 1;
-        int posEnd = text.IndexOf(' ', pos);
-        posEnd = (posEnd == -1) ? text.Length : posEnd;
+        int posEnd = Text.IndexOf(' ', pos);
+        posEnd = (posEnd == -1) ? Text.Length : posEnd;
 
         int length = ((posEnd - posStart) < 0) ? 0 : posEnd - posStart;
 
-        return text.Substring(posStart, length);
+        return Text.Substring(posStart, length);
     }
-
-    private void InsertWord(String newTag)
-    {
-        String text = Text;
-        int pos = SelectionStart;
-
-        int posStart = text.LastIndexOf(' ', (pos < 1) ? 0 : pos - 1);
-        posStart = (posStart == -1) ? 0 : posStart + 1;
-        int posEnd = text.IndexOf(' ', pos);
-
-        String firstPart = text.Substring(0, posStart) + newTag;
-        String updatedText = firstPart + ((posEnd == -1) ? "" : text.Substring(posEnd, text.Length - posEnd));
-
-
-        Text = updatedText;
-        SelectionStart = firstPart.Length;
-    }
-
     #endregion Methods
 }
-//MS-Public License
-/*
- * Microsoft Public License (Ms-PL)
-
-This license governs use of the accompanying software. If you use the software, you accept this license. If you do not accept the license, do not use the software.
-
-1. Definitions
-
-The terms "reproduce," "reproduction," "derivative works," and "distribution" have the same meaning here as under U.S. copyright law.
-
-A "contribution" is the original software, or any additions or changes to the software.
-
-A "contributor" is any person that distributes its contribution under this license.
-
-"Licensed patents" are a contributor's patent claims that read directly on its contribution.
-
-2. Grant of Rights
-
-(A) Copyright Grant- Subject to the terms of this license, including the license conditions and limitations in section 3, each contributor grants you a non-exclusive, worldwide, royalty-free copyright license to reproduce its contribution, prepare derivative works of its contribution, and distribute its contribution or any derivative works that you create.
-
-(B) Patent Grant- Subject to the terms of this license, including the license conditions and limitations in section 3, each contributor grants you a non-exclusive, worldwide, royalty-free license under its licensed patents to make, have made, use, sell, offer for sale, import, and/or otherwise dispose of its contribution in the software or derivative works of the contribution in the software.
-
-3. Conditions and Limitations
-
-(A) No Trademark License- This license does not grant you rights to use any contributors' name, logo, or trademarks.
-
-(B) If you bring a patent claim against any contributor over patents that you claim are infringed by the software, your patent license from such contributor to the software ends automatically.
-
-(C) If you distribute any portion of the software, you must retain all copyright, patent, trademark, and attribution notices that are present in the software.
-
-(D) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license.
-
-(E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
- * */

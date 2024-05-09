@@ -268,15 +268,14 @@ partial class frmUpdateEntry
         tokenBoxTags.DefaultTokenBorderColor = Color.DarkGray;
         tokenBoxTags.DefaultTokenBorderColorHovered = Color.DarkGray;
         tokenBoxTags.DefaultTokenFont = new Font("Microsoft Sans Serif", 8F);
-        tokenBoxTags.DefaultTokenFontHovered = new Font("Microsoft Sans Serif", 8F, FontStyle.Underline);
+        tokenBoxTags.DefaultTokenFontHovered = new Font("Microsoft Sans Serif", 8F);
         tokenBoxTags.DefaultTokenForeColor = Color.Black;
-        tokenBoxTags.DefaultTokenForeColorHovered = Color.Blue;
+        tokenBoxTags.DefaultTokenForeColorHovered = Color.Black;
         tokenBoxTags.Location = new Point(106, 108);
         tokenBoxTags.Name = "tokenBoxTags";
         tokenBoxTags.Padding = new Padding(0, 0, 10, 0);
         tokenBoxTags.ShowAutoComplete = true;
         tokenBoxTags.ShowDeleteCross = true;
-        tokenBoxTags.ShowFileIconInTokens = false;
         tokenBoxTags.Size = new Size(419, 57);
         tokenBoxTags.TabIndex = 20;
         // 
@@ -365,6 +364,5 @@ partial class frmUpdateEntry
     private Label label2;
     private Label label1;
     private Label label4;
-    private CustomControls.TokenBox tokenBox1;
     private CustomControls.TokenBox tokenBoxTags;
 }

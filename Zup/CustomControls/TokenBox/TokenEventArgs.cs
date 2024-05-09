@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zup.CustomControls;
+﻿namespace Zup.CustomControls;
 
 public delegate void NotifyParentDelegate(TokenEventArgs customEventArgs);
 
@@ -12,13 +6,11 @@ public class TokenEventArgs : EventArgs
 {
     private string _name;
     private MouseButtons _mb;
-    private object _tokenItem;
     private int _index;
-    public TokenEventArgs(string Name, int PositionInTokenBox, object Item, MouseButtons Mb)
+    public TokenEventArgs(string Name, int PositionInTokenBox, MouseButtons Mb)
     {
         _index = PositionInTokenBox;
         _name = Name;
-        _tokenItem = Item;
         _mb = Mb;
     }
 
@@ -38,19 +30,6 @@ public class TokenEventArgs : EventArgs
         set
         {
             _mb = value;
-        }
-    }
-
-    public object TokenItem
-    {
-        get
-        {
-            return _tokenItem;
-        }
-
-        set
-        {
-            _tokenItem = value;
         }
     }
 
