@@ -46,10 +46,11 @@ partial class frmUpdateEntry
         btnSaveChanges = new Button();
         btnDelete = new Button();
         groupBox1 = new GroupBox();
+        tokenBoxTags = new CustomControls.TokenBox();
+        label4 = new Label();
         label3 = new Label();
         label2 = new Label();
         label1 = new Label();
-        label4 = new Label();
         pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
@@ -64,7 +65,7 @@ partial class frmUpdateEntry
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.Location = new Point(0, 0);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(564, 329);
+        rtbNote.Size = new Size(564, 305);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
@@ -89,7 +90,7 @@ partial class frmUpdateEntry
         // btnDeleteNote
         // 
         btnDeleteNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnDeleteNote.Location = new Point(109, 332);
+        btnDeleteNote.Location = new Point(109, 308);
         btnDeleteNote.Name = "btnDeleteNote";
         btnDeleteNote.Size = new Size(105, 23);
         btnDeleteNote.TabIndex = 7;
@@ -101,7 +102,7 @@ partial class frmUpdateEntry
         // btnNewNote
         // 
         btnNewNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnNewNote.Location = new Point(3, 332);
+        btnNewNote.Location = new Point(3, 308);
         btnNewNote.Name = "btnNewNote";
         btnNewNote.Size = new Size(102, 23);
         btnNewNote.TabIndex = 8;
@@ -112,7 +113,7 @@ partial class frmUpdateEntry
         // btnSaveNote
         // 
         btnSaveNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        btnSaveNote.Location = new Point(435, 332);
+        btnSaveNote.Location = new Point(435, 308);
         btnSaveNote.Name = "btnSaveNote";
         btnSaveNote.Size = new Size(126, 23);
         btnSaveNote.TabIndex = 9;
@@ -157,9 +158,9 @@ partial class frmUpdateEntry
         // 
         pnlNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         pnlNotes.Controls.Add(splitContainer1);
-        pnlNotes.Location = new Point(7, 176);
+        pnlNotes.Location = new Point(7, 200);
         pnlNotes.Name = "pnlNotes";
-        pnlNotes.Size = new Size(815, 380);
+        pnlNotes.Size = new Size(815, 356);
         pnlNotes.TabIndex = 13;
         pnlNotes.TabStop = false;
         pnlNotes.Text = "Notes";
@@ -183,7 +184,7 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.Controls.Add(btnNewNote);
         splitContainer1.Panel2.Controls.Add(btnSaveNote);
         splitContainer1.Panel2.Controls.Add(btnDeleteNote);
-        splitContainer1.Size = new Size(809, 358);
+        splitContainer1.Size = new Size(809, 334);
         splitContainer1.SplitterDistance = 241;
         splitContainer1.TabIndex = 0;
         // 
@@ -206,7 +207,7 @@ partial class frmUpdateEntry
         lbPreviousNotes.ItemHeight = 15;
         lbPreviousNotes.Location = new Point(0, 191);
         lbPreviousNotes.Name = "lbPreviousNotes";
-        lbPreviousNotes.Size = new Size(238, 124);
+        lbPreviousNotes.Size = new Size(238, 94);
         lbPreviousNotes.TabIndex = 10;
         lbPreviousNotes.DrawItem += lbNotes_DrawItem;
         lbPreviousNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -214,7 +215,7 @@ partial class frmUpdateEntry
         // btnSaveChanges
         // 
         btnSaveChanges.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnSaveChanges.Location = new Point(714, 80);
+        btnSaveChanges.Location = new Point(714, 142);
         btnSaveChanges.Name = "btnSaveChanges";
         btnSaveChanges.Size = new Size(94, 23);
         btnSaveChanges.TabIndex = 14;
@@ -225,7 +226,7 @@ partial class frmUpdateEntry
         // btnDelete
         // 
         btnDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnDelete.Location = new Point(633, 80);
+        btnDelete.Location = new Point(633, 142);
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(75, 23);
         btnDelete.TabIndex = 15;
@@ -236,6 +237,7 @@ partial class frmUpdateEntry
         // groupBox1
         // 
         groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        groupBox1.Controls.Add(tokenBoxTags);
         groupBox1.Controls.Add(label4);
         groupBox1.Controls.Add(label3);
         groupBox1.Controls.Add(label2);
@@ -247,10 +249,45 @@ partial class frmUpdateEntry
         groupBox1.Controls.Add(dtTo);
         groupBox1.Location = new Point(7, 12);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(815, 158);
+        groupBox1.Size = new Size(815, 182);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
         groupBox1.Text = "Task Detail";
+        // 
+        // tokenBoxTags
+        // 
+        tokenBoxTags.AutoCompleteList = (List<string>)resources.GetObject("tokenBoxTags.AutoCompleteList");
+        tokenBoxTags.AutoScroll = true;
+        tokenBoxTags.BackColor = SystemColors.Window;
+        tokenBoxTags.BorderStyle = BorderStyle.FixedSingle;
+        tokenBoxTags.CanAddTokenByText = true;
+        tokenBoxTags.CanDeleteTokensWithBackspace = true;
+        tokenBoxTags.CanWriteInTokenBox = true;
+        tokenBoxTags.DefaultTokenBackgroundColor = Color.LightGray;
+        tokenBoxTags.DefaultTokenBackgroundColorHovered = Color.GhostWhite;
+        tokenBoxTags.DefaultTokenBorderColor = Color.DarkGray;
+        tokenBoxTags.DefaultTokenBorderColorHovered = Color.DarkGray;
+        tokenBoxTags.DefaultTokenFont = new Font("Microsoft Sans Serif", 8F);
+        tokenBoxTags.DefaultTokenFontHovered = new Font("Microsoft Sans Serif", 8F, FontStyle.Underline);
+        tokenBoxTags.DefaultTokenForeColor = Color.Black;
+        tokenBoxTags.DefaultTokenForeColorHovered = Color.Blue;
+        tokenBoxTags.Location = new Point(106, 108);
+        tokenBoxTags.Name = "tokenBoxTags";
+        tokenBoxTags.Padding = new Padding(0, 0, 10, 0);
+        tokenBoxTags.ShowAutoComplete = true;
+        tokenBoxTags.ShowDeleteCross = true;
+        tokenBoxTags.ShowFileIconInTokens = false;
+        tokenBoxTags.Size = new Size(419, 57);
+        tokenBoxTags.TabIndex = 20;
+        // 
+        // label4
+        // 
+        label4.AutoSize = true;
+        label4.Location = new Point(15, 108);
+        label4.Name = "label4";
+        label4.Size = new Size(30, 15);
+        label4.TabIndex = 19;
+        label4.Text = "Tags";
         // 
         // label3
         // 
@@ -278,15 +315,6 @@ partial class frmUpdateEntry
         label1.Size = new Size(29, 15);
         label1.TabIndex = 16;
         label1.Text = "Task";
-        // 
-        // label4
-        // 
-        label4.AutoSize = true;
-        label4.Location = new Point(15, 110);
-        label4.Name = "label4";
-        label4.Size = new Size(30, 15);
-        label4.TabIndex = 19;
-        label4.Text = "Tags";
         // 
         // frmUpdateEntry
         // 
@@ -337,4 +365,6 @@ partial class frmUpdateEntry
     private Label label2;
     private Label label1;
     private Label label4;
+    private CustomControls.TokenBox tokenBox1;
+    private CustomControls.TokenBox tokenBoxTags;
 }

@@ -63,6 +63,26 @@ namespace Zup.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CrossBlack {
+            get {
+                object obj = ResourceManager.GetObject("CrossBlack", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CrossRed {
+            get {
+                object obj = ResourceManager.GetObject("CrossRed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap zup_black_2 {
             get {
                 object obj = ResourceManager.GetObject("zup_black_2", resourceCulture);
