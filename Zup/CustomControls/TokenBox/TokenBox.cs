@@ -4,7 +4,6 @@ namespace Zup.CustomControls;
 
 public partial class TokenBox : FlowLayoutPanel
 {
-    AutoCompleteTextBox tb = new AutoCompleteTextBox();
     bool showAutoComplete = true;
     private List<string> autoCompleteList = new List<string>();
     private bool canAddTokenByText = true;
@@ -25,6 +24,38 @@ public partial class TokenBox : FlowLayoutPanel
     public event EventHandler<TokenEventArgs> TokenClicked;
 
     #region Properties
+    private AutoCompleteTextBox? acTxtBox;
+    private AutoCompleteTextBox AutoCompleteTextBox
+    {
+        get
+        {
+            if (acTxtBox == null)
+            {
+                acTxtBox = new AutoCompleteTextBox();
+
+                Controls.Add(acTxtBox);
+
+                acTxtBox.Margin = new Padding(4, 7, 2, 4);
+
+                acTxtBox.KeyDown += tb_KeyDown;
+                acTxtBox.TextChanged += tb_TextChanged;
+                acTxtBox.BackColor = BackColor;
+                acTxtBox.Width = 15;
+                acTxtBox.MinimumSize = acTxtBox.Size;
+                acTxtBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                acTxtBox.AutoCompleteMode = AutoCompleteMode.Suggest;
+                acTxtBox.BorderStyle = BorderStyle.None;
+                acTxtBox.Values = AutoCompleteList.ToArray();
+
+                BackColorChanged += acTxtBox.tokenBox_BackColorChanged;
+
+                acTxtBox.InitializeComponent();
+            }
+
+            return acTxtBox;
+        }
+    }
+
 
     /// <summary>
     /// If set to true, user can write in TokenBox and Tab or Enter to add a new Token.
@@ -34,8 +65,8 @@ public partial class TokenBox : FlowLayoutPanel
     {
         set
         {
-            tb.ReadOnly = !value;
-            tb.Text = String.Empty;
+            //AutoCompleteTextBox.ReadOnly = !value;
+            //AutoCompleteTextBox.Text = String.Empty;
             canAddTokenByText = value;
         }
         get
@@ -80,10 +111,10 @@ public partial class TokenBox : FlowLayoutPanel
         set
         {
             showAutoComplete = value;
-            if (tb.ShowAutoComplete != value)
-            {
-                tb.ShowAutoComplete = value;
-            }
+            //if (AutoCompleteTextBox.ShowAutoComplete != value)
+            //{
+            //    AutoCompleteTextBox.ShowAutoComplete = value;
+            //}
         }
     }
 
@@ -109,22 +140,25 @@ public partial class TokenBox : FlowLayoutPanel
         get
         {
             return canWriteInTokenBox;
-
         }
-
         set
         {
             canWriteInTokenBox = value;
-            if (value)
-            {
-                if (!this.Controls.Contains(tb))
-                { this.Controls.Add(tb); }
-            }
-            else
-            {
-                if (this.Controls.Contains(tb))
-                { this.Controls.Remove(tb); }
-            }
+
+            //if (value)
+            //{
+            //    if (!Controls.Contains(AutoCompleteTextBox))
+            //    { 
+            //        Controls.Add(AutoCompleteTextBox); 
+            //    }
+            //}
+            //else
+            //{
+            //    if (Controls.Contains(AutoCompleteTextBox))
+            //    { 
+            //        Controls.Remove(AutoCompleteTextBox); 
+            //    }
+            //}
         }
     }
 
@@ -276,17 +310,14 @@ public partial class TokenBox : FlowLayoutPanel
         // 
         // TokenBox
         // 
-        //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-        //this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.Name = "TokenBox";
         this.Size = new System.Drawing.Size(200, 25);
         this.ResumeLayout(false);
 
 
-        this.tb.Margin = new Padding(4, 7, 2, 4);
-        this.Controls.Add(tb);
-        this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mouseClick);
-        this.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.controlAdded);
+        
+        this.MouseClick += mouseClick;
+        this.ControlAdded += controlAdded;
         this.BackColor = Color.FromKnownColor(KnownColor.Window);
         this.Cursor = Cursors.IBeam;
         this.AutoScroll = true;
@@ -294,18 +325,8 @@ public partial class TokenBox : FlowLayoutPanel
         this.Padding = new Padding(0, 0, 10, 0);
         this.WrapContents = true;
         this.BorderStyle = BorderStyle.FixedSingle;
-        this.tb.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_KeyDown);
-        this.tb.TextChanged += new EventHandler(this.tb_TextChanged);
-        //Estilos del TextBox:
-        this.tb.BackColor = this.BackColor;
-        this.tb.Width = 15;
-        this.tb.MinimumSize = this.tb.Size;
-        this.tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
-        this.tb.AutoCompleteMode = AutoCompleteMode.Suggest;
-        this.tb.BorderStyle = BorderStyle.None;
-        this.tb.Values = AutoCompleteList.ToArray();
-        this.MouseEnter += new EventHandler(this.OnMouseEnter);
-        this.BackColorChanged += new System.EventHandler(this.tb.tokenBox_BackColorChanged);
+        
+        this.MouseEnter += OnMouseEnter;
     }
 
     #endregion Constructors
@@ -315,10 +336,10 @@ public partial class TokenBox : FlowLayoutPanel
     /// Adds a Token to the TokenBox.
     /// </summary>
     /// <param name="text">Text that will be shown in the Token.</param>
-    /// <param name="Item">Object with information associated with this Token. It can be a filename, a SMTP address, a Contact object,...</param>
     public void AddToken(string text)
     {
-        Token newToken = new Token(text, ShowDeleteCross);
+        var newToken = new Token(text, ShowDeleteCross);
+
         newToken.TokenColor = DefaultTokenBackgroundColor;
         newToken.TokenColorHovered = DefaultTokenBackgroundColorHovered;
         newToken.ForeColor = DefaultTokenForeColor;
@@ -327,19 +348,18 @@ public partial class TokenBox : FlowLayoutPanel
         newToken.FontHovered = DefaultTokenFontHovered;
         newToken.BorderColor = DefaultTokenBorderColor;
         newToken.BorderColorHovered = defaultTokenBorderColorHovered;
-        newToken.NotifyParentEvent += new NotifyParentDelegate(OnTokenClicked);
-        this.Controls.Add(newToken);
-        if (this.Controls.Contains(tb))
-        { this.Controls.SetChildIndex(tb, this.Controls.Count - 1); }
+        newToken.NotifyParentEvent += OnTokenClicked;
 
+        Controls.Add(newToken);
 
+        Controls.SetChildIndex(AutoCompleteTextBox, Controls.Count - 1);
     }
 
     public void RemoveToken(int Position)
     {
-        if (Position > 0 && Position < this.Controls.Count - 1)
+        if (Position > 0 && Position < Controls.Count - 1)
         {
-            this.Controls.RemoveAt(Position);
+            Controls.RemoveAt(Position);
         }
     }
 
@@ -347,22 +367,23 @@ public partial class TokenBox : FlowLayoutPanel
     {
         for (int i = Controls.Count - 1; i >= 0; i--)
         {
-            if (Controls[i] != tb) { Controls.RemoveAt(i); }
+            if (Controls[i] != AutoCompleteTextBox) 
+            { 
+                Controls.RemoveAt(i); 
+            }
         }
     }
 
-    public void ShowSuggestionList(string[] ListSuggestions)
+    public void ShowSuggestionList(string[] suggestions)
     {
-
-        this.tb.ShowExternalSuggestionList(ListSuggestions);
+        AutoCompleteTextBox.ShowExternalSuggestionList(suggestions);
     }
     #endregion Methods
 
     #region Events
-    public void OnMouseEnter(object sender, EventArgs e)
+    public void OnMouseEnter(object? sender, EventArgs e)
     {
-        if (CanWriteInTokenBox) this.Cursor = Cursors.IBeam;
-        else this.Cursor = Cursors.Default;
+        Cursor = CanWriteInTokenBox ? Cursors.IBeam : Cursors.Default;
     }
 
     public void OnTokenClicked(TokenEventArgs tokenEventArgs)
@@ -370,46 +391,52 @@ public partial class TokenBox : FlowLayoutPanel
         TokenClicked?.Invoke(null, tokenEventArgs);
     }
 
-    private void mouseClick(object sender, MouseEventArgs e)
+    private void mouseClick(object? sender, MouseEventArgs e)
     {
-        this.tb.Focus();
+        AutoCompleteTextBox.Focus();
     }
 
-    private void tb_KeyDown(object sender, KeyEventArgs e)
+    private void tb_KeyDown(object ?sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.Back &&
-            tb.SelectionStart == 0 &&
-            tb.SelectionLength == 0 &&
-            this.CanDeleteTokensWithBackspace &&
-            this.Controls.Count - 1 > 0)
+        if (e.KeyCode == Keys.Back 
+            && AutoCompleteTextBox.SelectionStart == 0 
+            && AutoCompleteTextBox.SelectionLength == 0 
+            && CanDeleteTokensWithBackspace 
+            && Controls.Count - 1 > 0)
         {
-            this.Controls.RemoveAt(this.Controls.Count - 2);
+            Controls.RemoveAt(this.Controls.Count - 2);
         }
-
     }
 
-    private void tb_TextChanged(object sender, EventArgs e)
+    private void tb_TextChanged(object? sender, EventArgs e)
     {
-        Size size = TextRenderer.MeasureText(this.tb.Text, this.tb.Font);
+        var size = TextRenderer.MeasureText(AutoCompleteTextBox.Text, AutoCompleteTextBox.Font);
 
-        this.tb.Width = size.Width + 16;
-
+        AutoCompleteTextBox.Width = size.Width + 16;
     }
 
-    private void controlAdded(object sender, ControlEventArgs e)
+    private void controlAdded(object? sender, ControlEventArgs e)
     {
-        int alturaNecesaria = this.Controls.OfType<Control>().Max(x => x.Location.Y + x.Height) + 9;
-        if (this.Height < alturaNecesaria)
+        var outermostControlLoc = Controls.OfType<Control>().Max(x => x.Location.Y + x.Height) + 9;
+
+        if (Height < outermostControlLoc && AutoScroll)
         {
-            if (this.MaximumSize.Height != 0 && this.MaximumSize.Height < alturaNecesaria)
+            if (MaximumSize.Height != 0 && MaximumSize.Height < outermostControlLoc)
             {
-                this.Height = this.MaximumSize.Height;
+                Height = MaximumSize.Height;
             }
             else
             {
-                this.Height = alturaNecesaria;
+                Height = outermostControlLoc;
             }
         }
     }
     #endregion Events
+
+    protected override void OnGotFocus(EventArgs e)
+    {
+        base.OnGotFocus(e);
+
+        AutoCompleteTextBox.Focus();
+    }
 }

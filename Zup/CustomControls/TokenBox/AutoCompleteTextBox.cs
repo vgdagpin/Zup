@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zup.CustomControls;
+﻿                            namespace Zup.CustomControls;
 
 /// <summary>
 /// This TokenProject borrows code from:
@@ -14,39 +8,21 @@ namespace Zup.CustomControls;
 /// </summary>
 public class AutoCompleteTextBox : TextBox
 {
-    private ListBox _listBox;
-    private bool _isAdded;
-    private String[] _values;
-    private String _formerValue = String.Empty;
+    private TokenBox ParentTokenBox = null!;
+    private Form ParentForm = null!;
+
+
+    private ListBox lbSuggestions = null!;
+    private bool lbSuggestAddedToControl;
+    private string _formerValue = string.Empty;
     private int _MouseIndex = -1;
     private bool _showAutoComplete;
 
     #region Properties
 
-    public bool ShowAutoComplete
-    {
-        get
-        {
-            return _showAutoComplete;
-        }
+    public bool ShowAutoComplete { get; set; } = true;
 
-        set
-        {
-            _showAutoComplete = value;
-        }
-    }
-
-    public string[] Values
-    {
-        get
-        {
-            return _values;
-        }
-        set
-        {
-            _values = value;
-        }
-    }
+    public string[] Values { get; set; } = null!;
 
     public List<string> SelectedValues
     {
@@ -58,69 +34,53 @@ public class AutoCompleteTextBox : TextBox
     }
     #endregion //Properties
 
-    #region Constructors
-    private void InitializeComponent()
+    public void InitializeComponent()
     {
-        _listBox = new ListBox();
+        lbSuggestions = new ListBox();
         //Events
-        _listBox.MouseClick += _listBox_MouseClick;
-        _listBox.MouseMove += _listBox_MouseMove;
+        lbSuggestions.MouseClick += _listBox_MouseClick;
+        lbSuggestions.MouseMove += _listBox_MouseMove;
         KeyDown += this_KeyDown;
         KeyUp += this_KeyUp;
 
+        ParentTokenBox = (TokenBox)Parent!;
+        ParentForm = GetParentForm(this);
     }
-
-
-    public AutoCompleteTextBox() : this(true)
-    {
-
-    }
-
-    public AutoCompleteTextBox(bool showAutoComplete)
-    {
-        ShowAutoComplete = showAutoComplete;
-        InitializeComponent();
-        ResetListBox();
-
-    }
-
-    #endregion Constructors
 
     #region Events
 
-    private void _listBox_MouseMove(object sender, MouseEventArgs e)
+    private void _listBox_MouseMove(object? sender, MouseEventArgs e)
     {
-        //throw new NotImplementedException();
-        int index = _listBox.IndexFromPoint(e.Location);
+        var index = lbSuggestions.IndexFromPoint(e.Location);
 
         if (index != -1 && index != _MouseIndex)
         {
             if (_MouseIndex != -1)
             {
-                _listBox.SetSelected(_MouseIndex, false);
+                lbSuggestions.SetSelected(_MouseIndex, false);
             }
             _MouseIndex = index;
-            _listBox.SetSelected(_MouseIndex, true);
-            _listBox.Invalidate();
+            lbSuggestions.SetSelected(_MouseIndex, true);
+            lbSuggestions.Invalidate();
 
         }
     }
 
-    private void _listBox_MouseClick(object sender, MouseEventArgs e)
+    private void _listBox_MouseClick(object? sender, MouseEventArgs e)
     {
-        string seleccionado = ((ListBox)sender).SelectedItem.ToString();
-        //MessageBox.Show(((ListBox)sender).SelectedItem.ToString());
-        introduceToken(seleccionado, true);
-        this.Focus();
+        var selectedToken = ((ListBox)sender!).SelectedItem!.ToString()!;
+
+        IntroduceToken(selectedToken);
+
+        Focus();
     }
 
-    public void tokenBox_BackColorChanged(object sender, EventArgs e)
-    {//The textbox needs to have the same background color as the parent so it is 
-     //not noticed.
-        this.BackColor = ((TokenBox)sender).BackColor;
+    public void tokenBox_BackColorChanged(object? sender, EventArgs e)
+    {
+        BackColor = ((TokenBox)sender!).BackColor;
     }
 
-    private void this_KeyUp(object sender, KeyEventArgs e)//todo: y esto??
+    private void this_KeyUp(object? sender, KeyEventArgs e)
     {
         if (ShowAutoComplete)
         {
@@ -128,7 +88,7 @@ public class AutoCompleteTextBox : TextBox
         }
     }
 
-    private void this_KeyDown(object sender, KeyEventArgs e)
+    private void this_KeyDown(object? sender, KeyEventArgs e)
     {
         switch (e.KeyCode)
         {
@@ -140,14 +100,14 @@ public class AutoCompleteTextBox : TextBox
                 }
             case Keys.Down:
                 {
-                    if ((_listBox.Visible) && (_listBox.SelectedIndex < _listBox.Items.Count - 1))
-                        _listBox.SelectedIndex++;
+                    if ((lbSuggestions.Visible) && (lbSuggestions.SelectedIndex < lbSuggestions.Items.Count - 1))
+                        lbSuggestions.SelectedIndex++;
                     break;
                 }
             case Keys.Up:
                 {
-                    if ((_listBox.Visible) && (_listBox.SelectedIndex > 0))
-                        _listBox.SelectedIndex--;
+                    if ((lbSuggestions.Visible) && (lbSuggestions.SelectedIndex > 0))
+                        lbSuggestions.SelectedIndex--;
                     break;
                 }
         }
@@ -159,71 +119,99 @@ public class AutoCompleteTextBox : TextBox
         base.OnLeave(e);
         AcceptInput();
     }
-    private void introduceToken(String textToken, bool hasX)
-    {
-        ((TokenBox)Parent).AddToken(textToken);
-        this.Text = String.Empty;
-        ResetListBox();
-    }
     #endregion Events
 
     #region Methods
-    public void ShowExternalSuggestionList(string[] sil)
+    private void IntroduceToken(string textToken)
     {
-        SizeF sizeText;
-        int widthListBox = _listBox.Width;
-        using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
+        ParentTokenBox.AddToken(textToken);
+
+        Text = string.Empty;
+    }
+
+    public void ShowExternalSuggestionList(string[] suggestionList)
+    {
+        var widthListBox = lbSuggestions.Width;
+
+        using (var g = Graphics.FromHwnd(IntPtr.Zero))
         {
-            foreach (var si in sil)
+            foreach (var suggestion in suggestionList)
             {
-                sizeText = g.MeasureString(si, this._listBox.Font);
-                if (sizeText.Width > widthListBox) widthListBox = (int)sizeText.Width;
-                //I might as well just add it here...
-                _listBox.Items.Add(si);
+                var sizeText = g.MeasureString(suggestion, this.lbSuggestions.Font);
+
+                if (sizeText.Width > widthListBox)
+                {
+                    widthListBox = (int)sizeText.Width;
+                }
+
+                if (!lbSuggestions.Items.Contains(suggestion))
+                {
+                    lbSuggestions.Items.Add(suggestion);
+                }
             }
         }
-        _listBox.Width = widthListBox;
-        _listBox.ItemHeight = 15;
-        //_listBox.Items.AddRange(ListSuggestions.Select(x => x).ToArray());
-        if (!_isAdded) //TODO: NO ENTIENDO PORQUE TIENE QUE AÑADIR ESTO
-        {
-            Parent.Parent.Controls.Add(_listBox); //CLARO, SE TIENE QUE IR A LA VENTANA PARA QUE EL DESPLEGABLE ESTÉ POR ENCIMA DE TODO.
 
-            _isAdded = true;
-        }//esto de arriba?
+        lbSuggestions.Width = widthListBox;
+        lbSuggestions.ItemHeight = 15;
 
-        _listBox.Top = this.Bottom + Parent.Top;
-        _listBox.Left = this.Left + Parent.Left;
-        if (_listBox.Right + Parent.Left > Parent.Parent.Width)
+        if (!lbSuggestAddedToControl)
         {
-            _listBox.Left -= _listBox.Right - Parent.Parent.Width;
+            ParentForm.Controls.Add(lbSuggestions);
+
+            lbSuggestAddedToControl = true;
         }
-        _listBox.Visible = true;
-        _listBox.BringToFront();
 
+        lbSuggestions.Top = Bottom + ParentTokenBox.Top;
+        lbSuggestions.Left = Left + ParentTokenBox.Left;
+
+        if (lbSuggestions.Right + Parent!.Left > ParentForm.Width)
+        {
+            lbSuggestions.Left -= lbSuggestions.Right - ParentForm.Width;
+        }
+
+        lbSuggestions.Visible = true;
+        lbSuggestions.BringToFront();
+    }
+
+    private Form GetParentForm(Control? control)
+    {
+        if (control == null)
+        {
+            throw new ArgumentNullException("Control");
+        }
+
+        var t = control.GetType();
+
+        if (control.Parent is Form parent)
+        {
+            return parent;
+        }
+
+        return GetParentForm(control.Parent);
     }
 
     private void ShowListBox()
     {
         if (ShowAutoComplete)
         {
-            if (!_isAdded) //TODO: NO ENTIENDO PORQUE TIENE QUE AÑADIR ESTO
+            if (!lbSuggestAddedToControl)
             {
-                Parent.Parent.Controls.Add(_listBox); //CLARO, SE TIENE QUE IR A LA VENTANA PARA QUE EL DESPLEGABLE ESTÉ POR ENCIMA DE TODO.
+                ParentForm.Controls.Add(lbSuggestions);
 
-                _isAdded = true;
-            }//esto de arriba?
+                lbSuggestAddedToControl = true;
+            }
 
-            _listBox.Top = this.Bottom + Parent.Top;
-            _listBox.Left = this.Left + Parent.Left;
-            _listBox.Visible = true;
-            _listBox.BringToFront();
+            lbSuggestions.Top = Bottom + ParentTokenBox.Top;
+            lbSuggestions.Left = Left + ParentTokenBox.Left;
+            lbSuggestions.Visible = true;
+
+            lbSuggestions.BringToFront();
         }
     }
 
     private void ResetListBox()
     {
-        _listBox.Visible = false;
+        lbSuggestions.Visible = false;
         _MouseIndex = -1;
     }
 
@@ -231,22 +219,22 @@ public class AutoCompleteTextBox : TextBox
 
     private void AcceptInput()
     {
-        if (_listBox.Visible)
+        if (lbSuggestions.Visible)
         {
-            var seleccionado = (string)_listBox.SelectedItem!;
-            introduceToken(seleccionado, true);
+            var suggestSelection = (string)lbSuggestions.SelectedItem!;
+
+            IntroduceToken(suggestSelection);
             _formerValue = Text;
-            this.Focus();
+            Focus();
         }
         else
         {
-            string entrada = this.Text;
-            entrada = entrada.Trim();
-            if (entrada.Length > 0)
+            if (!string.IsNullOrWhiteSpace(Text))
             {
-                ((TokenBox)Parent).AddToken(entrada);
-                this.Clear();
-                this.Focus();
+                ParentTokenBox.AddToken(Text.Trim());
+
+                Clear();
+                Focus();
             }
         }
     }
@@ -257,30 +245,30 @@ public class AutoCompleteTextBox : TextBox
         _formerValue = Text;
         var word = GetWord();
 
-        if (_values != null && word.Length > 0)
+        if (Values != null && word.Length > 0)
         {
-            var matches = Array.FindAll(_values,
+            var matches = Array.FindAll(Values,
              x => (x.StartsWith(word, StringComparison.OrdinalIgnoreCase) && !SelectedValues.Contains(x)));
             if (matches.Length > 0)
             {
                 ShowListBox();
-                _listBox.Items.Clear();
-                Array.ForEach(matches, x => _listBox.Items.Add(x));
+                lbSuggestions.Items.Clear();
+                Array.ForEach(matches, x => lbSuggestions.Items.Add(x));
                 //_listBox.SelectedIndex = 0;
-                _listBox.Height = 0;
-                _listBox.Width = 0;
+                lbSuggestions.Height = 0;
+                lbSuggestions.Width = 0;
                 Focus();
-                using (Graphics graphics = _listBox.CreateGraphics())
+                using (Graphics graphics = lbSuggestions.CreateGraphics())
                 {
-                    for (int i = 0; i < _listBox.Items.Count; i++)
+                    for (int i = 0; i < lbSuggestions.Items.Count; i++)
                     {
-                        _listBox.Height += _listBox.GetItemHeight(i);
+                        lbSuggestions.Height += lbSuggestions.GetItemHeight(i);
                         // it item width is larger than the current one
                         // set it to the new max item width
                         // GetItemRectangle does not work for me
                         // we add a little extra space by using '_'
-                        int itemWidth = (int)graphics.MeasureString(((String)_listBox.Items[i]) + "_", _listBox.Font).Width;
-                        _listBox.Width = (_listBox.Width < itemWidth) ? itemWidth : _listBox.Width;
+                        int itemWidth = (int)graphics.MeasureString(((String)lbSuggestions.Items[i]) + "_", lbSuggestions.Font).Width;
+                        lbSuggestions.Width = (lbSuggestions.Width < itemWidth) ? itemWidth : lbSuggestions.Width;
                     }
                 }
             }

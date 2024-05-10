@@ -157,10 +157,10 @@ public partial class frmEntryList : Form
 
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
+        // closed items
         foreach (var task in m_DbContext.TaskEntries
-            .Where(a => a.StartedOn >= minDate)
-            .OrderBy(a => a.StartedOn)
-            .Take(10))
+            .Where(a => a.StartedOn >= minDate && a.EndedOn != null)
+            .OrderBy(a => a.StartedOn))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
 
@@ -176,6 +176,7 @@ public partial class frmEntryList : Form
             count++;
         }
 
+        // not yet started
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
@@ -193,6 +194,7 @@ public partial class frmEntryList : Form
             queueCount++;
         }
 
+        // started but not yet closed
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn != null && a.EndedOn == null))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);

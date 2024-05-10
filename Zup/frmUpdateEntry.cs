@@ -387,6 +387,10 @@ public partial class frmUpdateEntry : Form
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
+        tokenBoxTags.ShowSuggestionList(new[] { "Test", "hahaha" });
+
+        return;
+
         var result = MessageBox.Show("Delete this entry?", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         if (result == DialogResult.Cancel)
@@ -560,6 +564,11 @@ public partial class frmUpdateEntry : Form
         if (e.KeyCode == Keys.Escape)
         {
             Close();
+        }
+        else if (e.KeyCode == Keys.T && e.Control)
+        {
+            e.SuppressKeyPress = true;
+            tokenBoxTags.Focus();
         }
     }
 }

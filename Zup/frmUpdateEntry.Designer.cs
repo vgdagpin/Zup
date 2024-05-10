@@ -45,7 +45,6 @@ partial class frmUpdateEntry
         lbPreviousNotes = new ListBox();
         btnSaveChanges = new Button();
         btnDelete = new Button();
-        groupBox1 = new GroupBox();
         tokenBoxTags = new CustomControls.TokenBox();
         label4 = new Label();
         label3 = new Label();
@@ -56,7 +55,6 @@ partial class frmUpdateEntry
         splitContainer1.Panel1.SuspendLayout();
         splitContainer1.Panel2.SuspendLayout();
         splitContainer1.SuspendLayout();
-        groupBox1.SuspendLayout();
         SuspendLayout();
         // 
         // rtbNote
@@ -130,7 +128,7 @@ partial class frmUpdateEntry
         // 
         txtTask.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         txtTask.Font = new Font("Segoe UI", 10F);
-        txtTask.Location = new Point(106, 22);
+        txtTask.Location = new Point(111, 13);
         txtTask.Name = "txtTask";
         txtTask.Size = new Size(702, 25);
         txtTask.TabIndex = 10;
@@ -139,7 +137,7 @@ partial class frmUpdateEntry
         // 
         dtFrom.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
         dtFrom.Format = DateTimePickerFormat.Custom;
-        dtFrom.Location = new Point(106, 53);
+        dtFrom.Location = new Point(111, 44);
         dtFrom.Name = "dtFrom";
         dtFrom.Size = new Size(164, 23);
         dtFrom.TabIndex = 11;
@@ -148,7 +146,7 @@ partial class frmUpdateEntry
         // 
         dtTo.CustomFormat = "MM/dd/yyyy hh:mm:ss tt";
         dtTo.Format = DateTimePickerFormat.Custom;
-        dtTo.Location = new Point(106, 78);
+        dtTo.Location = new Point(111, 69);
         dtTo.Name = "dtTo";
         dtTo.Size = new Size(164, 23);
         dtTo.TabIndex = 12;
@@ -215,7 +213,7 @@ partial class frmUpdateEntry
         // btnSaveChanges
         // 
         btnSaveChanges.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnSaveChanges.Location = new Point(714, 142);
+        btnSaveChanges.Location = new Point(719, 133);
         btnSaveChanges.Name = "btnSaveChanges";
         btnSaveChanges.Size = new Size(94, 23);
         btnSaveChanges.TabIndex = 14;
@@ -226,33 +224,13 @@ partial class frmUpdateEntry
         // btnDelete
         // 
         btnDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnDelete.Location = new Point(633, 142);
+        btnDelete.Location = new Point(638, 133);
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(75, 23);
         btnDelete.TabIndex = 15;
         btnDelete.Text = "Delete Task";
         btnDelete.UseVisualStyleBackColor = true;
         btnDelete.Click += btnDelete_Click;
-        // 
-        // groupBox1
-        // 
-        groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        groupBox1.Controls.Add(tokenBoxTags);
-        groupBox1.Controls.Add(label4);
-        groupBox1.Controls.Add(label3);
-        groupBox1.Controls.Add(label2);
-        groupBox1.Controls.Add(label1);
-        groupBox1.Controls.Add(txtTask);
-        groupBox1.Controls.Add(btnDelete);
-        groupBox1.Controls.Add(dtFrom);
-        groupBox1.Controls.Add(btnSaveChanges);
-        groupBox1.Controls.Add(dtTo);
-        groupBox1.Location = new Point(7, 12);
-        groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(815, 182);
-        groupBox1.TabIndex = 16;
-        groupBox1.TabStop = false;
-        groupBox1.Text = "Task Detail";
         // 
         // tokenBoxTags
         // 
@@ -271,7 +249,7 @@ partial class frmUpdateEntry
         tokenBoxTags.DefaultTokenFontHovered = new Font("Microsoft Sans Serif", 8F);
         tokenBoxTags.DefaultTokenForeColor = Color.Black;
         tokenBoxTags.DefaultTokenForeColorHovered = Color.Black;
-        tokenBoxTags.Location = new Point(106, 108);
+        tokenBoxTags.Location = new Point(111, 99);
         tokenBoxTags.Name = "tokenBoxTags";
         tokenBoxTags.Padding = new Padding(0, 0, 10, 0);
         tokenBoxTags.ShowAutoComplete = true;
@@ -282,7 +260,7 @@ partial class frmUpdateEntry
         // label4
         // 
         label4.AutoSize = true;
-        label4.Location = new Point(15, 108);
+        label4.Location = new Point(20, 99);
         label4.Name = "label4";
         label4.Size = new Size(30, 15);
         label4.TabIndex = 19;
@@ -291,7 +269,7 @@ partial class frmUpdateEntry
         // label3
         // 
         label3.AutoSize = true;
-        label3.Location = new Point(14, 81);
+        label3.Location = new Point(19, 72);
         label3.Name = "label3";
         label3.Size = new Size(59, 15);
         label3.TabIndex = 18;
@@ -300,7 +278,7 @@ partial class frmUpdateEntry
         // label2
         // 
         label2.AutoSize = true;
-        label2.Location = new Point(14, 59);
+        label2.Location = new Point(19, 50);
         label2.Name = "label2";
         label2.Size = new Size(63, 15);
         label2.TabIndex = 17;
@@ -309,7 +287,7 @@ partial class frmUpdateEntry
         // label1
         // 
         label1.AutoSize = true;
-        label1.Location = new Point(14, 29);
+        label1.Location = new Point(19, 20);
         label1.Name = "label1";
         label1.Size = new Size(29, 15);
         label1.TabIndex = 16;
@@ -320,8 +298,17 @@ partial class frmUpdateEntry
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(834, 561);
-        Controls.Add(groupBox1);
+        Controls.Add(btnDelete);
+        Controls.Add(tokenBoxTags);
+        Controls.Add(btnSaveChanges);
+        Controls.Add(label4);
+        Controls.Add(label3);
         Controls.Add(pnlNotes);
+        Controls.Add(label2);
+        Controls.Add(dtTo);
+        Controls.Add(label1);
+        Controls.Add(dtFrom);
+        Controls.Add(txtTask);
         Icon = (Icon)resources.GetObject("$this.Icon");
         KeyPreview = true;
         MaximizeBox = false;
@@ -338,9 +325,8 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
         splitContainer1.ResumeLayout(false);
-        groupBox1.ResumeLayout(false);
-        groupBox1.PerformLayout();
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
@@ -359,7 +345,6 @@ partial class frmUpdateEntry
     private Label label7;
     private Button btnSaveChanges;
     private Button btnDelete;
-    private GroupBox groupBox1;
     private Label label3;
     private Label label2;
     private Label label1;
