@@ -76,8 +76,9 @@ partial class frmView
         dgView.ReadOnly = true;
         dgView.RowHeadersVisible = false;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(614, 406);
+        dgView.Size = new Size(814, 406);
         dgView.TabIndex = 1;
+        dgView.CellPainting += dgView_CellPainting;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
         // 
@@ -139,7 +140,7 @@ partial class frmView
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(713, 450);
+        lblSelectedTotal.Location = new Point(913, 450);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(59, 23);
         lblSelectedTotal.TabIndex = 1;
@@ -164,7 +165,7 @@ partial class frmView
         txtTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         txtTimesheetFolder.Location = new Point(122, 54);
         txtTimesheetFolder.Name = "txtTimesheetFolder";
-        txtTimesheetFolder.Size = new Size(326, 23);
+        txtTimesheetFolder.Size = new Size(526, 23);
         txtTimesheetFolder.TabIndex = 3;
         // 
         // btnBrowseTimesheetFolder
@@ -172,7 +173,7 @@ partial class frmView
         btnBrowseTimesheetFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         btnBrowseTimesheetFolder.FlatAppearance.BorderColor = Color.FromArgb(224, 224, 224);
         btnBrowseTimesheetFolder.FlatStyle = FlatStyle.Flat;
-        btnBrowseTimesheetFolder.Location = new Point(449, 54);
+        btnBrowseTimesheetFolder.Location = new Point(649, 54);
         btnBrowseTimesheetFolder.Name = "btnBrowseTimesheetFolder";
         btnBrowseTimesheetFolder.Size = new Size(28, 23);
         btnBrowseTimesheetFolder.TabIndex = 4;
@@ -184,7 +185,7 @@ partial class frmView
         // 
         btnExportTimesheet.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         btnExportTimesheet.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        btnExportTimesheet.Location = new Point(650, 54);
+        btnExportTimesheet.Location = new Point(850, 54);
         btnExportTimesheet.Name = "btnExportTimesheet";
         btnExportTimesheet.Size = new Size(103, 23);
         btnExportTimesheet.TabIndex = 5;
@@ -197,7 +198,7 @@ partial class frmView
         dtTimesheetDate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         dtTimesheetDate.CustomFormat = "MM-dd-yyyy";
         dtTimesheetDate.Format = DateTimePickerFormat.Custom;
-        dtTimesheetDate.Location = new Point(503, 54);
+        dtTimesheetDate.Location = new Point(703, 54);
         dtTimesheetDate.Name = "dtTimesheetDate";
         dtTimesheetDate.Size = new Size(96, 23);
         dtTimesheetDate.TabIndex = 6;
@@ -206,7 +207,7 @@ partial class frmView
         // txtExtension
         // 
         txtExtension.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        txtExtension.Location = new Point(603, 54);
+        txtExtension.Location = new Point(803, 54);
         txtExtension.Name = "txtExtension";
         txtExtension.Size = new Size(41, 23);
         txtExtension.TabIndex = 7;
@@ -218,7 +219,7 @@ partial class frmView
         // 
         label2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         label2.AutoSize = true;
-        label2.Location = new Point(483, 58);
+        label2.Location = new Point(683, 58);
         label2.Name = "label2";
         label2.Size = new Size(12, 15);
         label2.TabIndex = 8;
@@ -242,7 +243,7 @@ partial class frmView
         statusStrip1.Items.AddRange(new ToolStripItem[] { ttsPath });
         statusStrip1.Location = new Point(0, 589);
         statusStrip1.Name = "statusStrip1";
-        statusStrip1.Size = new Size(784, 22);
+        statusStrip1.Size = new Size(984, 22);
         statusStrip1.TabIndex = 11;
         statusStrip1.Text = "statusStrip1";
         // 
@@ -262,7 +263,7 @@ partial class frmView
         txtRowFormat.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         txtRowFormat.Location = new Point(122, 22);
         txtRowFormat.Name = "txtRowFormat";
-        txtRowFormat.Size = new Size(603, 23);
+        txtRowFormat.Size = new Size(803, 23);
         txtRowFormat.TabIndex = 15;
         txtRowFormat.Text = "~StartedOnTicks~^~Task~^~Comments~^~TaskCode~^~Duration~^False^False";
         // 
@@ -290,7 +291,7 @@ partial class frmView
         groupBox1.Controls.Add(txtExtension);
         groupBox1.Location = new Point(11, 491);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(761, 86);
+        groupBox1.Size = new Size(961, 86);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
         groupBox1.Text = "Export Settings";
@@ -298,7 +299,7 @@ partial class frmView
         // btnRowFormatHelp
         // 
         btnRowFormatHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRowFormatHelp.Location = new Point(729, 22);
+        btnRowFormatHelp.Location = new Point(929, 22);
         btnRowFormatHelp.Name = "btnRowFormatHelp";
         btnRowFormatHelp.Size = new Size(24, 23);
         btnRowFormatHelp.TabIndex = 17;
@@ -309,7 +310,7 @@ partial class frmView
         // btnRefresh
         // 
         btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRefresh.Location = new Point(697, 10);
+        btnRefresh.Location = new Point(897, 10);
         btnRefresh.Name = "btnRefresh";
         btnRefresh.Size = new Size(75, 23);
         btnRefresh.TabIndex = 17;
@@ -333,7 +334,7 @@ partial class frmView
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(784, 611);
+        ClientSize = new Size(984, 611);
         Controls.Add(lbWeek);
         Controls.Add(btnRefresh);
         Controls.Add(groupBox1);
@@ -343,7 +344,7 @@ partial class frmView
         Controls.Add(dgView);
         Icon = (Icon)resources.GetObject("$this.Icon");
         KeyPreview = true;
-        MinimumSize = new Size(800, 650);
+        MinimumSize = new Size(1000, 650);
         Name = "frmView";
         Text = "View";
         Load += frmView_Load;

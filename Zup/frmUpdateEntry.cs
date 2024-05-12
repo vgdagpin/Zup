@@ -456,7 +456,15 @@ public partial class frmUpdateEntry : Form
         }
 
         e.Graphics.DrawString(createdOnStr, e.Font!, dateBrush, e.Bounds);
-        e.Graphics.DrawString(item.Summary, e.Font!, textBrush, new PointF(e.Bounds.X + 50, e.Bounds.Y));
+
+        if (control.Name == lbPreviousNotes.Name)
+        {
+            e.Graphics.DrawString(item.Summary, e.Font!, textBrush, new PointF(e.Bounds.X + 60, e.Bounds.Y));
+        }
+        else
+        {
+            e.Graphics.DrawString(item.Summary, e.Font!, textBrush, new PointF(e.Bounds.X + 50, e.Bounds.Y));
+        }
 
         e.DrawFocusRectangle();
     }

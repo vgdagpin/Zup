@@ -171,7 +171,11 @@ public partial class frmEntryList : Form
             eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-            AddEntryToFlowLayoutControl(eachEntry);
+            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
+            {
+                StopOtherTask = true,
+                StartNow = true
+            });
 
             count++;
         }
@@ -188,7 +192,11 @@ public partial class frmEntryList : Form
             eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-            AddEntryToFlowLayoutControl(eachEntry);
+            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
+            {
+                StopOtherTask = true,
+                StartNow = true
+            });
 
             count++;
             queueCount++;
@@ -206,7 +214,11 @@ public partial class frmEntryList : Form
             eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-            AddEntryToFlowLayoutControl(eachEntry);
+            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
+            {
+                StopOtherTask = true,
+                StartNow = true
+            });
 
             count++;
         }
@@ -316,25 +328,26 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false)
+    // private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false)
+    private void EachEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
         var newE = new tbl_TaskEntry
         {
             ID = Guid.NewGuid(),
-            Task = entry,
+            Task = args.Entry,
             CreatedOn = DateTime.Now
         };
 
-        if (startNow)
+        if (args.StartNow)
         {
             newE.StartedOn = DateTime.Now;
         }
 
         m_DbContext.TaskEntries.Add(newE);
 
-        if (bringNotesAndTags && parentEntryID != null)
+        if (args.BringNotes && args.ParentEntryID != null)
         {
-            foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntryID).ToList())
+            foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == args.ParentEntryID).ToList())
             {
                 m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
                 {
@@ -346,8 +359,11 @@ public partial class frmEntryList : Form
                     UpdatedOn = note.UpdatedOn
                 });
             }
+        }
 
-            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntryID).ToList())
+        if (args.BringTags && args.ParentEntryID != null)
+        {
+            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == args.ParentEntryID).ToList())
             {
                 m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
                 {
@@ -369,13 +385,13 @@ public partial class frmEntryList : Form
         eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
         eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-        AddEntryToFlowLayoutControl(eachEntry, stopOtherTask, startNow, parentEntryID, hideParent);
+        AddEntryToFlowLayoutControl(eachEntry, args);
 
         ReorderQueuedTask();
 
-        if (hideParent && parentEntryID != null)
+        if (args.HideParent && args.ParentEntryID != null)
         {
-            DeleteTimeLog(parentEntryID.Value);
+            DeleteTimeLog(args.ParentEntryID.Value);
         }
 
         if (Properties.Settings.Default.AutoOpenUpdateWindow)
@@ -406,13 +422,14 @@ public partial class frmEntryList : Form
         await m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
-    private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)
+    // private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)
+    private void AddEntryToFlowLayoutControl(EachEntry newEntry, NewEntryEventArgs args)
     {
         flpTaskList.Controls.Add(newEntry);
 
         // if want it to only queue and there's nothing running
         // send it to the bottom of the queue
-        if (!startNow)
+        if (!args.StartNow)
         {
             var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
 
@@ -427,7 +444,7 @@ public partial class frmEntryList : Form
             {
                 item.IsFirstItem = false;
 
-                if (stopOthers)
+                if (args.StopOtherTask)
                 {
                     if (item.IsStarted)
                     {

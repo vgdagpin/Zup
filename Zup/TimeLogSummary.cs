@@ -13,4 +13,6 @@ public class TimeLogSummary
     public DateTime? EndedOn { get; set; }
     public TimeSpan? Duration { get; set; }
     public string? DurationString { get; set; }
+
+    public string[] Tags { get; set; } = Array.Empty<string>();
 }

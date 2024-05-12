@@ -9,17 +9,15 @@ public partial class EachEntry : UserControl
 
     public bool IsStarted { get; private set; }
 
-    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false);
     public delegate void OnStop(Guid id, DateTime endOn);
     public delegate void OnUpdate(Guid id);
     public delegate void OnStart(Guid id);
-    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false);
 
-    public event OnResume? OnResumeEvent;
+    public event EventHandler<NewEntryEventArgs>? OnResumeEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
     public event OnStart? OnStartEvent;
-    public event OnStartQueue? OnStartQueueEvent;
+    public event EventHandler<NewEntryEventArgs>? OnStartQueueEvent;
 
     public event MouseEventHandler? TaskMouseDown;
 
@@ -187,7 +185,15 @@ public partial class EachEntry : UserControl
             if (OnResumeEvent != null)
             {
                 // if shift is pressed, create a new entry running in parallel
-                OnResumeEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID);
+                var args = new NewEntryEventArgs(Text) 
+                { 
+                    StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
+                    StartNow = true,
+                    ParentEntryID = EntryID,
+                    BringTags = true
+                };
+
+                OnResumeEvent(this, args);
 
                 return;
             }
@@ -197,7 +203,17 @@ public partial class EachEntry : UserControl
         {
             if (OnStartQueueEvent != null)
             {
-                OnStartQueueEvent(Text, !ModifierKeys.HasFlag(Keys.Shift), true, EntryID, true, true);
+                var args = new NewEntryEventArgs(Text) 
+                { 
+                    StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
+                    StartNow = true,
+                    ParentEntryID = EntryID, 
+                    HideParent = true, 
+                    BringNotes = true,
+                    BringTags = true
+                };
+
+                OnStartQueueEvent(this, args);
 
                 return;
             }

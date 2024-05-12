@@ -5,9 +5,7 @@ public partial class frmNewEntry : Form
 {
     private AutoCompleteStringCollection SuggestionSource = new AutoCompleteStringCollection();
 
-    public delegate void OnNewEntry(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
-
-    public event OnNewEntry? OnNewEntryEvent;
+    public event EventHandler<NewEntryEventArgs>? OnNewEntryEvent;
 
     private string[]? Suggestions = null;
 
@@ -73,7 +71,7 @@ public partial class frmNewEntry : Form
             {
                 if (OnNewEntryEvent != null)
                 {
-                    OnNewEntryEvent(temp, false, false);
+                    OnNewEntryEvent(this, new NewEntryEventArgs(temp));
                 }
             }
         }
@@ -90,7 +88,10 @@ public partial class frmNewEntry : Form
             {
                 if (OnNewEntryEvent != null)
                 {
-                    OnNewEntryEvent(temp, false, true);
+                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                    {
+                        StartNow = true
+                    });
                 }
             }
         }
@@ -106,7 +107,11 @@ public partial class frmNewEntry : Form
             {
                 if (OnNewEntryEvent != null)
                 {
-                    OnNewEntryEvent(temp, true, true);
+                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                    {
+                        StopOtherTask = true,
+                        StartNow = true
+                    });
                 }
             }
         }
@@ -216,7 +221,11 @@ public partial class frmNewEntry : Form
         {
             if (OnNewEntryEvent != null)
             {
-                OnNewEntryEvent(temp, true, true);
+                OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                {
+                    StopOtherTask = true,
+                    StartNow = true
+                });
             }
         }
     }    

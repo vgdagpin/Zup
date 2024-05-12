@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
 using System.Text;
 using Zup.Entities;
@@ -111,7 +112,8 @@ public partial class frmView : Form
                         StartedOn = a.StartedOn,
                         EndedOn = a.EndedOn,
                         Duration = durationData,
-                        DurationString = duration
+                        DurationString = duration,
+                        Tags = ["Tag1", "Tag2", "Tag3"]
                     };
                 })
                 .ToList();
@@ -392,6 +394,73 @@ public partial class frmView : Form
     private void btnRowFormatHelp_Click(object sender, EventArgs e)
     {
         MessageBox.Show(string.Join("\n", GetActions().Keys), "Available Templates");
+    }
+
+    private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0)
+        {
+            return;
+        }
+
+        if (e.ColumnIndex == 1)
+        {
+            e.Paint(e.CellBounds, DataGridViewPaintParts.All);
+
+            var dataRow = dgView.Rows[e.RowIndex].DataBoundItem as TimeLogSummary;
+
+            var text = e.FormattedValue.ToString();
+            var textSize = e.Graphics.MeasureString(text, e.CellStyle.Font);
+
+            var halfWidth = e.CellBounds.Width / 2;
+            var halfHeight = e.CellBounds.Height / 2;
+            var centerX = e.CellBounds.X + halfWidth;
+            var centerY = e.CellBounds.Y + halfHeight;
+
+            using (var bb = GetPathRoundCorners(e.CellBounds, 4))
+            {
+
+            }
+
+            using (var brush = new SolidBrush(e.CellStyle.ForeColor))
+            {
+                e.Graphics.FillEllipse(brush, e.CellBounds.Width - textSize.Width, centerY - halfHeight / 2, textSize.Width, textSize.Height);
+            }
+            
+            var textLocation = new PointF(centerX - textSize.Width / 2, centerY - textSize.Height / 2);
+
+            using (var brush = new SolidBrush(e.CellStyle.BackColor))
+            {
+                e.Graphics.DrawString(text, e.CellStyle.Font, brush, textLocation);
+            }
+
+            e.Handled = true;
+        }
+    }
+
+    private GraphicsPath GetPathRoundCorners(Rectangle rc, int r)
+    {
+        int x = rc.X;
+        int y = rc.Y;
+        int w = rc.Width;
+        int h = rc.Height;
+        r = r << 1;
+        GraphicsPath path = new GraphicsPath();
+        if (r > 0)
+        {
+            if (r > h) r = h;
+            if (r > w) r = w;
+            path.AddArc(x, y, r, r, 180, 90);
+            path.AddArc(x + w - r, y, r, r, 270, 90);
+            path.AddArc(x + w - r, y + h - r, r, r, 0, 90);
+            path.AddArc(x, y + h - r, r, r, 90, 90);
+            path.CloseFigure();
+        }
+        else
+        {
+            path.AddRectangle(rc);
+        }
+        return path;
     }
 
     /*
