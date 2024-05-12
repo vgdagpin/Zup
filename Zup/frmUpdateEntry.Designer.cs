@@ -237,7 +237,6 @@ partial class frmUpdateEntry
         // 
         // tokenBoxTags
         // 
-        tokenBoxTags.AutoCompleteList = (List<string>)resources.GetObject("tokenBoxTags.AutoCompleteList");
         tokenBoxTags.AutoScroll = true;
         tokenBoxTags.BackColor = SystemColors.Window;
         tokenBoxTags.BorderStyle = BorderStyle.FixedSingle;

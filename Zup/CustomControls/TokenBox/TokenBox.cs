@@ -62,6 +62,7 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// List of the suggested values to be shown if ShowAutoComplete is set to True.
     /// </summary>
+    [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
     public List<string> AutoCompleteList { get; set; } = new List<string>();
 
 
