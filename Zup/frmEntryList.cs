@@ -316,7 +316,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false)
+    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false)
     {
         var newE = new tbl_TaskEntry
         {
@@ -332,7 +332,7 @@ public partial class frmEntryList : Form
 
         m_DbContext.TaskEntries.Add(newE);
 
-        if (bringNotes && parentEntryID != null)
+        if (bringNotesAndTags && parentEntryID != null)
         {
             foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntryID).ToList())
             {
@@ -345,7 +345,17 @@ public partial class frmEntryList : Form
                     RTF = note.RTF,
                     UpdatedOn = note.UpdatedOn
                 });
-            }            
+            }
+
+            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntryID).ToList())
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    CreatedOn = tag.CreatedOn,
+                    TaskID = newE.ID,
+                    TagID = tag.TagID
+                });
+            }
         }
 
         m_DbContext.SaveChanges();

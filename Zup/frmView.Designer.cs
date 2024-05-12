@@ -304,6 +304,7 @@ partial class frmView
         btnRowFormatHelp.TabIndex = 17;
         btnRowFormatHelp.Text = "?";
         btnRowFormatHelp.UseVisualStyleBackColor = true;
+        btnRowFormatHelp.Click += btnRowFormatHelp_Click;
         // 
         // btnRefresh
         // 

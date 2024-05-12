@@ -9,11 +9,11 @@ public partial class EachEntry : UserControl
 
     public bool IsStarted { get; private set; }
 
-    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
+    public delegate void OnResume(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false);
     public delegate void OnStop(Guid id, DateTime endOn);
     public delegate void OnUpdate(Guid id);
     public delegate void OnStart(Guid id);
-    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false);
+    public delegate void OnStartQueue(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false);
 
     public event OnResume? OnResumeEvent;
     public event OnStop? OnStopEvent;

@@ -164,7 +164,7 @@ partial class frmUpdateEntry
         pnlNotes.Size = new Size(815, 356);
         pnlNotes.TabIndex = 13;
         pnlNotes.TabStop = false;
-        pnlNotes.Text = "Notes";
+        pnlNotes.Text = "&Notes";
         // 
         // splitContainer1
         // 
@@ -269,7 +269,7 @@ partial class frmUpdateEntry
         label4.Name = "label4";
         label4.Size = new Size(30, 15);
         label4.TabIndex = 19;
-        label4.Text = "Tags";
+        label4.Text = "&Tags";
         // 
         // label3
         // 
@@ -278,7 +278,7 @@ partial class frmUpdateEntry
         label3.Name = "label3";
         label3.Size = new Size(59, 15);
         label3.TabIndex = 18;
-        label3.Text = "Ended On";
+        label3.Text = "&Ended On";
         // 
         // label2
         // 
@@ -287,7 +287,7 @@ partial class frmUpdateEntry
         label2.Name = "label2";
         label2.Size = new Size(63, 15);
         label2.TabIndex = 17;
-        label2.Text = "Started On";
+        label2.Text = "&Started On";
         // 
         // label1
         // 
@@ -296,7 +296,7 @@ partial class frmUpdateEntry
         label1.Name = "label1";
         label1.Size = new Size(29, 15);
         label1.TabIndex = 16;
-        label1.Text = "Task";
+        label1.Text = "T&ask";
         // 
         // frmUpdateEntry
         // 

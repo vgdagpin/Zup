@@ -666,6 +666,23 @@ public partial class frmUpdateEntry : Form
             e.SuppressKeyPress = true;
             rtbNote.Focus();
         }
+        else if (e.KeyCode == Keys.S && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            dtFrom.Focus();
+
+        }
+        else if (e.KeyCode == Keys.E && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            dtTo.Focus();
+
+        }
+        else if (e.KeyCode == Keys.A && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            txtTask.Focus();
+        }
     }
 
     private void tokenBoxTags_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)

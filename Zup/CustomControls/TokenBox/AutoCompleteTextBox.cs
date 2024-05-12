@@ -244,6 +244,8 @@ public class AutoCompleteTextBox : TextBox
                     lbSuggestions.SelectedIndex = 0;
                 }
 
+                Focus();
+
                 return;
             }
 
