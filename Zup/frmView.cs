@@ -251,6 +251,7 @@ public partial class frmView : Form
 
         dicAction.Add("~StartedOnTicks~", dicAction => dicAction.StartedOn!.Value.Ticks.ToString());
         dicAction.Add("~Task~", dicAction => dicAction.Task);
+        dicAction.Add("~Tags~", dicAction => ExtractTags(dicAction.ID));
         dicAction.Add("~Comments~", dicAction => ExtractComments(dicAction.ID));
         dicAction.Add("~TaskCode~", dicAction => GetClients(dicAction.ID));
         dicAction.Add("~Duration~", dicAction => dicAction.DurationString!);
@@ -285,6 +286,19 @@ public partial class frmView : Form
         }
 
         return string.Join(';', str);
+    }
+
+    private string ExtractTags(Guid taskID)
+    {
+        var query = from et in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                     on et.TagID equals t.ID
+                    where et.TaskID == taskID
+                    select t.Name;
+
+        var tags = query.ToList();
+
+        return string.Join(";", tags);
     }
 
     private string GetClients(Guid taskID)
@@ -367,13 +381,17 @@ public partial class frmView : Form
         LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
     }
 
-    private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+    private void frmView_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape)
         {
-            e.SuppressKeyPress = true;
             Close();
         }
+    }
+
+    private void btnRowFormatHelp_Click(object sender, EventArgs e)
+    {
+        MessageBox.Show(string.Join("\n", GetActions().Keys), "Available Templates");
     }
 
     /*

@@ -21,10 +21,70 @@ public partial class frmUpdateEntry : Form
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
+    private tbl_TaskEntry? selectedEntry;
+
+    private bool startTracking = false;
+
+    private bool isEntryModified = false;
+    public bool IsEntryModified
+    {
+        get
+        {
+            return isEntryModified;
+        }
+        set
+        {
+            if (!startTracking)
+            {
+                return;
+            }
+
+            isEntryModified = value;
+
+            if (isEntryModified)
+            {
+                Text = "Update Entry ●";
+            }
+            else
+            {
+                Text = "Update Entry";
+            }
+        }
+    }
+
+    private bool isNotesModified = false;
+    public bool IsNotesModified
+    {
+        get
+        {
+            return isNotesModified;
+        }
+        set
+        {
+            if (!startTracking)
+            {
+                return;
+            }
+
+            isNotesModified = value;
+
+            if (isNotesModified)
+            {
+                Text = "Update Entry ●";
+            }
+            else
+            {
+                Text = "Update Entry";
+            }
+        }
+    }
+
     public frmUpdateEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
         p_DbContext = dbContext;
+
+        SetControlsEnable(false);
     }
 
     private void frmUpdateEntry_Load(object sender, EventArgs e)
@@ -36,12 +96,32 @@ public partial class frmUpdateEntry : Form
     {
         e.Cancel = true;
 
+        if (IsEntryModified || IsNotesModified)
+        {
+            var saveChanges = MessageBox.Show("Data was modified, save changes?", "Save Changes", MessageBoxButtons.YesNo);
+
+            if (saveChanges == DialogResult.Yes)
+            {
+                SaveEntry();
+                SaveNotes();
+            }
+        }
+
+        SetControlsEnable(false);
+
         Hide();
     }
 
-    public void ShowUpdateEntry(Guid entryID)
+    public async Task ShowUpdateEntry(Guid entryID)
     {
-        var entry = p_DbContext.TaskEntries.Find(entryID);
+        Text = "Update Entry";
+        startTracking = false;
+        isEntryModified = false;
+        isNotesModified = false;
+
+        Show();
+
+        selectedEntry = await p_DbContext.TaskEntries.FindAsync(entryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -49,70 +129,112 @@ public partial class frmUpdateEntry : Form
         lbPreviousNotes.Items.Clear();
         rtbNote.Clear();
 
-        if (entry == null)
+        if (selectedEntry == null)
         {
             return;
         }
 
         selectedEntryID = entryID;
 
-        txtTask.Text = entry.Task;
+        txtTask.Text = selectedEntry.Task;
 
-        dtFrom.Value = entry.StartedOn != null
-            ? entry.StartedOn.Value
+        dtFrom.Value = selectedEntry.StartedOn != null
+            ? selectedEntry.StartedOn.Value
             : dtFrom.MinDate;
 
-        dtFrom.CustomFormat = entry.StartedOn != null
+        dtFrom.CustomFormat = selectedEntry.StartedOn != null
             ? DateTimeCustomFormat
             : " ";
 
 
-        dtTo.Value = entry.EndedOn != null
-            ? entry.EndedOn.Value
+        dtTo.Value = selectedEntry.EndedOn != null
+            ? selectedEntry.EndedOn.Value
             : dtTo.MinDate;
 
-        dtTo.CustomFormat = entry.EndedOn != null
+        dtTo.CustomFormat = selectedEntry.EndedOn != null
             ? DateTimeCustomFormat
             : " ";
 
-        LoadNotes(entry);
-        LoadPreviousNotes(entry);
+        _ = LoadTags(selectedEntry);
+        _ = LoadNotes(selectedEntry);
+        _ = LoadPreviousNotes(selectedEntry);
 
         tmrFocus.Enabled = true;
 
-        Show();
+        SetControlsEnable(true);
+
+        startTracking = true;
     }
 
-    private void LoadNotes(tbl_TaskEntry currentTaskEntry)
+    private void SetControlsEnable(bool value)
     {
-        foreach (var note in p_DbContext.TaskEntryNotes.Where(a => a.TaskID == currentTaskEntry.ID).ToList())
+        txtTask.Enabled = value;
+        dtFrom.Enabled = value;
+        dtTo.Enabled = value;
+        btnDelete.Enabled = value;
+        btnSaveChanges.Enabled = value;
+        rtbNote.Enabled = value;
+
+        if (!value)
         {
-            lbNotes.Items.Add(NoteSummary.Parse(note));
+            lbNotes.BackColor = Color.LightGray;
+            lbPreviousNotes.BackColor = Color.LightGray;
         }
     }
 
-    private void LoadPreviousNotes(tbl_TaskEntry currentTaskEntry)
+
+    private async Task LoadTags(tbl_TaskEntry currentTaskEntry)
+    {
+        tokenBoxTags.RemoveAllTokens();
+        tokenBoxTags.AutoCompleteList.Clear();
+
+        var query = from tet in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                        on tet.TagID equals t.ID
+                    where tet.TaskID == currentTaskEntry.ID
+                    orderby tet.CreatedOn
+                    select t.Name;
+
+        tokenBoxTags.Tokens = await query.ToArrayAsync();
+
+        tokenBoxTags.AutoCompleteList.AddRange(p_DbContext.Tags.Select(a => a.Name));
+    }
+
+
+    private async Task LoadNotes(tbl_TaskEntry currentTaskEntry)
+    {
+        foreach (var note in await p_DbContext.TaskEntryNotes.Where(a => a.TaskID == currentTaskEntry.ID).ToListAsync())
+        {
+            lbNotes.Items.Add(NoteSummary.Parse(note));
+        }
+
+        lbNotes.BackColor = Color.White;
+    }
+
+    private async Task LoadPreviousNotes(tbl_TaskEntry currentTaskEntry)
     {
         if (currentTaskEntry == null)
         {
             return;
         }
 
-        var allIDs = p_DbContext.TaskEntries
+        var allIDs = await p_DbContext.TaskEntries
             .Where(a => a.Task == txtTask.Text && a.ID != currentTaskEntry.ID && a.StartedOn < currentTaskEntry.StartedOn)
             .OrderByDescending(a => a.StartedOn)
             .Select(a => a.ID)
-            .ToArray();
+            .ToArrayAsync();
 
-        foreach (var note in p_DbContext.TaskEntryNotes
+        foreach (var note in await p_DbContext.TaskEntryNotes
             .Where(a => allIDs.Contains(a.TaskID))
             .OrderByDescending(a => a.CreatedOn)
             .Take(50)
             .AsNoTracking()
-            .ToList())
+            .ToListAsync())
         {
             lbPreviousNotes.Items.Add(NoteSummary.Parse(note));
         }
+
+        lbPreviousNotes.BackColor = Color.White;
     }
 
     private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -123,7 +245,7 @@ public partial class frmUpdateEntry : Form
 
             btnDeleteNote.Visible = false;
 
-            SaveChanges();
+            SaveNotes();
         }
 
         if (e.KeyData == (Keys.Control | Keys.N))
@@ -179,7 +301,7 @@ public partial class frmUpdateEntry : Form
         return rtbNote.Rtf;
     }
 
-    void SaveChanges()
+    void SaveNotes()
     {
         var noteData = GetNoteData();
         var rtfNoteData = GetRichTextNote();
@@ -243,9 +365,9 @@ public partial class frmUpdateEntry : Form
     #region lbNotes and lvPreviousNotes
     private void lbNotes_SelectedIndexChanged(object sender, EventArgs e)
     {
-        var control = (ListBox)sender;        
+        var control = (ListBox)sender;
 
-        selectedNoteID = null;        
+        selectedNoteID = null;
 
         if (control.SelectedIndex == -1)
         {
@@ -373,12 +495,21 @@ public partial class frmUpdateEntry : Form
 
     private void btnSaveNote_Click(object sender, EventArgs e)
     {
-        SaveChanges();
+        SaveNotes();
     }
 
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
     {
-        btnSaveNote.Visible = rtbNote.Text.Trim().Length > 0;
+        if (rtbNote.Text.Trim().Length > 0)
+        {
+            btnSaveNote.Visible = true;
+            IsNotesModified = true;
+        }
+        else
+        {
+            btnSaveNote.Visible = false;
+            IsNotesModified = false;
+        }
     }
 
     private void tmrFocus_Tick(object sender, EventArgs e)
@@ -390,21 +521,19 @@ public partial class frmUpdateEntry : Form
         rtbNote.Focus();
     }
 
-    private void rtbNote_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Escape)
-        {
-            e.SuppressKeyPress = true;
-            Close();
-        }
-    }
-
     private void dtTo_ValueChanged(object sender, EventArgs e)
     {
         dtTo.CustomFormat = DateTimeCustomFormat;
+
+        IsEntryModified = true;
     }
 
     private void btnSaveChanges_Click(object sender, EventArgs e)
+    {
+        SaveEntry();
+    }
+
+    private void SaveEntry()
     {
         var task = p_DbContext.TaskEntries.Find(selectedEntryID);
 
@@ -414,7 +543,11 @@ public partial class frmUpdateEntry : Form
             task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
             task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
 
+            SaveTags(task.ID, tokenBoxTags.Tokens.ToArray());
+
             p_DbContext.SaveChanges();
+
+            IsEntryModified = false;
 
             if (OnSavedEvent != null)
             {
@@ -423,18 +556,160 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-
-    private void txtTask_KeyDown(object sender, KeyEventArgs e)
+    private void SaveTags(Guid taskID, string[] tags)
     {
-        if (e.KeyCode == Keys.Escape)
+        if (tags == null)
         {
-            e.SuppressKeyPress = true;
-            Close();
+            return;
         }
+
+        var allTagsNameIDDictionary = p_DbContext.Tags.Where(a => tags.Contains(a.Name))
+            .ToList()
+            .ToDictionary(a => a.Name, a => a.ID);
+
+        var query = from tet in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                        on tet.TagID equals t.ID
+                    where tet.TaskID == taskID
+                    orderby tet.CreatedOn
+                    select new
+                    {
+                        t.ID,
+                        t.Name
+                    };
+
+        var existing = query.ToArray();
+
+
+        #region Tags to remove
+        var tagIDsToRemove = new List<Guid>();
+
+        foreach (var item in existing)
+        {
+            if (!tags.Contains(item.Name))
+            {
+                tagIDsToRemove.Add(item.ID);
+            }
+        }
+
+        if (tagIDsToRemove.Any())
+        {
+            var tagEToRem = p_DbContext.TaskEntryTags.Where(a => a.TaskID == taskID && tagIDsToRemove.Contains(a.TagID))
+            .ToList();
+
+            p_DbContext.TaskEntryTags.RemoveRange(tagEToRem);
+        }
+        #endregion
+
+        #region Tags to add
+        var tagNamesToAdd = new List<string>();
+
+        foreach (var newTag in tags)
+        {
+            if (!existing.Any(a => a.Name == newTag))
+            {
+                tagNamesToAdd.Add(newTag);
+            }
+        }
+
+
+        foreach (var tag in tagNamesToAdd.Distinct())
+        {
+            if (allTagsNameIDDictionary.ContainsKey(tag))
+            {
+                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = allTagsNameIDDictionary[tag],
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+            else
+            {
+                var newTag = new tbl_Tag
+                {
+                    ID = Guid.NewGuid(),
+                    Name = tag
+                };
+
+                p_DbContext.Tags.Add(newTag);
+
+                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = newTag.ID,
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+        }
+        #endregion
     }
 
     private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
     {
         Process.Start("explorer.exe", e.LinkText!);
+    }
+
+    private void frmUpdateEntry_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            Close();
+        }
+        else if (e.KeyCode == Keys.T && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            tokenBoxTags.Focus();
+        }
+        else if (e.KeyCode == Keys.N && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            rtbNote.Focus();
+        }
+        else if (e.KeyCode == Keys.S && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            dtFrom.Focus();
+
+        }
+        else if (e.KeyCode == Keys.E && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            dtTo.Focus();
+
+        }
+        else if (e.KeyCode == Keys.A && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            txtTask.Focus();
+        }
+    }
+
+    private void tokenBoxTags_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    {
+        if (e.KeyData == (Keys.Control | Keys.S))
+        {
+            SaveEntry();
+        }
+    }
+
+    private void tokenBoxTags_TokenChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void txtTask_TextChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void dtFrom_ValueChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void rtbNote_TextChanged(object sender, EventArgs e)
+    {
+
     }
 }

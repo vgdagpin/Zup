@@ -157,10 +157,10 @@ public partial class frmEntryList : Form
 
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
+        // closed items
         foreach (var task in m_DbContext.TaskEntries
-            .Where(a => a.StartedOn >= minDate)
-            .OrderBy(a => a.StartedOn)
-            .Take(10))
+            .Where(a => a.StartedOn >= minDate && a.EndedOn != null)
+            .OrderBy(a => a.StartedOn))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
 
@@ -176,6 +176,7 @@ public partial class frmEntryList : Form
             count++;
         }
 
+        // not yet started
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
@@ -193,6 +194,7 @@ public partial class frmEntryList : Form
             queueCount++;
         }
 
+        // started but not yet closed
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn != null && a.EndedOn == null))
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
@@ -314,7 +316,7 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotes = false)
+    private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false)
     {
         var newE = new tbl_TaskEntry
         {
@@ -330,7 +332,7 @@ public partial class frmEntryList : Form
 
         m_DbContext.TaskEntries.Add(newE);
 
-        if (bringNotes && parentEntryID != null)
+        if (bringNotesAndTags && parentEntryID != null)
         {
             foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntryID).ToList())
             {
@@ -343,7 +345,17 @@ public partial class frmEntryList : Form
                     RTF = note.RTF,
                     UpdatedOn = note.UpdatedOn
                 });
-            }            
+            }
+
+            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntryID).ToList())
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    CreatedOn = tag.CreatedOn,
+                    TaskID = newE.ID,
+                    TagID = tag.TagID
+                });
+            }
         }
 
         m_DbContext.SaveChanges();
@@ -389,9 +401,9 @@ public partial class frmEntryList : Form
         ShowUpdateEntry(id);
     }
 
-    public void ShowUpdateEntry(Guid entryID)
+    public async void ShowUpdateEntry(Guid entryID)
     {
-        m_FormUpdateEntry.ShowUpdateEntry(entryID);
+        await m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)

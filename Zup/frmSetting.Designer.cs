@@ -267,6 +267,7 @@ partial class frmSetting
         Controls.Add(groupBox1);
         FormBorderStyle = FormBorderStyle.FixedSingle;
         Icon = (Icon)resources.GetObject("$this.Icon");
+        KeyPreview = true;
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "frmSetting";
@@ -274,6 +275,7 @@ partial class frmSetting
         Text = "Setting";
         FormClosing += frmSetting_FormClosing;
         Load += frmSetting_Load;
+        KeyDown += frmSetting_KeyDown;
         groupBox1.ResumeLayout(false);
         groupBox1.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).EndInit();
