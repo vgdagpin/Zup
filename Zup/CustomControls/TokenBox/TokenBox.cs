@@ -5,7 +5,6 @@ namespace Zup.CustomControls;
 public partial class TokenBox : FlowLayoutPanel
 {
     bool showAutoComplete = true;
-    private List<string> autoCompleteList = new List<string>();
     private bool canAddTokenByText = true;
     private bool canDeleteTokensWithBackspace = true;
     private bool canWriteInTokenBox = true;
@@ -45,9 +44,10 @@ public partial class TokenBox : FlowLayoutPanel
                 acTxtBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
                 acTxtBox.AutoCompleteMode = AutoCompleteMode.Suggest;
                 acTxtBox.BorderStyle = BorderStyle.None;
-                acTxtBox.Values = AutoCompleteList.ToArray();
+                acTxtBox.Values = AutoCompleteList;
 
                 BackColorChanged += acTxtBox.tokenBox_BackColorChanged;
+                acTxtBox.PreviewKeyDown += TokenBox_PreviewKeyDown;
 
                 acTxtBox.InitializeComponent();
             }
@@ -56,11 +56,20 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    private void TokenBox_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
+    {
+        OnPreviewKeyDown(e);
+    }
+
+    /// <summary>
+    /// List of the suggested values to be shown if ShowAutoComplete is set to True.
+    /// </summary>
+    public List<string> AutoCompleteList { get; set; } = new List<string>();
+
 
     /// <summary>
     /// If set to true, user can write in TokenBox and Tab or Enter to add a new Token.
     /// </summary>
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool CanAddTokenByText
     {
         set
@@ -78,6 +87,7 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// Returns True if there are Tokens added in the TokenBox.
     /// </summary>
+    [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
     public bool HasTokens
     {
         get
@@ -89,6 +99,7 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// Returns a List of Tokens in the TokenBox.
     /// </summary>
+    [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
     public IEnumerable<Token> Tokens
     {
         get
@@ -118,21 +129,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
-    /// <summary>
-    /// List of the suggested values to be shown if ShowAutoComplete is set to True.
-    /// </summary>
-    public List<string> AutoCompleteList
-    {
-        get
-        {
-            return autoCompleteList;
-        }
-
-        set
-        {
-            autoCompleteList = value;
-        }
-    }
+   
 
 
     public bool CanWriteInTokenBox

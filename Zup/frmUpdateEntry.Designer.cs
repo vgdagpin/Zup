@@ -256,6 +256,7 @@ partial class frmUpdateEntry
         tokenBoxTags.ShowDeleteCross = true;
         tokenBoxTags.Size = new Size(419, 57);
         tokenBoxTags.TabIndex = 20;
+        tokenBoxTags.PreviewKeyDown += tokenBoxTags_PreviewKeyDown;
         // 
         // label4
         // 

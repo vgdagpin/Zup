@@ -16,19 +16,19 @@ public class AutoCompleteTextBox : TextBox
     private bool lbSuggestAddedToControl;
     private string _formerValue = string.Empty;
     private int _MouseIndex = -1;
-    private bool _showAutoComplete;
 
     #region Properties
 
     public bool ShowAutoComplete { get; set; } = true;
 
-    public string[] Values { get; set; } = null!;
+    public List<string> Values { get; set; } = new List<string>();
 
     public List<string> SelectedValues
     {
         get
         {
             var result = Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            
             return new List<string>(result);
         }
     }
@@ -94,22 +94,32 @@ public class AutoCompleteTextBox : TextBox
         {
             case Keys.Enter:
             case Keys.Tab:
-                {
-                    AcceptInput();
-                    break;
-                }
+                AcceptInput();
+                break;
             case Keys.Down:
+                if (lbSuggestions.Visible)
                 {
-                    if ((lbSuggestions.Visible) && (lbSuggestions.SelectedIndex < lbSuggestions.Items.Count - 1))
+                    e.SuppressKeyPress = true;
+
+                    if (lbSuggestions.SelectedIndex < lbSuggestions.Items.Count - 1)
+                    {
                         lbSuggestions.SelectedIndex++;
-                    break;
-                }
+                    }
+                }                
+                break;
             case Keys.Up:
+                if (lbSuggestions.Visible)
                 {
-                    if ((lbSuggestions.Visible) && (lbSuggestions.SelectedIndex > 0))
+                    e.SuppressKeyPress = true;
+
+                    if (lbSuggestions.SelectedIndex > 0)
+                    {
                         lbSuggestions.SelectedIndex--;
-                    break;
-                }
+                    }
+                }                
+                break;
+            default:
+                break;
         }
     }
 
@@ -117,6 +127,7 @@ public class AutoCompleteTextBox : TextBox
     protected override void OnLeave(EventArgs e)
     {
         base.OnLeave(e);
+        
         AcceptInput();
     }
     #endregion Events
@@ -221,11 +232,21 @@ public class AutoCompleteTextBox : TextBox
     {
         if (lbSuggestions.Visible)
         {
+            if (lbSuggestions.SelectedIndex == -1)
+            {
+                lbSuggestions.SelectedIndex = 0;
+                return;
+            }
+
             var suggestSelection = (string)lbSuggestions.SelectedItem!;
 
-            IntroduceToken(suggestSelection);
-            _formerValue = Text;
-            Focus();
+            if (!string.IsNullOrWhiteSpace(suggestSelection))
+            {
+                IntroduceToken(suggestSelection);
+                _formerValue = Text;
+                ResetListBox();
+                Focus();
+            }            
         }
         else
         {
@@ -242,13 +263,16 @@ public class AutoCompleteTextBox : TextBox
     private void UpdateListBoxWithLocalMatches()
     {
         if (Text == _formerValue) return;
+
         _formerValue = Text;
+
         var word = GetWord();
 
         if (Values != null && word.Length > 0)
         {
-            var matches = Array.FindAll(Values,
-             x => (x.StartsWith(word, StringComparison.OrdinalIgnoreCase) && !SelectedValues.Contains(x)));
+            var matches = Values.Where(a => a.StartsWith(word, StringComparison.OrdinalIgnoreCase) && !SelectedValues.Contains(a))
+                .ToArray();
+
             if (matches.Length > 0)
             {
                 ShowListBox();
@@ -258,7 +282,7 @@ public class AutoCompleteTextBox : TextBox
                 lbSuggestions.Height = 0;
                 lbSuggestions.Width = 0;
                 Focus();
-                using (Graphics graphics = lbSuggestions.CreateGraphics())
+                using (var graphics = lbSuggestions.CreateGraphics())
                 {
                     for (int i = 0; i < lbSuggestions.Items.Count; i++)
                     {
@@ -267,7 +291,8 @@ public class AutoCompleteTextBox : TextBox
                         // set it to the new max item width
                         // GetItemRectangle does not work for me
                         // we add a little extra space by using '_'
-                        int itemWidth = (int)graphics.MeasureString(((String)lbSuggestions.Items[i]) + "_", lbSuggestions.Font).Width;
+                        int itemWidth = (int)graphics.MeasureString(((string)lbSuggestions.Items[i]) + "_", lbSuggestions.Font).Width;
+                        
                         lbSuggestions.Width = (lbSuggestions.Width < itemWidth) ? itemWidth : lbSuggestions.Width;
                     }
                 }

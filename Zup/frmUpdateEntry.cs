@@ -21,6 +21,8 @@ public partial class frmUpdateEntry : Form
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
+    bool isModified = false;
+
     public frmUpdateEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
@@ -31,7 +33,7 @@ public partial class frmUpdateEntry : Form
 
     private void frmUpdateEntry_Load(object sender, EventArgs e)
     {
-        
+
     }
 
     private void frmUpdateEntry_FormClosing(object sender, FormClosingEventArgs e)
@@ -54,7 +56,6 @@ public partial class frmUpdateEntry : Form
         lbNotes.Items.Clear();
         lbPreviousNotes.Items.Clear();
         rtbNote.Clear();
-        tokenBoxTags.RemoveAllTokens();
 
         if (entry == null)
         {
@@ -110,6 +111,9 @@ public partial class frmUpdateEntry : Form
 
     private async Task LoadTags(tbl_TaskEntry currentTaskEntry)
     {
+        tokenBoxTags.RemoveAllTokens();
+        tokenBoxTags.AutoCompleteList.Clear();
+
         var query = from tet in p_DbContext.TaskEntryTags
                     join t in p_DbContext.Tags
                         on tet.TagID equals t.ID
@@ -121,6 +125,8 @@ public partial class frmUpdateEntry : Form
         {
             tokenBoxTags.AddToken(tag);
         }
+
+        tokenBoxTags.AutoCompleteList.AddRange(p_DbContext.Tags.Select(a => a.Name));
     }
 
 
@@ -168,7 +174,7 @@ public partial class frmUpdateEntry : Form
 
             btnDeleteNote.Visible = false;
 
-            SaveChanges();
+            SaveNotes();
         }
 
         if (e.KeyData == (Keys.Control | Keys.N))
@@ -224,7 +230,7 @@ public partial class frmUpdateEntry : Form
         return rtbNote.Rtf;
     }
 
-    void SaveChanges()
+    void SaveNotes()
     {
         var noteData = GetNoteData();
         var rtfNoteData = GetRichTextNote();
@@ -387,10 +393,6 @@ public partial class frmUpdateEntry : Form
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
-        tokenBoxTags.ShowSuggestionList(new[] { "Test", "hahaha" });
-
-        return;
-
         var result = MessageBox.Show("Delete this entry?", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         if (result == DialogResult.Cancel)
@@ -422,7 +424,7 @@ public partial class frmUpdateEntry : Form
 
     private void btnSaveNote_Click(object sender, EventArgs e)
     {
-        SaveChanges();
+        SaveNotes();
     }
 
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
@@ -445,6 +447,11 @@ public partial class frmUpdateEntry : Form
     }
 
     private void btnSaveChanges_Click(object sender, EventArgs e)
+    {
+        SaveEntry();
+    }
+
+    private void SaveEntry()
     {
         var task = p_DbContext.TaskEntries.Find(selectedEntryID);
 
@@ -550,7 +557,7 @@ public partial class frmUpdateEntry : Form
                     CreatedOn = DateTime.Now
                 });
             }
-        } 
+        }
         #endregion
     }
 
@@ -569,6 +576,14 @@ public partial class frmUpdateEntry : Form
         {
             e.SuppressKeyPress = true;
             tokenBoxTags.Focus();
+        }
+    }
+
+    private void tokenBoxTags_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    {
+        if (e.KeyData == (Keys.Control | Keys.S))
+        {
+            SaveEntry();
         }
     }
 }

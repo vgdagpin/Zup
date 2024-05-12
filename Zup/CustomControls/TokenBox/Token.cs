@@ -19,51 +19,13 @@ public partial class Token : Control
     /// </summary>
     public int Radius { get; set; } = 4;
 
-    public override Color BackColor
-    {
-        get
-        {
-            return base.BackColor;
-        }
-    }
+    public override Color BackColor => base.BackColor;
 
     public int BorderWidth { get; set; }
 
     public bool ShowsX { get; set; } = true;
 
-    public override string Text
-    {
-        get
-        {
-            return base.Text;
-        }
-
-        set
-        {
-            base.Text = value;
-            SizeF sizeText;
-            using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
-            {
-                sizeText = g.MeasureString(base.Text, this.Font);
-            }
-
-            var initialRectangle = new Point(3, 3);
-
-            var sizeDisplayedText = new Size((int)sizeText.Width + 3, (int)sizeText.Height + 1);
-            var offsetCenterVerticalText = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
-            rText = new Rectangle(new Point(3, initialRectangle.Y + offsetCenterVerticalText + 2), sizeDisplayedText);
-
-            rCloseX.Location = new Point(rText.Right + 1, initialRectangle.Y);
-            if (this.ShowsX)
-            {
-                rCloseX.Size = sizeIcon;
-            }
-
-            this.Size = new Size(rCloseX.Right + 1, sizeIcon.Height + 6);
-        }
-    }
-
-    public Font FontHovered { get; set; }
+    public Font FontHovered { get; set; } = null!;
 
     public Color ForeColorHovered { get; set; }
 
@@ -78,8 +40,6 @@ public partial class Token : Control
     #endregion Properties
 
     #region Constructors
-
-
     public Token(string textToDisplay, bool showX = true)
     {
         InitializeComponent();
@@ -90,11 +50,34 @@ public partial class Token : Control
         this.ShowsX = showX;
         this.Text = textToDisplay;
         this.Margin = new Padding(1, 0, 1, 0);
+
+        AdjustSize();
     }
 
     #endregion Constructors
 
+    private void AdjustSize()
+    {
+        SizeF sizeText;
+        using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
+        {
+            sizeText = g.MeasureString(base.Text, this.Font);
+        }
 
+        var initialRectangle = new Point(3, 3);
+
+        var sizeDisplayedText = new Size((int)sizeText.Width + 3, (int)sizeText.Height + 1);
+        var offsetCenterVerticalText = (sizeIcon.Height - sizeDisplayedText.Height) / 2;
+        rText = new Rectangle(new Point(3, initialRectangle.Y + offsetCenterVerticalText + 2), sizeDisplayedText);
+
+        rCloseX.Location = new Point(rText.Right + 1, initialRectangle.Y);
+        if (this.ShowsX)
+        {
+            rCloseX.Size = sizeIcon;
+        }
+
+        this.Size = new Size(rCloseX.Right + 1, sizeIcon.Height + 6);
+    }
 
     #region Events
     /// <summary>
@@ -222,8 +205,9 @@ public partial class Token : Control
         return path;
     }
 
-    public event EventHandler TokenBodyClicked;
-    protected void OnTokenBodyClicked(Object sender, MouseEventArgs e)
+    public event EventHandler? TokenBodyClicked;
+    
+    protected void OnTokenBodyClicked(object sender, MouseEventArgs e)
     {
         TokenBodyClicked?.Invoke(sender, e);
     }
@@ -232,6 +216,7 @@ public partial class Token : Control
     protected override void OnMouseClick(MouseEventArgs e)
     {
         base.OnMouseClick(e);
+
         int indexOfThisToken = Parent!.Controls.IndexOf(this);
         if (rCloseX.Contains(e.Location) && e.Button == MouseButtons.Left)
         {
@@ -241,7 +226,8 @@ public partial class Token : Control
         {
             if (NotifyParentEvent != null)
             {
-                TokenEventArgs tokenEventArgs = new TokenEventArgs(this.Text, indexOfThisToken, e.Button);
+                var tokenEventArgs = new TokenEventArgs(Text, indexOfThisToken, e.Button);
+                
                 NotifyParentEvent(tokenEventArgs);
             }
         }
