@@ -6,7 +6,7 @@ namespace Zup.CustomControls;
 
 public partial class Token : Control
 {
-    public event NotifyParentDelegate? NotifyParentEvent;
+    public event EventHandler<TokenEventArgs>? NotifyParentEvent;
     private Rectangle rCloseX = new Rectangle(0, 0, 0, 0);
     private Rectangle rText = new Rectangle(0, 0, 0, 0);
     private Size sizeIcon = new Size(16, 16);
@@ -148,9 +148,10 @@ public partial class Token : Control
     protected override void OnMouseEnter(EventArgs e)
     {
         base.OnMouseEnter(e);
-        this.Cursor = Cursors.Hand;
-        this.isBeingHovered = true;
-        this.Refresh();
+
+        Cursor = Cursors.Hand;
+        isBeingHovered = true;
+        Refresh();
     }
 
     /// <summary>
@@ -171,10 +172,9 @@ public partial class Token : Control
     protected override void OnMouseLeave(EventArgs e)
     {
         base.OnMouseLeave(e);
-        this.Cursor = Cursors.Default;
-        this.isBeingHovered = false;
-        this.Refresh();
-        //SetTokenNormal();
+        Cursor = Cursors.Default;
+        isBeingHovered = false;
+        Refresh();
     }
 
     #endregion Events
@@ -217,19 +217,42 @@ public partial class Token : Control
     {
         base.OnMouseClick(e);
 
-        int indexOfThisToken = Parent!.Controls.IndexOf(this);
+        var indexOfThisToken = Parent!.Controls.IndexOf(this);
+
         if (rCloseX.Contains(e.Location) && e.Button == MouseButtons.Left)
         {
             Parent.Controls.RemoveAt(indexOfThisToken);
+
+            if (NotifyParentEvent != null)
+            {
+                var tokenEventArgs = new TokenEventArgs(Text, "Remove");
+
+                NotifyParentEvent(this, tokenEventArgs);
+            }
         }
         else
         {
             if (NotifyParentEvent != null)
             {
-                var tokenEventArgs = new TokenEventArgs(Text, indexOfThisToken, e.Button);
-                
-                NotifyParentEvent(tokenEventArgs);
+                if (e.Clicks == 1)
+                {
+                    var tokenEventArgs = new TokenEventArgs(Text, "Click");
+
+                    NotifyParentEvent(this, tokenEventArgs);
+                }                
             }
+        }
+    }
+
+    protected override void OnMouseDoubleClick(MouseEventArgs e)
+    {
+        base.OnMouseDoubleClick(e);
+
+        if (NotifyParentEvent != null)
+        {
+            var tokenEventArgs = new TokenEventArgs(Text, "DoubleClick");
+
+            NotifyParentEvent(this, tokenEventArgs);
         }
     }
 }

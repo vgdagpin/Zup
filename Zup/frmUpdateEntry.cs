@@ -21,7 +21,63 @@ public partial class frmUpdateEntry : Form
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
-    bool isModified = false;
+    private tbl_TaskEntry? selectedEntry;
+
+    private bool startTracking = false;
+
+    private bool isEntryModified = false;
+    public bool IsEntryModified
+    {
+        get
+        {
+            return isEntryModified;
+        }
+        set
+        {
+            if (!startTracking)
+            {
+                return;
+            }
+
+            isEntryModified = value;
+
+            if (isEntryModified)
+            {
+                Text = "Update Entry ●";
+            }
+            else
+            {
+                Text = "Update Entry";
+            }
+        }
+    }
+
+    private bool isNotesModified = false;
+    public bool IsNotesModified
+    {
+        get
+        {
+            return isNotesModified;
+        }
+        set
+        {
+            if (!startTracking)
+            {
+                return;
+            }
+
+            isNotesModified = value;
+
+            if (isNotesModified)
+            {
+                Text = "Update Entry ●";
+            }
+            else
+            {
+                Text = "Update Entry";
+            }
+        }
+    }
 
     public frmUpdateEntry(ZupDbContext dbContext)
     {
@@ -38,18 +94,34 @@ public partial class frmUpdateEntry : Form
 
     private void frmUpdateEntry_FormClosing(object sender, FormClosingEventArgs e)
     {
-        SetControlsEnable(false);
-
         e.Cancel = true;
+
+        if (IsEntryModified || IsNotesModified)
+        {
+            var saveChanges = MessageBox.Show("Data was modified, save changes?", "Save Changes", MessageBoxButtons.YesNo);
+
+            if (saveChanges == DialogResult.Yes)
+            {
+                SaveEntry();
+                SaveNotes();
+            }
+        }
+
+        SetControlsEnable(false);
 
         Hide();
     }
 
     public async Task ShowUpdateEntry(Guid entryID)
     {
+        Text = "Update Entry";
+        startTracking = false;
+        isEntryModified = false;
+        isNotesModified = false;
+
         Show();
 
-        var entry = await p_DbContext.TaskEntries.FindAsync(entryID);
+        selectedEntry = await p_DbContext.TaskEntries.FindAsync(entryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -57,39 +129,41 @@ public partial class frmUpdateEntry : Form
         lbPreviousNotes.Items.Clear();
         rtbNote.Clear();
 
-        if (entry == null)
+        if (selectedEntry == null)
         {
             return;
         }
 
         selectedEntryID = entryID;
 
-        txtTask.Text = entry.Task;
+        txtTask.Text = selectedEntry.Task;
 
-        dtFrom.Value = entry.StartedOn != null
-            ? entry.StartedOn.Value
+        dtFrom.Value = selectedEntry.StartedOn != null
+            ? selectedEntry.StartedOn.Value
             : dtFrom.MinDate;
 
-        dtFrom.CustomFormat = entry.StartedOn != null
+        dtFrom.CustomFormat = selectedEntry.StartedOn != null
             ? DateTimeCustomFormat
             : " ";
 
 
-        dtTo.Value = entry.EndedOn != null
-            ? entry.EndedOn.Value
+        dtTo.Value = selectedEntry.EndedOn != null
+            ? selectedEntry.EndedOn.Value
             : dtTo.MinDate;
 
-        dtTo.CustomFormat = entry.EndedOn != null
+        dtTo.CustomFormat = selectedEntry.EndedOn != null
             ? DateTimeCustomFormat
             : " ";
 
-        _ = LoadTags(entry);
-        _ = LoadNotes(entry);
-        _ = LoadPreviousNotes(entry);
+        _ = LoadTags(selectedEntry);
+        _ = LoadNotes(selectedEntry);
+        _ = LoadPreviousNotes(selectedEntry);
 
         tmrFocus.Enabled = true;
 
         SetControlsEnable(true);
+
+        startTracking = true;
     }
 
     private void SetControlsEnable(bool value)
@@ -121,10 +195,7 @@ public partial class frmUpdateEntry : Form
                     orderby tet.CreatedOn
                     select t.Name;
 
-        foreach (var tag in await query.ToArrayAsync())
-        {
-            tokenBoxTags.AddToken(tag);
-        }
+        tokenBoxTags.Tokens = await query.ToArrayAsync();
 
         tokenBoxTags.AutoCompleteList.AddRange(p_DbContext.Tags.Select(a => a.Name));
     }
@@ -429,7 +500,16 @@ public partial class frmUpdateEntry : Form
 
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
     {
-        btnSaveNote.Visible = rtbNote.Text.Trim().Length > 0;
+        if (rtbNote.Text.Trim().Length > 0)
+        {
+            btnSaveNote.Visible = true;
+            IsNotesModified = true;
+        }
+        else
+        {
+            btnSaveNote.Visible = false;
+            IsNotesModified = false;
+        }
     }
 
     private void tmrFocus_Tick(object sender, EventArgs e)
@@ -444,6 +524,8 @@ public partial class frmUpdateEntry : Form
     private void dtTo_ValueChanged(object sender, EventArgs e)
     {
         dtTo.CustomFormat = DateTimeCustomFormat;
+
+        IsEntryModified = true;
     }
 
     private void btnSaveChanges_Click(object sender, EventArgs e)
@@ -461,9 +543,11 @@ public partial class frmUpdateEntry : Form
             task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
             task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
 
-            SaveTags(task.ID, tokenBoxTags.Tokens.Select(a => a.Text).ToArray());
+            SaveTags(task.ID, tokenBoxTags.Tokens.ToArray());
 
             p_DbContext.SaveChanges();
+
+            IsEntryModified = false;
 
             if (OnSavedEvent != null)
             {
@@ -572,10 +656,15 @@ public partial class frmUpdateEntry : Form
         {
             Close();
         }
-        else if (e.KeyCode == Keys.T && e.Control)
+        else if (e.KeyCode == Keys.T && e.Alt)
         {
             e.SuppressKeyPress = true;
             tokenBoxTags.Focus();
+        }
+        else if (e.KeyCode == Keys.N && e.Alt)
+        {
+            e.SuppressKeyPress = true;
+            rtbNote.Focus();
         }
     }
 
@@ -585,5 +674,25 @@ public partial class frmUpdateEntry : Form
         {
             SaveEntry();
         }
+    }
+
+    private void tokenBoxTags_TokenChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void txtTask_TextChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void dtFrom_ValueChanged(object sender, EventArgs e)
+    {
+        IsEntryModified = true;
+    }
+
+    private void rtbNote_TextChanged(object sender, EventArgs e)
+    {
+
     }
 }

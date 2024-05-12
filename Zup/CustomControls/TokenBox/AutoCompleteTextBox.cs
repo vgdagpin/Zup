@@ -135,9 +135,14 @@ public class AutoCompleteTextBox : TextBox
     #region Methods
     private void IntroduceToken(string textToken)
     {
+        if (string.IsNullOrWhiteSpace(textToken))
+        {
+            return;
+        }
+
         ParentTokenBox.AddToken(textToken);
 
-        Text = string.Empty;
+        Text = string.Empty;        
     }
 
     public void ShowExternalSuggestionList(string[] suggestionList)
@@ -234,7 +239,11 @@ public class AutoCompleteTextBox : TextBox
         {
             if (lbSuggestions.SelectedIndex == -1)
             {
-                lbSuggestions.SelectedIndex = 0;
+                if (lbSuggestions.Items.Count > 0)
+                {
+                    lbSuggestions.SelectedIndex = 0;
+                }
+
                 return;
             }
 

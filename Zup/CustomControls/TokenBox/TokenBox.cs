@@ -4,12 +4,6 @@ namespace Zup.CustomControls;
 
 public partial class TokenBox : FlowLayoutPanel
 {
-    bool showAutoComplete = true;
-    private bool canAddTokenByText = true;
-    private bool canDeleteTokensWithBackspace = true;
-    private bool canWriteInTokenBox = true;
-    private bool showDeleteCross = true;
-
     private Color defaultTokenBorderColor = Color.DarkGray;
     private Color defaultTokenBorderColorHovered = Color.DarkGray;
     private Color defaultTokenTextColor = Color.Black;
@@ -20,7 +14,11 @@ public partial class TokenBox : FlowLayoutPanel
     private Font defaultTokenFont = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular);
     private Font defaultTokenFontHovered = new Font("Microsoft Sans Serif", 8F, FontStyle.Underline);
 
-    public event EventHandler<TokenEventArgs> TokenClicked;
+    public event EventHandler<TokenEventArgs>? TokenClicked;
+    public event EventHandler<TokenEventArgs>? TokenDoubleClicked;
+    public event EventHandler? TokenChanged;
+
+    bool triggerChangeEvent = true;
 
     #region Properties
     private AutoCompleteTextBox? acTxtBox;
@@ -70,19 +68,7 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// If set to true, user can write in TokenBox and Tab or Enter to add a new Token.
     /// </summary>
-    public bool CanAddTokenByText
-    {
-        set
-        {
-            //AutoCompleteTextBox.ReadOnly = !value;
-            //AutoCompleteTextBox.Text = String.Empty;
-            canAddTokenByText = value;
-        }
-        get
-        {
-            return canAddTokenByText;
-        }
-    }
+    public bool CanAddTokenByText { get; set; } = true;
 
     /// <summary>
     /// Returns True if there are Tokens added in the TokenBox.
@@ -100,96 +86,44 @@ public partial class TokenBox : FlowLayoutPanel
     /// Returns a List of Tokens in the TokenBox.
     /// </summary>
     [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-    public IEnumerable<Token> Tokens
+    public IEnumerable<string> Tokens
     {
         get
         {
-            return Controls.OfType<Token>();
+            return Controls.OfType<Token>().Select(a => a.Text).ToArray();
         }
+        set
+        {
+            triggerChangeEvent = false;
 
+            foreach (var item in value)
+            {
+                AddToken(item);
+            }
+
+            triggerChangeEvent = true;
+        }
     }
 
     /// <summary>
     /// If set to True, a list of suggested texts will be shown to the user when writing the name of a new TokenBox. Needs to have CanAddTokenByText property set to True.
     /// </summary>
-    public bool ShowAutoComplete
-    {
-        get
-        {
-            return showAutoComplete;
-        }
-
-        set
-        {
-            showAutoComplete = value;
-            //if (AutoCompleteTextBox.ShowAutoComplete != value)
-            //{
-            //    AutoCompleteTextBox.ShowAutoComplete = value;
-            //}
-        }
-    }
+    public bool ShowAutoComplete { get; set; } = true;
 
    
 
 
-    public bool CanWriteInTokenBox
-    {
-        get
-        {
-            return canWriteInTokenBox;
-        }
-        set
-        {
-            canWriteInTokenBox = value;
-
-            //if (value)
-            //{
-            //    if (!Controls.Contains(AutoCompleteTextBox))
-            //    { 
-            //        Controls.Add(AutoCompleteTextBox); 
-            //    }
-            //}
-            //else
-            //{
-            //    if (Controls.Contains(AutoCompleteTextBox))
-            //    { 
-            //        Controls.Remove(AutoCompleteTextBox); 
-            //    }
-            //}
-        }
-    }
+    public bool CanWriteInTokenBox { get; set; } = true;
 
     /// <summary>
     /// If set to False, the user will not be able to delete Tokens using Backspace when cursor is in TokenBox. Needs CanAddTokenByText set to True.
     /// </summary>
-    public bool CanDeleteTokensWithBackspace
-    {
-        get
-        {
-            return canDeleteTokensWithBackspace;
-        }
-
-        set
-        {
-            canDeleteTokensWithBackspace = value;
-        }
-    }
+    public bool CanDeleteTokensWithBackspace { get; set; } = true;
 
     /// <summary>
     /// If set to True, a red cross will be shown in the rightmost part of the Token. Clicking on this cross will delete Token.
     /// </summary>
-    public bool ShowDeleteCross
-    {
-        get
-        {
-            return showDeleteCross;
-        }
-
-        set
-        {
-            showDeleteCross = value;
-        }
-    }
+    public bool ShowDeleteCross { get; set; } = true;
 
     public Color DefaultTokenBackgroundColor
     {
@@ -345,11 +279,35 @@ public partial class TokenBox : FlowLayoutPanel
         newToken.FontHovered = DefaultTokenFontHovered;
         newToken.BorderColor = DefaultTokenBorderColor;
         newToken.BorderColorHovered = defaultTokenBorderColorHovered;
-        newToken.NotifyParentEvent += OnTokenClicked;
+        newToken.NotifyParentEvent += NewToken_NotifyParentEvent; ;
 
         Controls.Add(newToken);
 
         Controls.SetChildIndex(AutoCompleteTextBox, Controls.Count - 1);
+
+        if (TokenChanged != null && triggerChangeEvent)
+        {
+            TokenChanged(this, new EventArgs());
+        }
+    }
+
+    private void NewToken_NotifyParentEvent(object? sender, TokenEventArgs e)
+    {
+        if (e.EventType == "Click")
+        {
+            TokenClicked?.Invoke(null, e);
+        }
+        if (e.EventType == "DoubleClick")
+        {
+            TokenDoubleClicked?.Invoke(null, e);
+        }
+        else if (e.EventType == "Remove")
+        {
+            if (TokenChanged != null && triggerChangeEvent)
+            {
+                TokenChanged(this, new EventArgs());
+            }
+        }
     }
 
     public void RemoveToken(int Position)
@@ -383,11 +341,6 @@ public partial class TokenBox : FlowLayoutPanel
         Cursor = CanWriteInTokenBox ? Cursors.IBeam : Cursors.Default;
     }
 
-    public void OnTokenClicked(TokenEventArgs tokenEventArgs)
-    {
-        TokenClicked?.Invoke(null, tokenEventArgs);
-    }
-
     private void mouseClick(object? sender, MouseEventArgs e)
     {
         AutoCompleteTextBox.Focus();
@@ -401,7 +354,12 @@ public partial class TokenBox : FlowLayoutPanel
             && CanDeleteTokensWithBackspace 
             && Controls.Count - 1 > 0)
         {
-            Controls.RemoveAt(this.Controls.Count - 2);
+            Controls.RemoveAt(Controls.Count - 2);
+
+            if (TokenChanged != null)
+            {
+                TokenChanged(sender, e);
+            }
         }
     }
 
