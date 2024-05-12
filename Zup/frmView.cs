@@ -407,89 +407,86 @@ public partial class frmView : Form
         {
             e.Paint(e.CellBounds, DataGridViewPaintParts.All);
 
-            var dataRow = dgView.Rows[e.RowIndex].DataBoundItem as TimeLogSummary;
+            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
 
-            var text = e.FormattedValue.ToString();
-            var textSize = e.Graphics.MeasureString(text, e.CellStyle.Font);
-
-            var halfWidth = e.CellBounds.Width / 2;
-            var halfHeight = e.CellBounds.Height / 2;
-            var centerX = e.CellBounds.X + halfWidth;
-            var centerY = e.CellBounds.Y + halfHeight;
-
-            using (var bb = GetPathRoundCorners(e.CellBounds, 4))
-            {
-
-            }
-
-            using (var brush = new SolidBrush(e.CellStyle.ForeColor))
-            {
-                e.Graphics.FillEllipse(brush, e.CellBounds.Width - textSize.Width, centerY - halfHeight / 2, textSize.Width, textSize.Height);
-            }
+            DrawTags(dataRow.Tags, e.Graphics!, e.CellBounds, new Font(e.CellStyle!.Font.FontFamily, 7));
             
-            var textLocation = new PointF(centerX - textSize.Width / 2, centerY - textSize.Height / 2);
-
-            using (var brush = new SolidBrush(e.CellStyle.BackColor))
-            {
-                e.Graphics.DrawString(text, e.CellStyle.Font, brush, textLocation);
-            }
-
             e.Handled = true;
         }
     }
 
-    private GraphicsPath GetPathRoundCorners(Rectangle rc, int r)
+    private void DrawTags(string[] tags, Graphics graphics, Rectangle cellBoundRec, Font font)
     {
-        int x = rc.X;
-        int y = rc.Y;
-        int w = rc.Width;
-        int h = rc.Height;
-        r = r << 1;
-        GraphicsPath path = new GraphicsPath();
-        if (r > 0)
+        if (tags == null)
         {
-            if (r > h) r = h;
-            if (r > w) r = w;
-            path.AddArc(x, y, r, r, 180, 90);
-            path.AddArc(x + w - r, y, r, r, 270, 90);
-            path.AddArc(x + w - r, y + h - r, r, r, 0, 90);
-            path.AddArc(x, y + h - r, r, r, 90, 90);
+            return;
+        }
+
+        for (int i = 0; i < tags.Length; i++)
+        {
+            var tag = tags[i];
+
+            var textSize = graphics.MeasureString(tag, font);
+
+            var pathRec = new Rectangle
+            {
+                X = Convert.ToInt32(cellBoundRec.Width - textSize.Width - 4),
+                Y = cellBoundRec.Y + 3,
+                Width = (int)textSize.Width + 2,
+                Height = (int)textSize.Height + 1
+            };
+
+            pathRec.X = pathRec.X - (pathRec.Width * i) - (i * 2); // offset - margin
+
+            DrawTag(tag, graphics, pathRec, font);
+        }
+    }
+
+    private void DrawTag(string text, Graphics graphics, Rectangle textRect, Font font)
+    {
+        using (var bb = GetPathRoundCorners(textRect, 2))
+        {
+
+            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            graphics.FillPath(new SolidBrush(Color.DarkGray), bb);
+            graphics.DrawPath(new Pen(Brushes.White), bb);
+        }
+
+        using (var brush = new SolidBrush(Color.White))
+        {
+            var textLoc = new Point(textRect.X + 1, textRect.Y + 1);
+            graphics.DrawString(text, font, brush, textLoc);
+        }
+    }
+
+    private GraphicsPath GetPathRoundCorners(Rectangle rc, int radius)
+    {
+        var x = rc.X;
+        var y = rc.Y;
+        var w = rc.Width;
+        var h = rc.Height;
+
+        radius = radius << 1;
+
+        var path = new GraphicsPath();
+
+        if (radius > 0)
+        {
+            if (radius > h) radius = h;
+            if (radius > w) radius = w;
+
+            path.AddArc(x, y, radius, radius, 180, 90);
+            path.AddArc(x + w - radius, y, radius, radius, 270, 90);
+            path.AddArc(x + w - radius, y + h - radius, radius, radius, 0, 90);
+            path.AddArc(x, y + h - radius, radius, radius, 90, 90);
             path.CloseFigure();
         }
         else
         {
             path.AddRectangle(rc);
         }
+
         return path;
     }
-
-    /*
-    // from Fuse
-    public void SaveTimesheet(string currentFile)
-    {
-        try
-        {
-            List<String> lines = new List<String>();
-            foreach (var task in Tasks)
-            {
-                lines.Add(task.TaskId + "^" + task.TaskDesc + "^" + task.Comments + "^" + task.Client + "^" + task.Duration + "^" + task.Running + "^" + task.Delete);
-            }
-
-            if (currentFile == DateTime.Now.Date.ToString("MM-dd-yyyy"))
-            {
-                endTime = Functions.GetDateTime("{0:MM/dd/yyyy h:mm:ss tt}");
-            }
-
-            lines.Add("FileEnd^" + MiscTimer.TaskSeconds + "^" + startTime + "^" + endTime + "^" + totalTimeClosed);
-            //start saving away data        
-            foreach (var item in awayData)
-            {
-                lines.Add("AwayData^" + item.Lock + "^" + item.Unlock + "^" + item.Add + "^" + item.Remove);
-            }
-
-            System.IO.File.WriteAllLines(Utility.CurrentStageUserDataTimesheetFolder + currentFile + ".fd", lines);
-        }
-        catch { }
-    }
-     */
 }
