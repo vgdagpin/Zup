@@ -697,6 +697,7 @@ public partial class frmUpdateEntry : Form
     {
         if (e.KeyData == (Keys.Control | Keys.S))
         {
+            e.IsInputKey = true;
             SaveEntry();
         }
     }

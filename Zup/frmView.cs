@@ -88,35 +88,37 @@ public partial class frmView : Form
             filter = a => a.Task.ToLower().Contains(search.ToLower());
         }
 
-        dgView.DataSource = p_DbContext.TaskEntries
-                .AsNoTracking()
-                .Where(filter)
-                .OrderByDescending(a => a.StartedOn)
-                .ToList()
-                .Select(a =>
-                {
-                    string? duration = null;
-                    TimeSpan? durationData = null;
+        dgView.DataSource = (from te in p_DbContext.TaskEntries.Where(filter)
+                             join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID
+                             join tag in p_DbContext.Tags on tet.TagID equals tag.ID
+                             select new { TaskEntry = te, Tag = tag })
+                                .AsEnumerable()
+                                .GroupBy(x => x.TaskEntry)
+                                .OrderByDescending(a => a.Key.StartedOn)
+                                .Select(a =>
+                                {
+                                    string? duration = null;
+                                    TimeSpan? durationData = null;
 
-                    if (a.EndedOn != null)
-                    {
-                        durationData = a.EndedOn!.Value - a.StartedOn;
+                                    if (a.Key.EndedOn != null)
+                                    {
+                                        durationData = a.Key.EndedOn!.Value - a.Key.StartedOn;
 
-                        duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
-                    }
+                                        duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
+                                    }
 
-                    return new TimeLogSummary
-                    {
-                        ID = a.ID,
-                        Task = a.Task,
-                        StartedOn = a.StartedOn,
-                        EndedOn = a.EndedOn,
-                        Duration = durationData,
-                        DurationString = duration,
-                        Tags = ["Tag1", "Tag2", "Tag3"]
-                    };
-                })
-                .ToList();
+                                    return new TimeLogSummary
+                                    {
+                                        ID = a.Key.ID,
+                                        Task = a.Key.Task,
+                                        StartedOn = a.Key.StartedOn,
+                                        EndedOn = a.Key.EndedOn,
+                                        Duration = durationData,
+                                        DurationString = duration,
+                                        Tags = a.Select(x => x.Tag.Name).ToArray()
+                                    };
+                                })
+                                .ToList();
     }
 
     private void dgView_DoubleClick(object sender, EventArgs e)
@@ -417,7 +419,7 @@ public partial class frmView : Form
 
     private void DrawTags(string[] tags, Graphics graphics, Rectangle cellBoundRec, Font font)
     {
-        if (tags == null)
+        if (tags == null || tags.Length == 0)
         {
             return;
         }

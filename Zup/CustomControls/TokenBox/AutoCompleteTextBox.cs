@@ -242,9 +242,9 @@ public class AutoCompleteTextBox : TextBox
                 if (lbSuggestions.Items.Count > 0)
                 {
                     lbSuggestions.SelectedIndex = 0;
-                }
 
-                Focus();
+                    Focus();
+                }                
 
                 return;
             }
