@@ -92,9 +92,11 @@ public partial class frmView : Form
         }
 
         dgView.DataSource = (from te in p_DbContext.TaskEntries.Where(filter)
-                             join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID
-                             join tag in p_DbContext.Tags on tet.TagID equals tag.ID
-                             select new { TaskEntry = te, Tag = new { tet.CreatedOn, tag.Name } })
+                             join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID into tet
+                             from tet2 in tet.DefaultIfEmpty()
+                             join tag in p_DbContext.Tags on tet2.TagID equals tag.ID into tag
+                             from tag2 in tag.DefaultIfEmpty()
+                             select new { TaskEntry = te, Tag = tet2 == null ? null : new { tet2.CreatedOn, tag2.Name } })
                                 .AsEnumerable()
                                 .GroupBy(x => x.TaskEntry)
                                 .OrderByDescending(a => a.Key.StartedOn)
@@ -118,7 +120,10 @@ public partial class frmView : Form
                                         EndedOn = a.Key.EndedOn,
                                         Duration = durationData,
                                         DurationString = duration,
-                                        Tags = a.OrderByDescending(a => a.Tag.CreatedOn).Select(x => x.Tag.Name).ToArray()
+                                        Tags = a.Where(a => a.Tag != null)
+                                            .OrderByDescending(a => a.Tag.CreatedOn)
+                                            .Select(x => x.Tag.Name)
+                                            .ToArray()
                                     };
                                 })
                                 .ToList();
