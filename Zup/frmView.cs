@@ -3,6 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Zup.Entities;
 
@@ -37,6 +38,8 @@ public partial class frmView : Form
         txtExtension.Text = Properties.Settings.Default.ExportFileExtension;
 
         SetLabelOutput();
+
+        typeof(DataGridView).InvokeMember("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty, null, dgView, new object[] { true });
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
@@ -398,76 +401,61 @@ public partial class frmView : Form
         MessageBox.Show(string.Join("\n", GetActions().Keys), "Available Templates");
     }
 
+    private Font? tagFont = null;
+
     private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
     {
-        if (e.RowIndex < 0)
+        if (e.RowIndex < 0 || e.ColumnIndex != 1)
         {
             return;
         }
 
-        if (e.ColumnIndex == 1)
-        {
-            e.Paint(e.CellBounds, DataGridViewPaintParts.All);
+        e.PaintBackground(e.CellBounds, true);
+        e.PaintContent(e.CellBounds);
 
-            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
+        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
+        var tags = dataRow.Tags;
 
-            DrawTags(dataRow.Tags, e.Graphics!, e.CellBounds, new Font(e.CellStyle!.Font.FontFamily, 7));
-            
-            e.Handled = true;
-        }
-    }
-
-    private void DrawTags(string[] tags, Graphics graphics, Rectangle cellBoundRec, Font font)
-    {
         if (tags == null || tags.Length == 0)
         {
             return;
         }
 
-        var x = cellBoundRec.Width;
+        if (tagFont == null)
+        {
+            tagFont = new Font(e.CellStyle!.Font.FontFamily, 7);
+        }
+
+        var x = e.CellBounds.Right;
 
         for (int i = 0; i < tags.Length; i++)
         {
             var tag = tags[i];
+            var textSize = e.Graphics!.MeasureString(tag, tagFont);
+            
+            x -= (int)textSize.Width + 4;
 
-            var textSize = graphics.MeasureString(tag, font);
-
-            x = x - (int)textSize.Width - 4;
-
-            //if (x < 400)
-            //{
-            //    x = x + (int)textSize.Width + 4;
-            //    tag = "..";
-            //    textSize = graphics.MeasureString(tag, font);
-            //    x = x - (int)textSize.Width - 4;
-            //}
-
-            var pathRec = new Rectangle
-            {
-                X = x,
-                Y = cellBoundRec.Y + 3,
-                Width = (int)textSize.Width + 2,
-                Height = (int)textSize.Height + 1
-            };
-
-            DrawTag(tag, graphics, pathRec, font);
+            var textRect = new Rectangle(x, e.CellBounds.Top + 3, (int)textSize.Width + 2, (int)textSize.Height + 1);
+            DrawTag(tag, e.Graphics, textRect, tagFont);
         }
+
+        e.Handled = true;
     }
 
     private void DrawTag(string text, Graphics graphics, Rectangle textRect, Font font)
     {
-        using (var bb = GetPathRoundCorners(textRect, 2))
+        using (var path = GetPathRoundCorners(textRect, 2))
+        using (var fillBrush = new SolidBrush(Color.Gray))
+        using (var drawPen = new Pen(Brushes.DarkGray))
+        using (var textBrush = new SolidBrush(Color.White))
         {
             graphics.SmoothingMode = SmoothingMode.HighQuality;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            graphics.FillPath(new SolidBrush(Color.Gray), bb);
-            graphics.DrawPath(new Pen(Brushes.DarkGray), bb);
-        }
+            graphics.FillPath(fillBrush, path);
+            graphics.DrawPath(drawPen, path);
 
-        using (var brush = new SolidBrush(Color.White))
-        {
             var textLoc = new Point(textRect.X + 1, textRect.Y + 1);
-            graphics.DrawString(text, font, brush, textLoc);
+            graphics.DrawString(text, font, textBrush, textLoc);
         }
     }
 

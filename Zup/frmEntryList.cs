@@ -374,6 +374,28 @@ public partial class frmEntryList : Form
             }
         }
 
+        if (args.GetTags && args.ParentEntryID == null)
+        {
+            var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+
+            var tagIDs = (from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
+                          join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
+                             orderby t.CreatedOn descending
+                             where e.Task == args.Entry
+                             select t.TagID)
+                             .Distinct();
+
+            foreach (var tagID in tagIDs)
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    CreatedOn = DateTime.Now,
+                    TaskID = newE.ID,
+                    TagID = tagID
+                });
+            }
+        }
+
         m_DbContext.SaveChanges();
 
         var eachEntry = new EachEntry(newE.ID, newE.Task, newE.CreatedOn, newE.StartedOn, null);

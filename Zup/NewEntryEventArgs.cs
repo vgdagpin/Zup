@@ -14,4 +14,6 @@ public class NewEntryEventArgs : EventArgs
     public bool HideParent { get; set; }
     public bool BringNotes { get; set; }
     public bool BringTags { get; set; }
+
+    public bool GetTags { get; set; }
 }

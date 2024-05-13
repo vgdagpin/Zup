@@ -58,6 +58,7 @@ public partial class frmNewEntry : Form
             e.SuppressKeyPress = true;
             Close();
         }
+        // add to queue
         else if (e.KeyData == (Keys.Alt | Keys.Enter)
             || e.KeyData == (Keys.Alt | Keys.Control | Keys.Enter))
         {
@@ -71,10 +72,14 @@ public partial class frmNewEntry : Form
             {
                 if (OnNewEntryEvent != null)
                 {
-                    OnNewEntryEvent(this, new NewEntryEventArgs(temp));
+                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                    {
+                        GetTags = true
+                    });
                 }
             }
         }
+        // run in parallel
         else if (e.KeyData == (Keys.Shift | Keys.Enter)
             || e.KeyData == (Keys.Shift | Keys.Control | Keys.Enter))
         {
@@ -90,11 +95,13 @@ public partial class frmNewEntry : Form
                 {
                     OnNewEntryEvent(this, new NewEntryEventArgs(temp)
                     {
-                        StartNow = true
+                        StartNow = true,
+                        GetTags = true
                     });
                 }
             }
         }
+        // run this and stop others
         else if (e.KeyCode == Keys.Enter)
         {
             e.SuppressKeyPress = true;
@@ -110,7 +117,8 @@ public partial class frmNewEntry : Form
                     OnNewEntryEvent(this, new NewEntryEventArgs(temp)
                     {
                         StopOtherTask = true,
-                        StartNow = true
+                        StartNow = true,
+                        GetTags = true
                     });
                 }
             }
@@ -224,7 +232,8 @@ public partial class frmNewEntry : Form
                 OnNewEntryEvent(this, new NewEntryEventArgs(temp)
                 {
                     StopOtherTask = true,
-                    StartNow = true
+                    StartNow = true,
+                    GetTags = true
                 });
             }
         }
