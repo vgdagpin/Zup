@@ -91,7 +91,7 @@ public partial class frmView : Form
         dgView.DataSource = (from te in p_DbContext.TaskEntries.Where(filter)
                              join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID
                              join tag in p_DbContext.Tags on tet.TagID equals tag.ID
-                             select new { TaskEntry = te, Tag = tag })
+                             select new { TaskEntry = te, Tag = new { tet.CreatedOn, tag.Name } })
                                 .AsEnumerable()
                                 .GroupBy(x => x.TaskEntry)
                                 .OrderByDescending(a => a.Key.StartedOn)
@@ -115,7 +115,7 @@ public partial class frmView : Form
                                         EndedOn = a.Key.EndedOn,
                                         Duration = durationData,
                                         DurationString = duration,
-                                        Tags = a.Select(x => x.Tag.Name).ToArray()
+                                        Tags = a.OrderByDescending(a => a.Tag.CreatedOn).Select(x => x.Tag.Name).ToArray()
                                     };
                                 })
                                 .ToList();
@@ -424,21 +424,31 @@ public partial class frmView : Form
             return;
         }
 
+        var x = cellBoundRec.Width;
+
         for (int i = 0; i < tags.Length; i++)
         {
             var tag = tags[i];
 
             var textSize = graphics.MeasureString(tag, font);
 
+            x = x - (int)textSize.Width - 4;
+
+            //if (x < 400)
+            //{
+            //    x = x + (int)textSize.Width + 4;
+            //    tag = "..";
+            //    textSize = graphics.MeasureString(tag, font);
+            //    x = x - (int)textSize.Width - 4;
+            //}
+
             var pathRec = new Rectangle
             {
-                X = Convert.ToInt32(cellBoundRec.Width - textSize.Width - 4),
+                X = x,
                 Y = cellBoundRec.Y + 3,
                 Width = (int)textSize.Width + 2,
                 Height = (int)textSize.Height + 1
             };
-
-            pathRec.X = pathRec.X - (pathRec.Width * i) - (i * 2); // offset - margin
 
             DrawTag(tag, graphics, pathRec, font);
         }
@@ -448,11 +458,10 @@ public partial class frmView : Form
     {
         using (var bb = GetPathRoundCorners(textRect, 2))
         {
-
             graphics.SmoothingMode = SmoothingMode.HighQuality;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            graphics.FillPath(new SolidBrush(Color.DarkGray), bb);
-            graphics.DrawPath(new Pen(Brushes.White), bb);
+            graphics.FillPath(new SolidBrush(Color.Gray), bb);
+            graphics.DrawPath(new Pen(Brushes.DarkGray), bb);
         }
 
         using (var brush = new SolidBrush(Color.White))

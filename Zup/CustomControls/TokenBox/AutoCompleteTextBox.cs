@@ -90,10 +90,17 @@ public class AutoCompleteTextBox : TextBox
 
     private void this_KeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.KeyCode == Keys.S && e.Control)
+        {
+            e.SuppressKeyPress = true;
+        }
+
         switch (e.KeyCode)
         {
             case Keys.Enter:
             case Keys.Tab:
+            case Keys.Space:
+                e.SuppressKeyPress = true;
                 AcceptInput();
                 break;
             case Keys.Down:
@@ -105,7 +112,7 @@ public class AutoCompleteTextBox : TextBox
                     {
                         lbSuggestions.SelectedIndex++;
                     }
-                }                
+                }
                 break;
             case Keys.Up:
                 if (lbSuggestions.Visible)
@@ -116,7 +123,7 @@ public class AutoCompleteTextBox : TextBox
                     {
                         lbSuggestions.SelectedIndex--;
                     }
-                }                
+                }
                 break;
             default:
                 break;
