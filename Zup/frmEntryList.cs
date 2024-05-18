@@ -141,7 +141,7 @@ public partial class frmEntryList : Form
 
         var list = LoadListToControl();
 
-        ReorderQueuedTask();
+        SortTasks();
 
         ListIsReady = true;
 
@@ -199,62 +199,72 @@ public partial class frmEntryList : Form
 
     public void SortTasks()
     {
-        var queue = new Queue<EachEntry>();
+        var stack = new Stack<EachEntry>();
         var list = flpTaskList.Controls.Cast<EachEntry>().ToList();
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+
+        flpTaskList.SuspendLayout();
+
+        // running
+        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.IsRunning).OrderBy(a => a.CreatedOn))
+        {
+            stack.Push(item);
+            list.Remove(item);
+        }
 
         // with ranking
         foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Rank != null).OrderBy(a => a.Rank))
         {
-            queue.Enqueue(item);
+            stack.Push(item);
             list.Remove(item);
         }
 
         // started but not yet closed
         foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
         {
-            queue.Enqueue(item);
+            stack.Push(item);
             list.Remove(item);
         }
 
         // not yet started
         foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
         {
-            queue.Enqueue(item);
+            stack.Push(item);
             list.Remove(item);
         }
 
         // closed items
         foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn >= minDate && a.EndedOn != null)
-            .OrderBy(a => a.StartedOn))
+            .OrderByDescending(a => a.StartedOn))
         {
-            queue.Enqueue(item);
+            stack.Push(item);
             list.Remove(item);
         }
 
         foreach (var item in list)
         {
-            queue.Enqueue(item);
+            stack.Push(item);
         }
 
-        var c = flpTaskList.Controls.Count;
         var i = 0;
-        while (queue.TryDequeue(out var entry))
+        while (stack.TryPop(out var entry))
         {
-            flpTaskList.Controls.SetChildIndex(entry, c - 1);
+            flpTaskList.Controls.SetChildIndex(entry, i);
             i++;
         }
 
-        EachEntry? firstItem = c > 0
-            ? (EachEntry)flpTaskList.Controls[c - 1]
+        EachEntry? firstItem = flpTaskList.Controls.Count > 0
+            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
             : null;
 
         if (firstItem != null)
         {
-            ActiveControl = firstItem;
+            flpTaskList.ScrollControlIntoView(firstItem);
 
             firstItem.IsFirstItem = true;
         }
+
+        flpTaskList.ResumeLayout();
     }
 
     private void ReorderQueuedTask()
@@ -420,7 +430,7 @@ public partial class frmEntryList : Form
 
         AddEntryToFlowLayoutControl(eachEntry, args);
 
-        ReorderQueuedTask();
+        SortTasks();
 
         if (args.HideParent && args.ParentEntryID != null)
         {
@@ -459,16 +469,16 @@ public partial class frmEntryList : Form
     {
         flpTaskList.Controls.Add(newEntry);
 
-        // if want it to only queue and there's nothing running
-        // send it to the bottom of the queue
-        if (!args.StartNow)
-        {
-            var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
+        //// if want it to only queue and there's nothing running
+        //// send it to the bottom of the queue
+        //if (!args.StartNow)
+        //{
+        //    var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
 
-            flpTaskList.Controls.SetChildIndex(newEntry, newIx);
-        }
+        //    flpTaskList.Controls.SetChildIndex(newEntry, newIx);
+        //}
 
-        ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
+        //ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
 
         if (!p_OnLoad)
         {

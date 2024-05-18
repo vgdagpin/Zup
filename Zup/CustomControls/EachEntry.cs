@@ -52,7 +52,7 @@ public partial class EachEntry : UserControl
             }
             else
             {
-                lblRank.Text = $"#{rank:00}";
+                lblRank.Text = $"#{rank}";
             }
         }
     }
@@ -118,6 +118,8 @@ public partial class EachEntry : UserControl
             WriteTime();
         }
     }
+
+    public bool IsRunning => tmr.Enabled;
 
     public EachEntry(string text)
     {
