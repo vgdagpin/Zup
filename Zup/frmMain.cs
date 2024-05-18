@@ -283,6 +283,11 @@ public partial class frmMain : Form
 
     protected bool IsNewWeek()
     {
+        if (!m_DbContext.TaskEntries.Any())
+        {
+            return false;
+        }
+
         var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
         var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
         var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;

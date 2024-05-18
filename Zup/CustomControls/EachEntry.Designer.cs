@@ -36,6 +36,9 @@ partial class EachEntry
         lblDuration = new ZupLabel();
         toolTip = new ToolTip(components);
         lblRank = new ZupLabel();
+        cmsEachEntry = new ContextMenuStrip(components);
+        clearTimerToolStripMenuItem = new ToolStripMenuItem();
+        cmsEachEntry.SuspendLayout();
         SuspendLayout();
         // 
         // lblText
@@ -103,11 +106,24 @@ partial class EachEntry
         lblRank.TabIndex = 6;
         lblRank.Text = "#1";
         // 
+        // cmsEachEntry
+        // 
+        cmsEachEntry.Items.AddRange(new ToolStripItem[] { clearTimerToolStripMenuItem });
+        cmsEachEntry.Name = "cmsEachEntry";
+        cmsEachEntry.Size = new Size(135, 26);
+        // 
+        // clearTimerToolStripMenuItem
+        // 
+        clearTimerToolStripMenuItem.Name = "clearTimerToolStripMenuItem";
+        clearTimerToolStripMenuItem.Size = new Size(180, 22);
+        clearTimerToolStripMenuItem.Text = "Clear Timer";
+        // 
         // EachEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
+        ContextMenuStrip = cmsEachEntry;
         Controls.Add(lblRank);
         Controls.Add(lblDuration);
         Controls.Add(lblTimeInOut);
@@ -117,6 +133,7 @@ partial class EachEntry
         Name = "EachEntry";
         Size = new Size(247, 35);
         MouseDown += EachEntry_MouseDown;
+        cmsEachEntry.ResumeLayout(false);
         ResumeLayout(false);
     }
 
@@ -129,4 +146,6 @@ partial class EachEntry
     private ZupLabel lblDuration;
     private ToolTip toolTip;
     private ZupLabel lblRank;
+    private ContextMenuStrip cmsEachEntry;
+    private ToolStripMenuItem clearTimerToolStripMenuItem;
 }

@@ -1,6 +1,4 @@
-﻿using Accessibility;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 using System.Data;
 using System.Runtime.InteropServices;
@@ -89,7 +87,7 @@ public partial class frmEntryList : Form
 
     public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry)
     {
-        InitializeComponent();        
+        InitializeComponent();
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
@@ -103,7 +101,7 @@ public partial class frmEntryList : Form
         e.Cancel = true;
 
         Hide();
-    }    
+    }
 
     public void ShowNewEntry()
     {
@@ -199,55 +197,81 @@ public partial class frmEntryList : Form
 
     public void SortTasks()
     {
-        var stack = new Stack<EachEntry>();
-        var list = flpTaskList.Controls.Cast<EachEntry>().ToList();
+        var stack = new Queue<EachEntry>();
+        var list = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToList();
+        var all = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToArray();
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
         flpTaskList.SuspendLayout();
 
         // running
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.IsRunning).OrderBy(a => a.CreatedOn))
+        foreach (var item in all.Where(a => a.IsRunning).OrderBy(a => a.CreatedOn))
         {
-            stack.Push(item);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
             list.Remove(item);
         }
 
         // with ranking
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Rank != null).OrderBy(a => a.Rank))
+        foreach (var item in all.Where(a => a.Rank != null).OrderBy(a => a.Rank))
         {
-            stack.Push(item);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
             list.Remove(item);
         }
 
         // started but not yet closed
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
+        foreach (var item in all.Where(a => a.StartedOn != null && a.EndedOn == null))
         {
-            stack.Push(item);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
             list.Remove(item);
         }
 
         // not yet started
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
+        foreach (var item in all.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
         {
-            stack.Push(item);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
             list.Remove(item);
         }
 
         // closed items
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn >= minDate && a.EndedOn != null)
+        foreach (var item in all.Where(a => a.StartedOn >= minDate && a.EndedOn != null)
             .OrderByDescending(a => a.StartedOn))
         {
-            stack.Push(item);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
             list.Remove(item);
         }
 
         foreach (var item in list)
         {
-            stack.Push(item);
+            stack.Enqueue(item);
         }
 
         var i = 0;
-        while (stack.TryPop(out var entry))
+        while (stack.TryDequeue(out var entry))
         {
             flpTaskList.Controls.SetChildIndex(entry, i);
             i++;
@@ -366,44 +390,54 @@ public partial class frmEntryList : Form
 
         m_DbContext.TaskEntries.Add(newE);
 
-        if (args.BringNotes && args.ParentEntryID != null)
+        tbl_TaskEntry? parentEntry = args.ParentEntryID != null
+            ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
+            : null;
+
+        // bring notes, tags and rank from parent, this is when the user started a queued task
+        if (parentEntry != null)
         {
-            foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == args.ParentEntryID).ToList())
+            if (args.BringNotes)
             {
-                m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
+                foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntry.ID).ToList())
                 {
-                    ID = Guid.NewGuid(),
-                    TaskID = newE.ID,
-                    CreatedOn = note.CreatedOn,
-                    Notes = note.Notes,
-                    RTF = note.RTF,
-                    UpdatedOn = note.UpdatedOn
-                });
+                    m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
+                    {
+                        ID = Guid.NewGuid(),
+                        TaskID = newE.ID,
+                        CreatedOn = note.CreatedOn,
+                        Notes = note.Notes,
+                        RTF = note.RTF,
+                        UpdatedOn = note.UpdatedOn
+                    });
+                }
             }
+
+            if (args.BringTags)
+            {
+                foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntry.ID).ToList())
+                {
+                    m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                    {
+                        CreatedOn = tag.CreatedOn,
+                        TaskID = newE.ID,
+                        TagID = tag.TagID
+                    });
+                }
+            }
+
+            parentEntry.Rank = null;
         }
 
-        if (args.BringTags && args.ParentEntryID != null)
-        {
-            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == args.ParentEntryID).ToList())
-            {
-                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    CreatedOn = tag.CreatedOn,
-                    TaskID = newE.ID,
-                    TagID = tag.TagID
-                });
-            }
-        }
-
-        if (args.GetTags && args.ParentEntryID == null)
+        if (args.GetTags && parentEntry == null)
         {
             var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
             var tagIDs = (from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
                           join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
-                             orderby t.CreatedOn descending
-                             where e.Task == args.Entry
-                             select t.TagID)
+                          orderby t.CreatedOn descending
+                          where e.Task == args.Entry
+                          select t.TagID)
                              .Distinct();
 
             foreach (var tagID in tagIDs)
@@ -420,6 +454,11 @@ public partial class frmEntryList : Form
         m_DbContext.SaveChanges();
 
         var eachEntry = new EachEntry(newE.ID, newE.Task, newE.CreatedOn, newE.StartedOn, null);
+
+        if (newE.Rank != null)
+        {
+            eachEntry.Rank = newE.Rank;
+        }
 
         eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -442,7 +481,7 @@ public partial class frmEntryList : Form
             ShowUpdateEntry(newE.ID);
         }
 
-        ResizeForm();        
+        ResizeForm();
 
         if (OnQueueTaskUpdatedEvent != null)
         {
@@ -497,7 +536,7 @@ public partial class frmEntryList : Form
                     {
                         item.IsExpanded = false;
                     }
-                }                
+                }
             }
 
             if (newEntry.StartedOn != null)
