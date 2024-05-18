@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 
 using Zup.Entities;
+using Zup.EventArguments;
 
 namespace Zup;
 
@@ -14,10 +15,9 @@ public partial class frmUpdateEntry : Form
     private Guid? selectedNoteID;
 
     public delegate void OnDelete(Guid entryID);
-    public delegate void OnSaved(tbl_TaskEntry log);
 
     public event OnDelete? OnDeleteEvent;
-    public event OnSaved? OnSavedEvent;
+    public event EventHandler<SaveEventArgs>? OnSavedEvent;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -570,7 +570,7 @@ public partial class frmUpdateEntry : Form
 
             if (OnSavedEvent != null)
             {
-                OnSavedEvent(task);
+                OnSavedEvent(this, new SaveEventArgs(task));
             }
         }
     }

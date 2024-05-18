@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Accessibility;
+
+using Microsoft.EntityFrameworkCore;
 
 using System.Data;
 using System.Runtime.InteropServices;
@@ -170,7 +172,10 @@ public partial class frmEntryList : Form
 
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate))
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
+            {
+                Rank = task.Rank
+            };
 
             eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -232,10 +237,16 @@ public partial class frmEntryList : Form
             queue.Enqueue(item);
         }
 
-        flpTaskList.Controls.SetChildIndex(flpTaskList.Controls[1], 0);
+        var c = flpTaskList.Controls.Count;
+        var i = 0;
+        while (queue.TryDequeue(out var entry))
+        {
+            flpTaskList.Controls.SetChildIndex(entry, c - 1);
+            i++;
+        }
 
-        EachEntry? firstItem = flpTaskList.Controls.Count > 0
-            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
+        EachEntry? firstItem = c > 0
+            ? (EachEntry)flpTaskList.Controls[c - 1]
             : null;
 
         if (firstItem != null)
@@ -278,15 +289,16 @@ public partial class frmEntryList : Form
         Height = totalHeight;
     }
 
-    private void FormUpdateEntry_OnSavedEventHandler(tbl_TaskEntry log)
+    private void FormUpdateEntry_OnSavedEventHandler(object? sender, SaveEventArgs args)
     {
         foreach (var entry in flpTaskList.Controls.Cast<EachEntry>())
         {
-            if (entry.EntryID == log.ID)
+            if (entry.EntryID == args.Task.ID)
             {
-                entry.Text = log.Task;
-                entry.StartedOn = log.StartedOn;
-                entry.EndedOn = log.EndedOn;
+                entry.Text = args.Task.Task;
+                entry.StartedOn = args.Task.StartedOn;
+                entry.EndedOn = args.Task.EndedOn;
+                entry.Rank = args.Task.Rank;
             }
         }
     }
