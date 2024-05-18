@@ -44,7 +44,10 @@ public class ZupDbContext : DbContext
 
         var backupPath = Path.Combine(dir, newFileName);
 
-        File.Copy(Properties.Settings.Default.DbPath, backupPath);
+        if (!File.Exists(backupPath))
+        {
+            File.Copy(Properties.Settings.Default.DbPath, backupPath);
+        }
 
         return dir;
     }

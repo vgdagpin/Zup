@@ -38,6 +38,25 @@ public partial class EachEntry : UserControl
     public const int ExpandedHeight = 35;
     public const int CollapsedHeight = 22;
 
+    byte? rank;
+    public byte? Rank
+    {
+        get => rank;
+        set
+        {
+            rank = value;
+
+            if (rank == null)
+            {
+                lblRank.Text = string.Empty;
+            }
+            else
+            {
+                lblRank.Text = $"#{rank:00}";
+            }
+        }
+    }
+
     bool isExpanded = false;
     public bool IsExpanded
     {
@@ -118,6 +137,7 @@ public partial class EachEntry : UserControl
         CreatedOn = createdOn;
         StartedOn = startedOn;
         EndedOn = endedOn;
+        Rank = null;
 
         WriteTime();
 

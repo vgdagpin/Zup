@@ -155,6 +155,8 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
+        numRank.Value = selectedEntry.Rank ?? 0;
+
         _ = LoadTags(selectedEntry);
         _ = LoadNotes(selectedEntry);
         _ = LoadPreviousNotes(selectedEntry);
@@ -550,6 +552,15 @@ public partial class frmUpdateEntry : Form
             task.Task = txtTask.Text;
             task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
             task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
+
+            if (numRank.Value <= 0)
+            {
+                task.Rank = null;
+            }
+            else
+            {
+                task.Rank = (byte)numRank.Value;
+            }
 
             SaveTags(task.ID, tokenBoxTags.Tokens.ToArray());
 

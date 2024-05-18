@@ -4,6 +4,8 @@ using Microsoft.Win32;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
+using Zup.EventArguments;
+
 namespace Zup;
 
 public partial class frmMain : Form
@@ -66,9 +68,9 @@ public partial class frmMain : Form
         }
     }
 
-    private void FrmEntryList_OnQueueTaskUpdatedEvent(int queueCount)
+    private void FrmEntryList_OnQueueTaskUpdatedEvent(object? sender, QueueTaskUpdatedEventArgs args)
     {
-        SetIcon(queueCount);
+        SetIcon(args.QueueCount);
     }
 
     public void SetIcon(int? queueCount = null)
@@ -121,9 +123,9 @@ public partial class frmMain : Form
         return false;
     }
 
-    private void FrmEntryList_OnListReadyEvent(int listCount)
+    private void FrmEntryList_OnListReadyEvent(object? sender, ListReadyEventArgs args)
     {
-        if (listCount == 0)
+        if (!args.HasItem)
         {
             notifIconZup.ShowBalloonTip(1000, "", "It's lonely here, press Shift+Alt+J to start adding task!", ToolTipIcon.Info);
         }
@@ -281,14 +283,13 @@ public partial class frmMain : Form
 
     protected bool IsNewWeek()
     {
-        var lastRow = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault();
+        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
+        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
+        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
 
-        if (lastRow == null)
-        {
-            return false;
-        }
+        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();        
 
-        var lastRowWeekNum = Utility.GetWeekNumber(lastRow.StartedOn!.Value);
+        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
         var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
 
         return lastRowWeekNum < weekNumNow;
@@ -323,14 +324,15 @@ public partial class frmMain : Form
                         m_FormEntryList.ToggleLastRunningTask();
                         break;
                     case Constants.ShowViewAll:
-                        if (m_FormView.Visible)
-                        {
-                            m_FormView.Activate();
+                        //if (m_FormView.Visible)
+                        //{
+                        //    m_FormView.Activate();
 
-                            return;
-                        }
+                        //    return;
+                        //}
 
-                        m_FormView.Show();
+                        //m_FormView.Show();
+                        m_FormEntryList.SortTasks();
                         break;
                 }
             }
