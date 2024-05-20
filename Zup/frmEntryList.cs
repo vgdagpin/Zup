@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 using Zup.CustomControls;
 using Zup.Entities;
+using Zup.EventArguments;
 
 namespace Zup;
 
@@ -21,11 +22,8 @@ public partial class frmEntryList : Form
 
     public bool ListIsReady { get; set; }
 
-    public delegate void OnListReady(int listCount);
-    public delegate void OnQueueTaskUpdated(int queueCount);
-
-    public event OnListReady? OnListReadyEvent;
-    public event OnQueueTaskUpdated? OnQueueTaskUpdatedEvent;
+    public event EventHandler<ListReadyEventArgs>? OnListReadyEvent;
+    public event EventHandler<QueueTaskUpdatedEventArgs>? OnQueueTaskUpdatedEvent;
 
     #region Draggable Form
     public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -89,7 +87,7 @@ public partial class frmEntryList : Form
 
     public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry)
     {
-        InitializeComponent();        
+        InitializeComponent();
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
@@ -103,7 +101,7 @@ public partial class frmEntryList : Form
         e.Cancel = true;
 
         Hide();
-    }    
+    }
 
     public void ShowNewEntry()
     {
@@ -139,8 +137,21 @@ public partial class frmEntryList : Form
         m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
         m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
 
-        LoadListToControl();
-        ReorderQueuedTask();
+        var list = LoadListToControl();
+
+        SortTasks();
+
+        ListIsReady = true;
+
+        if (OnListReadyEvent != null)
+        {
+            OnListReadyEvent(this, new ListReadyEventArgs(list.HasItem));
+        }
+
+        if (OnQueueTaskUpdatedEvent != null)
+        {
+            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(list.QueueCount));
+        }
 
         p_OnLoad = false;
 
@@ -150,19 +161,19 @@ public partial class frmEntryList : Form
         UpdateFormPosition();
     }
 
-    private void LoadListToControl()
+    private (bool HasItem, int QueueCount) LoadListToControl()
     {
-        var count = 0;
         var queueCount = 0;
+        var hasItem = false;
 
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
-        // closed items
-        foreach (var task in m_DbContext.TaskEntries
-            .Where(a => a.StartedOn >= minDate && a.EndedOn != null)
-            .OrderBy(a => a.StartedOn))
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate))
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
+            {
+                Rank = task.Rank
+            };
 
             eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -171,91 +182,135 @@ public partial class frmEntryList : Form
             eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
-            {
-                StopOtherTask = true,
-                StartNow = true
-            });
+            flpTaskList.Controls.Add(eachEntry);
 
-            count++;
+            hasItem = true;
+
+            if (task.StartedOn == null)
+            {
+                queueCount++;
+            }
         }
 
-        // not yet started
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
+        return (hasItem, queueCount);
+    }
+
+    public void SortTasks()
+    {
+        var stack = new Queue<EachEntry>();
+        var list = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToList();
+        var all = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToArray();
+        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+
+        flpTaskList.SuspendLayout();
+
+        // running
+        foreach (var item in all.Where(a => a.IsRunning).OrderBy(a => a.CreatedOn))
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
-
-            eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
-            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
-            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
-            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
-            eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
-            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
-
-            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
+            if (!list.Contains(item))
             {
-                StopOtherTask = true,
-                StartNow = true
-            });
+                continue;
+            }
 
-            count++;
-            queueCount++;
+            stack.Enqueue(item);
+            list.Remove(item);
+        }
+
+        // with ranking
+        foreach (var item in all.Where(a => a.Rank != null).OrderBy(a => a.Rank))
+        {
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
+            list.Remove(item);
         }
 
         // started but not yet closed
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.StartedOn != null && a.EndedOn == null))
+        foreach (var item in all.Where(a => a.StartedOn != null && a.EndedOn == null))
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn);
-
-            eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
-            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
-            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
-            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
-            eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
-            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
-
-            AddEntryToFlowLayoutControl(eachEntry, new NewEntryEventArgs(task.Task)
+            if (!list.Contains(item))
             {
-                StopOtherTask = true,
-                StartNow = true
-            });
+                continue;
+            }
 
-            count++;
+            stack.Enqueue(item);
+            list.Remove(item);
         }
 
-        ListIsReady = true;
-
-        if (OnListReadyEvent != null)
+        // not yet started
+        foreach (var item in all.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
         {
-            OnListReadyEvent(count);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
+            list.Remove(item);
         }
 
-        if (OnQueueTaskUpdatedEvent != null)
+        // closed items
+        foreach (var item in all.Where(a => a.StartedOn >= minDate && a.EndedOn != null)
+            .OrderByDescending(a => a.StartedOn))
         {
-            OnQueueTaskUpdatedEvent(queueCount);
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
+            list.Remove(item);
         }
+
+        foreach (var item in list)
+        {
+            stack.Enqueue(item);
+        }
+
+        var i = 0;
+        while (stack.TryDequeue(out var entry))
+        {
+            flpTaskList.Controls.SetChildIndex(entry, i);
+            i++;
+        }
+
+        EachEntry? firstItem = flpTaskList.Controls.Count > 0
+            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
+            : null;
+
+        if (firstItem != null)
+        {
+            flpTaskList.ScrollControlIntoView(firstItem);
+
+            firstItem.IsFirstItem = true;
+        }
+
+        flpTaskList.ResumeLayout();
     }
 
     private void ReorderQueuedTask()
     {
-        var queue = new Queue<EachEntry>();
+        //var queue = new Queue<EachEntry>();
 
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null))
-        {
-            queue.Enqueue(item);
-        }
+        //foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null))
+        //{
+        //    queue.Enqueue(item);
+        //}
 
-        foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
-        {
-            queue.Enqueue(item);
-        }
+        //foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
+        //{
+        //    queue.Enqueue(item);
+        //}
 
-        var startIx = flpTaskList.Controls.Count - queue.Count;
+        //var startIx = flpTaskList.Controls.Count - queue.Count;
 
-        for (int i = startIx; i < flpTaskList.Controls.Count; i++)
-        {
-            //flpTaskList.Controls.SetChildIndex(queue.Dequeue(), i);
-        }        
+        //for (int i = startIx; i < flpTaskList.Controls.Count; i++)
+        //{
+        //    flpTaskList.Controls.SetChildIndex(queue.Dequeue(), i);
+        //}
     }
 
     public void ResizeForm()
@@ -268,25 +323,16 @@ public partial class frmEntryList : Form
         Height = totalHeight;
     }
 
-    public void ExpandFirstEntryOnly()
-    {
-        var lastControl = flpTaskList.Controls.Cast<EachEntry>().LastOrDefault();
-
-        if (lastControl != null)
-        {
-            lastControl.IsExpanded = true;
-        }
-    }
-
-    private void FormUpdateEntry_OnSavedEventHandler(tbl_TaskEntry log)
+    private void FormUpdateEntry_OnSavedEventHandler(object? sender, SaveEventArgs args)
     {
         foreach (var entry in flpTaskList.Controls.Cast<EachEntry>())
         {
-            if (entry.EntryID == log.ID)
+            if (entry.EntryID == args.Task.ID)
             {
-                entry.Text = log.Task;
-                entry.StartedOn = log.StartedOn;
-                entry.EndedOn = log.EndedOn;
+                entry.Text = args.Task.Task;
+                entry.StartedOn = args.Task.StartedOn;
+                entry.EndedOn = args.Task.EndedOn;
+                entry.Rank = args.Task.Rank;
             }
         }
     }
@@ -305,7 +351,7 @@ public partial class frmEntryList : Form
 
         if (OnQueueTaskUpdatedEvent != null)
         {
-            OnQueueTaskUpdatedEvent(GetQueueCount(false));
+            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
         }
     }
 
@@ -328,7 +374,6 @@ public partial class frmEntryList : Form
         }
     }
 
-    // private void EachEntry_NewEntryEventHandler(string entry, bool stopOtherTask, bool startNow, Guid? parentEntryID = null, bool hideParent = false, bool bringNotesAndTags = false)
     private void EachEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
         var newE = new tbl_TaskEntry
@@ -345,44 +390,54 @@ public partial class frmEntryList : Form
 
         m_DbContext.TaskEntries.Add(newE);
 
-        if (args.BringNotes && args.ParentEntryID != null)
+        tbl_TaskEntry? parentEntry = args.ParentEntryID != null
+            ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
+            : null;
+
+        // bring notes, tags and rank from parent, this is when the user started a queued task
+        if (parentEntry != null)
         {
-            foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == args.ParentEntryID).ToList())
+            if (args.BringNotes)
             {
-                m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
+                foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntry.ID).ToList())
                 {
-                    ID = Guid.NewGuid(),
-                    TaskID = newE.ID,
-                    CreatedOn = note.CreatedOn,
-                    Notes = note.Notes,
-                    RTF = note.RTF,
-                    UpdatedOn = note.UpdatedOn
-                });
+                    m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
+                    {
+                        ID = Guid.NewGuid(),
+                        TaskID = newE.ID,
+                        CreatedOn = note.CreatedOn,
+                        Notes = note.Notes,
+                        RTF = note.RTF,
+                        UpdatedOn = note.UpdatedOn
+                    });
+                }
             }
+
+            if (args.BringTags)
+            {
+                foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntry.ID).ToList())
+                {
+                    m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                    {
+                        CreatedOn = tag.CreatedOn,
+                        TaskID = newE.ID,
+                        TagID = tag.TagID
+                    });
+                }
+            }
+
+            parentEntry.Rank = null;
         }
 
-        if (args.BringTags && args.ParentEntryID != null)
-        {
-            foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == args.ParentEntryID).ToList())
-            {
-                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    CreatedOn = tag.CreatedOn,
-                    TaskID = newE.ID,
-                    TagID = tag.TagID
-                });
-            }
-        }
-
-        if (args.GetTags && args.ParentEntryID == null)
+        if (args.GetTags && parentEntry == null)
         {
             var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
             var tagIDs = (from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
                           join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
-                             orderby t.CreatedOn descending
-                             where e.Task == args.Entry
-                             select t.TagID)
+                          orderby t.CreatedOn descending
+                          where e.Task == args.Entry
+                          select t.TagID)
                              .Distinct();
 
             foreach (var tagID in tagIDs)
@@ -400,6 +455,11 @@ public partial class frmEntryList : Form
 
         var eachEntry = new EachEntry(newE.ID, newE.Task, newE.CreatedOn, newE.StartedOn, null);
 
+        if (newE.Rank != null)
+        {
+            eachEntry.Rank = newE.Rank;
+        }
+
         eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
         eachEntry.OnStartEvent += EachEntry_OnStartEvent;
@@ -409,7 +469,7 @@ public partial class frmEntryList : Form
 
         AddEntryToFlowLayoutControl(eachEntry, args);
 
-        ReorderQueuedTask();
+        SortTasks();
 
         if (args.HideParent && args.ParentEntryID != null)
         {
@@ -421,11 +481,11 @@ public partial class frmEntryList : Form
             ShowUpdateEntry(newE.ID);
         }
 
-        ResizeForm();        
+        ResizeForm();
 
         if (OnQueueTaskUpdatedEvent != null)
         {
-            OnQueueTaskUpdatedEvent(GetQueueCount(false));
+            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
         }
     }
 
@@ -444,21 +504,20 @@ public partial class frmEntryList : Form
         await m_FormUpdateEntry.ShowUpdateEntry(entryID);
     }
 
-    // private void AddEntryToFlowLayoutControl(EachEntry newEntry, bool stopOthers = true, bool startNow = true, Guid? parentEntryID = null, bool hideParent = false)
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, NewEntryEventArgs args)
     {
         flpTaskList.Controls.Add(newEntry);
 
-        // if want it to only queue and there's nothing running
-        // send it to the bottom of the queue
-        if (!args.StartNow)
-        {
-            var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
+        //// if want it to only queue and there's nothing running
+        //// send it to the bottom of the queue
+        //if (!args.StartNow)
+        //{
+        //    var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
 
-            flpTaskList.Controls.SetChildIndex(newEntry, newIx);
-        }
+        //    flpTaskList.Controls.SetChildIndex(newEntry, newIx);
+        //}
 
-        ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
+        //ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
 
         if (!p_OnLoad)
         {
@@ -477,7 +536,7 @@ public partial class frmEntryList : Form
                     {
                         item.IsExpanded = false;
                     }
-                }                
+                }
             }
 
             if (newEntry.StartedOn != null)

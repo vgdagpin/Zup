@@ -12,4 +12,6 @@ public class tbl_TaskEntry
     public DateTime CreatedOn { get; set; }
     public DateTime? StartedOn { get; set; }
     public DateTime? EndedOn { get; set; }
+
+    public byte? Rank { get; set; }
 }

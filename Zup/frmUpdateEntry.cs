@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 
 using Zup.Entities;
+using Zup.EventArguments;
 
 namespace Zup;
 
@@ -14,10 +15,9 @@ public partial class frmUpdateEntry : Form
     private Guid? selectedNoteID;
 
     public delegate void OnDelete(Guid entryID);
-    public delegate void OnSaved(tbl_TaskEntry log);
 
     public event OnDelete? OnDeleteEvent;
-    public event OnSaved? OnSavedEvent;
+    public event EventHandler<SaveEventArgs>? OnSavedEvent;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -155,10 +155,13 @@ public partial class frmUpdateEntry : Form
             ? DateTimeCustomFormat
             : " ";
 
+        numRank.Value = selectedEntry.Rank ?? 0;
+
         _ = LoadTags(selectedEntry);
         _ = LoadNotes(selectedEntry);
         _ = LoadPreviousNotes(selectedEntry);
 
+        /// <see cref="tmrFocus_Tick"/>
         tmrFocus.Enabled = true;
 
         SetControlsEnable(true);
@@ -551,6 +554,15 @@ public partial class frmUpdateEntry : Form
             task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
             task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
 
+            if (numRank.Value <= 0)
+            {
+                task.Rank = null;
+            }
+            else
+            {
+                task.Rank = (byte)numRank.Value;
+            }
+
             SaveTags(task.ID, tokenBoxTags.Tokens.ToArray());
 
             p_DbContext.SaveChanges();
@@ -559,7 +571,7 @@ public partial class frmUpdateEntry : Form
 
             if (OnSavedEvent != null)
             {
-                OnSavedEvent(task);
+                OnSavedEvent(this, new SaveEventArgs(task));
             }
         }
     }

@@ -38,6 +38,25 @@ public partial class EachEntry : UserControl
     public const int ExpandedHeight = 35;
     public const int CollapsedHeight = 22;
 
+    byte? rank;
+    public byte? Rank
+    {
+        get => rank;
+        set
+        {
+            rank = value;
+
+            if (rank == null)
+            {
+                lblRank.Text = string.Empty;
+            }
+            else
+            {
+                lblRank.Text = $"#{rank}";
+            }
+        }
+    }
+
     bool isExpanded = false;
     public bool IsExpanded
     {
@@ -100,6 +119,8 @@ public partial class EachEntry : UserControl
         }
     }
 
+    public bool IsRunning => tmr.Enabled;
+
     public EachEntry(string text)
     {
         InitializeComponent();
@@ -118,6 +139,7 @@ public partial class EachEntry : UserControl
         CreatedOn = createdOn;
         StartedOn = startedOn;
         EndedOn = endedOn;
+        Rank = null;
 
         WriteTime();
 
@@ -127,6 +149,8 @@ public partial class EachEntry : UserControl
         VisibleChanged += EachEntry_VisibleChanged;
 
         IsExpanded = StartedOn != null;
+
+        SetStyle(ControlStyles.Selectable, false);
     }
 
     private void EachEntry_VisibleChanged(object? sender, EventArgs e)
@@ -184,6 +208,10 @@ public partial class EachEntry : UserControl
         {
             if (OnResumeEvent != null)
             {
+                // we need to set this to null
+                // because we are moving this rank to the new entry
+                Rank = null;
+
                 // if shift is pressed, create a new entry running in parallel
                 var args = new NewEntryEventArgs(Text) 
                 { 
@@ -203,6 +231,10 @@ public partial class EachEntry : UserControl
         {
             if (OnStartQueueEvent != null)
             {
+                // we need to set this to null
+                // because we are moving this rank to the new entry
+                Rank = null;
+
                 var args = new NewEntryEventArgs(Text) 
                 { 
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
@@ -211,7 +243,7 @@ public partial class EachEntry : UserControl
                     HideParent = true, 
                     BringNotes = true,
                     BringTags = true
-                };
+                };                
 
                 OnStartQueueEvent(this, args);
 

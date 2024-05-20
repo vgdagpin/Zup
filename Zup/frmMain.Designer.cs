@@ -39,6 +39,7 @@ partial class frmMain
         toolStripSeparator1 = new ToolStripSeparator();
         exitToolStripMenuItem = new ToolStripMenuItem();
         tmrDelayShowList = new System.Windows.Forms.Timer(components);
+        tagEditorToolStripMenuItem = new ToolStripMenuItem();
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -54,9 +55,9 @@ partial class frmMain
         // 
         // notifCms
         // 
-        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(298, 142);
+        notifCms.Size = new Size(298, 186);
         // 
         // viewToolStripMenuItem
         // 
@@ -115,6 +116,13 @@ partial class frmMain
         tmrDelayShowList.Interval = 300;
         tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
+        // tagEditorToolStripMenuItem
+        // 
+        tagEditorToolStripMenuItem.Name = "tagEditorToolStripMenuItem";
+        tagEditorToolStripMenuItem.Size = new Size(297, 22);
+        tagEditorToolStripMenuItem.Text = "Tag Editor";
+        tagEditorToolStripMenuItem.Click += tagEditorToolStripMenuItem_Click;
+        // 
         // frmMain
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -143,4 +151,5 @@ partial class frmMain
     private ToolStripMenuItem openNewEntryToolStripMenuItem;
     private ToolStripMenuItem updateCurrentRunningTaskToolStripMenuItem;
     private ToolStripMenuItem toggleLastRunningTaskToolStripMenuItem;
+    private ToolStripMenuItem tagEditorToolStripMenuItem;
 }

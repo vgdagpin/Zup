@@ -50,11 +50,14 @@ partial class frmUpdateEntry
         label3 = new Label();
         label2 = new Label();
         label1 = new Label();
+        label5 = new Label();
+        numRank = new NumericUpDown();
         pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
         splitContainer1.Panel2.SuspendLayout();
         splitContainer1.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)numRank).BeginInit();
         SuspendLayout();
         // 
         // rtbNote
@@ -131,7 +134,7 @@ partial class frmUpdateEntry
         txtTask.Font = new Font("Segoe UI", 10F);
         txtTask.Location = new Point(111, 13);
         txtTask.Name = "txtTask";
-        txtTask.Size = new Size(702, 25);
+        txtTask.Size = new Size(627, 25);
         txtTask.TabIndex = 10;
         txtTask.TextChanged += txtTask_TextChanged;
         // 
@@ -237,6 +240,7 @@ partial class frmUpdateEntry
         // 
         // tokenBoxTags
         // 
+        tokenBoxTags.AutoCompleteList = (List<string>)resources.GetObject("tokenBoxTags.AutoCompleteList");
         tokenBoxTags.AutoScroll = true;
         tokenBoxTags.BackColor = SystemColors.Window;
         tokenBoxTags.BorderStyle = BorderStyle.FixedSingle;
@@ -297,11 +301,33 @@ partial class frmUpdateEntry
         label1.TabIndex = 16;
         label1.Text = "T&ask";
         // 
+        // label5
+        // 
+        label5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        label5.AutoSize = true;
+        label5.Location = new Point(793, 16);
+        label5.Name = "label5";
+        label5.Size = new Size(33, 15);
+        label5.TabIndex = 21;
+        label5.Text = "&Rank";
+        // 
+        // numRank
+        // 
+        numRank.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        numRank.Location = new Point(744, 13);
+        numRank.Maximum = new decimal(new int[] { 5, 0, 0, 0 });
+        numRank.Name = "numRank";
+        numRank.Size = new Size(43, 23);
+        numRank.TabIndex = 22;
+        numRank.TextAlign = HorizontalAlignment.Center;
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(834, 561);
+        Controls.Add(numRank);
+        Controls.Add(label5);
         Controls.Add(btnDelete);
         Controls.Add(tokenBoxTags);
         Controls.Add(btnSaveChanges);
@@ -329,6 +355,7 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
         splitContainer1.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)numRank).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -354,4 +381,6 @@ partial class frmUpdateEntry
     private Label label1;
     private Label label4;
     private CustomControls.TokenBox tokenBoxTags;
+    private Label label5;
+    private NumericUpDown numRank;
 }

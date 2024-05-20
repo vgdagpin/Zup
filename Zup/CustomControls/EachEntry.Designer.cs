@@ -35,15 +35,19 @@ partial class EachEntry
         tmr = new System.Windows.Forms.Timer(components);
         lblDuration = new ZupLabel();
         toolTip = new ToolTip(components);
+        lblRank = new ZupLabel();
+        cmsEachEntry = new ContextMenuStrip(components);
+        clearTimerToolStripMenuItem = new ToolStripMenuItem();
+        cmsEachEntry.SuspendLayout();
         SuspendLayout();
         // 
         // lblText
         // 
         lblText.AutoEllipsis = true;
         lblText.Font = new Font("Segoe UI", 7F);
-        lblText.Location = new Point(4, 4);
+        lblText.Location = new Point(19, 4);
         lblText.Name = "lblText";
-        lblText.Size = new Size(215, 13);
+        lblText.Size = new Size(200, 13);
         lblText.TabIndex = 0;
         lblText.Text = "Task #1";
         toolTip.SetToolTip(lblText, "Test");
@@ -67,7 +71,7 @@ partial class EachEntry
         // lblTimeInOut
         // 
         lblTimeInOut.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
-        lblTimeInOut.Location = new Point(5, 18);
+        lblTimeInOut.Location = new Point(19, 17);
         lblTimeInOut.Name = "lblTimeInOut";
         lblTimeInOut.Size = new Size(94, 12);
         lblTimeInOut.TabIndex = 2;
@@ -90,11 +94,37 @@ partial class EachEntry
         lblDuration.Text = "00:00:00";
         lblDuration.MouseDown += lblDuration_MouseDown;
         // 
+        // lblRank
+        // 
+        lblRank.BackColor = Color.LawnGreen;
+        lblRank.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        lblRank.ForeColor = Color.IndianRed;
+        lblRank.Location = new Point(0, 0);
+        lblRank.Name = "lblRank";
+        lblRank.Padding = new Padding(0, 4, 0, 0);
+        lblRank.Size = new Size(17, 35);
+        lblRank.TabIndex = 6;
+        lblRank.Text = "#1";
+        // 
+        // cmsEachEntry
+        // 
+        cmsEachEntry.Items.AddRange(new ToolStripItem[] { clearTimerToolStripMenuItem });
+        cmsEachEntry.Name = "cmsEachEntry";
+        cmsEachEntry.Size = new Size(135, 26);
+        // 
+        // clearTimerToolStripMenuItem
+        // 
+        clearTimerToolStripMenuItem.Name = "clearTimerToolStripMenuItem";
+        clearTimerToolStripMenuItem.Size = new Size(180, 22);
+        clearTimerToolStripMenuItem.Text = "Clear Timer";
+        // 
         // EachEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
+        ContextMenuStrip = cmsEachEntry;
+        Controls.Add(lblRank);
         Controls.Add(lblDuration);
         Controls.Add(lblTimeInOut);
         Controls.Add(btnToggleStartStop);
@@ -103,6 +133,7 @@ partial class EachEntry
         Name = "EachEntry";
         Size = new Size(247, 35);
         MouseDown += EachEntry_MouseDown;
+        cmsEachEntry.ResumeLayout(false);
         ResumeLayout(false);
     }
 
@@ -114,4 +145,7 @@ partial class EachEntry
     private System.Windows.Forms.Timer tmr;
     private ZupLabel lblDuration;
     private ToolTip toolTip;
+    private ZupLabel lblRank;
+    private ContextMenuStrip cmsEachEntry;
+    private ToolStripMenuItem clearTimerToolStripMenuItem;
 }

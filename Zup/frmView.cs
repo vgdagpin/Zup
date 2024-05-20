@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+
 using Zup.Entities;
 
 namespace Zup;
@@ -40,13 +40,20 @@ public partial class frmView : Form
         SetLabelOutput();
 
         typeof(DataGridView).InvokeMember("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty, null, dgView, new object[] { true });
+
+        TagHelper.Register<TimeLogSummary>("StartedOnTicks", (tagKey, dicAction) => dicAction.StartedOn!.Value.Ticks.ToString());
+        TagHelper.Register<TimeLogSummary>("Task", (tagKey, dicAction) => dicAction.Task);
+        TagHelper.Register<TimeLogSummary>("Tags", (tagKey, dicAction) => ExtractTags(dicAction.ID));
+        TagHelper.Register<TimeLogSummary>("Tag", (tagKey, dicAction) => ExtractTag(tagKey, dicAction.ID));
+        TagHelper.Register<TimeLogSummary>("Comments", (tagKey, dicAction) => ExtractComments(dicAction.ID));
+        TagHelper.Register<TimeLogSummary>("Duration", (tagKey, dicAction) => dicAction.DurationString!);
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
     {
         if (Visible)
         {
-            LoadWeekData();
+            LoadWeekData();            
         }
     }
 
@@ -234,7 +241,7 @@ public partial class frmView : Form
 
     private string GetContent(string format)
     {
-        var dicAction = GetActions();
+        var tags = TagHelper.GetTags(format);
 
         var content = new StringBuilder();
 
@@ -246,29 +253,17 @@ public partial class frmView : Form
             {
                 var data = format;
 
-                foreach (var action in dicAction)
+                foreach (var tag in tags)
                 {
-                    data = data.Replace(action.Key, action.Value(a));
+                    var output = TagHelper.RunTag(tag, a);
+
+                    data = data.Replace($"~{tag}~", output);
                 }
 
                 content.AppendLine(data);
             });
 
         return content.ToString();
-    }
-
-    private Dictionary<string, Func<TimeLogSummary, string>> GetActions()
-    {
-        var dicAction = new Dictionary<string, Func<TimeLogSummary, string>>();
-
-        dicAction.Add("~StartedOnTicks~", dicAction => dicAction.StartedOn!.Value.Ticks.ToString());
-        dicAction.Add("~Task~", dicAction => dicAction.Task);
-        dicAction.Add("~Tags~", dicAction => ExtractTags(dicAction.ID));
-        dicAction.Add("~Comments~", dicAction => ExtractComments(dicAction.ID));
-        dicAction.Add("~TaskCode~", dicAction => GetClients(dicAction.ID));
-        dicAction.Add("~Duration~", dicAction => dicAction.DurationString!);
-
-        return dicAction;
     }
 
     private string ExtractComments(Guid taskID)
@@ -300,6 +295,19 @@ public partial class frmView : Form
         return string.Join(';', str);
     }
 
+    private string ExtractTag(TagHelper.TagKey tagKey, Guid taskID)
+    {
+        var query = from et in p_DbContext.TaskEntryTags
+                    join t in p_DbContext.Tags
+                     on et.TagID equals t.ID
+                    where et.TaskID == taskID
+                    select t;
+
+        var tags = query.ToArray();
+
+        return TagHelper.ExtractValue(tagKey, tags);
+    }
+
     private string ExtractTags(Guid taskID)
     {
         var query = from et in p_DbContext.TaskEntryTags
@@ -311,11 +319,6 @@ public partial class frmView : Form
         var tags = query.ToList();
 
         return string.Join(";", tags);
-    }
-
-    private string GetClients(Guid taskID)
-    {
-        return string.Empty;
     }
 
     private void txtExtension_TextChanged(object sender, EventArgs e)
@@ -403,7 +406,14 @@ public partial class frmView : Form
 
     private void btnRowFormatHelp_Click(object sender, EventArgs e)
     {
-        MessageBox.Show(string.Join("\n", GetActions().Keys), "Available Templates");
+        var allowedTags = TagHelper.GetRegisteredTags().ToList();
+
+        allowedTags.Add("Tag[0]");
+        allowedTags.Add("Tag[0].Name");
+        allowedTags.Add("Tag[0].Description");
+        allowedTags.Add("Tag[Name=Bill%].Description");
+
+        MessageBox.Show(string.Join("\n", allowedTags.Select(a => $"~{a}~")), "Available Templates");
     }
 
     private Font? tagFont = null;

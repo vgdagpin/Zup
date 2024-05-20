@@ -21,6 +21,7 @@ internal static class Program
                 services.AddTransient<frmView>();
                 services.AddTransient<frmNewEntry>();
                 services.AddTransient<frmUpdateEntry>();
+                services.AddTransient<frmTagEditor>();
 
                 services.AddDbContext<ZupDbContext>(optionsAction =>
                 {

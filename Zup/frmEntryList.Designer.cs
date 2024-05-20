@@ -37,7 +37,7 @@ partial class frmEntryList
         // 
         flpTaskList.AutoScroll = true;
         flpTaskList.Dock = DockStyle.Fill;
-        flpTaskList.FlowDirection = FlowDirection.BottomUp;
+        flpTaskList.FlowDirection = FlowDirection.TopDown;
         flpTaskList.Location = new Point(0, 0);
         flpTaskList.Name = "flpTaskList";
         flpTaskList.Size = new Size(266, 86);

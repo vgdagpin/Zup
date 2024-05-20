@@ -4,6 +4,8 @@ using Microsoft.Win32;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
+using Zup.EventArguments;
+
 namespace Zup;
 
 public partial class frmMain : Form
@@ -66,9 +68,9 @@ public partial class frmMain : Form
         }
     }
 
-    private void FrmEntryList_OnQueueTaskUpdatedEvent(int queueCount)
+    private void FrmEntryList_OnQueueTaskUpdatedEvent(object? sender, QueueTaskUpdatedEventArgs args)
     {
-        SetIcon(queueCount);
+        SetIcon(args.QueueCount);
     }
 
     public void SetIcon(int? queueCount = null)
@@ -121,9 +123,9 @@ public partial class frmMain : Form
         return false;
     }
 
-    private void FrmEntryList_OnListReadyEvent(int listCount)
+    private void FrmEntryList_OnListReadyEvent(object? sender, ListReadyEventArgs args)
     {
-        if (listCount == 0)
+        if (!args.HasItem)
         {
             notifIconZup.ShowBalloonTip(1000, "", "It's lonely here, press Shift+Alt+J to start adding task!", ToolTipIcon.Info);
         }
@@ -144,6 +146,21 @@ public partial class frmMain : Form
             return frmView;
         }
     }
+
+    frmTagEditor? frmTagEditor = null;
+    private frmTagEditor m_FormTagEditor
+    {
+        get
+        {
+            if (frmTagEditor == null || frmTagEditor.IsDisposed)
+            {
+                frmTagEditor = m_ServiceProvider.GetRequiredService<frmTagEditor>();
+            }
+
+            return frmTagEditor;
+        }
+    }
+
 
 
     private readonly IServiceProvider p_ServiceProvider;
@@ -281,14 +298,18 @@ public partial class frmMain : Form
 
     protected bool IsNewWeek()
     {
-        var lastRow = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault();
-
-        if (lastRow == null)
+        if (!m_DbContext.TaskEntries.Any())
         {
             return false;
         }
 
-        var lastRowWeekNum = Utility.GetWeekNumber(lastRow.StartedOn!.Value);
+        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
+        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
+        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
+
+        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();
+
+        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
         var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
 
         return lastRowWeekNum < weekNumNow;
@@ -418,5 +439,17 @@ public partial class frmMain : Form
     private void toggleLastRunningTaskToolStripMenuItem_Click(object sender, EventArgs e)
     {
         m_FormEntryList.ToggleLastRunningTask();
+    }
+
+    private void tagEditorToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (m_FormTagEditor.Visible)
+        {
+            m_FormTagEditor.Activate();
+
+            return;
+        }
+
+        m_FormTagEditor.Show();
     }
 }

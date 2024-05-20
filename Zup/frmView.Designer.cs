@@ -265,7 +265,7 @@ partial class frmView
         txtRowFormat.Name = "txtRowFormat";
         txtRowFormat.Size = new Size(803, 23);
         txtRowFormat.TabIndex = 15;
-        txtRowFormat.Text = "~StartedOnTicks~^~Task~^~Comments~^~TaskCode~^~Duration~^False^False";
+        txtRowFormat.Text = "~StartedOnTicks~^~Task~^~Comments~^~Tag[Name=Bill%].Description~^~Duration~^False^False";
         // 
         // label4
         // 
