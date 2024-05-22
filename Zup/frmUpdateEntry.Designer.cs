@@ -72,7 +72,6 @@ partial class frmUpdateEntry
         rtbNote.LinkClicked += rtbNote_LinkClicked;
         rtbNote.KeyDown += rtbNote_KeyDown;
         rtbNote.KeyPress += rtbNote_KeyPress;
-        rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
         // 
         // lbNotes
         // 

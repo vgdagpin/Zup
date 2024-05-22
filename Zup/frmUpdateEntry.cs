@@ -508,24 +508,7 @@ public partial class frmUpdateEntry : Form
         }
 
         lbPreviousNotes.BackColor = Color.White;
-    }
-
-    private void rtbNote_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-    {
-        if (e.KeyData == (Keys.Control | Keys.K))
-        {
-            e.IsInputKey = false;
-
-            var editLink = new frmEditHyperLink(rtbNote.SelectedRtf);
-
-            editLink.SaveChanges += (s, e) =>
-            {
-                rtbNote.SelectedRtf = e;
-            };
-            
-            editLink.Show();
-        }
-    }
+    }   
 
     void DeleteNote()
     {
@@ -715,6 +698,7 @@ public partial class frmUpdateEntry : Form
         SaveNotes();
     }
 
+    #region rtbNote Events
     private void rtbNote_KeyPress(object sender, KeyPressEventArgs e)
     {
         if (rtbNote.Text.Trim().Length > 0)
@@ -728,6 +712,53 @@ public partial class frmUpdateEntry : Form
             IsNotesModified = false;
         }
     }
+
+    private void rtbNote_KeyDown(object sender, KeyEventArgs e)
+    {
+        var rtb = (RichTextBox)sender;
+
+        if (e.Control)
+        {
+            if (e.KeyCode == Keys.B)
+            {
+                if (rtb.SelectionFont != null)
+                {
+                    var currentFont = rtb.SelectionFont;
+
+                    var newFontStyle = rtb.SelectionFont.Bold
+                        ? currentFont.Style & ~FontStyle.Bold
+                        : currentFont.Style | FontStyle.Bold;
+
+                    rtb.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newFontStyle);
+                }
+
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.K)
+            {
+                var editLink = new frmEditHyperLink(rtbNote.SelectedText, rtbNote.SelectedRtf);
+
+                editLink.SaveChanges += (s, e) =>
+                {
+                    try
+                    {
+                        rtbNote.SelectedRtf = e;
+                    }
+                    catch { }
+                };
+
+                editLink.Show();
+
+                e.SuppressKeyPress = true;
+            }
+        }
+    }
+
+    private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
+    {
+        OpenUrl(e.LinkText!);
+    } 
+    #endregion
 
     private void tmrFocus_Tick(object sender, EventArgs e)
     {
@@ -748,12 +779,7 @@ public partial class frmUpdateEntry : Form
     private void btnSaveChanges_Click(object sender, EventArgs e)
     {
         SaveEntry();
-    }
-
-    private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
-    {
-        OpenUrl(e.LinkText!);
-    }
+    }    
 
     private void OpenUrl(string url)
     {
@@ -807,26 +833,5 @@ public partial class frmUpdateEntry : Form
     private void numRank_ValueChanged(object sender, EventArgs e)
     {
         IsEntryModified = true;
-    }
-
-    private void rtbNote_KeyDown(object sender, KeyEventArgs e)
-    {
-        var rtb = (RichTextBox)sender;
-
-        if (e.Control && e.KeyCode == Keys.B)
-        {
-            if (rtb.SelectionFont != null)
-            {
-                var currentFont = rtb.SelectionFont;
-
-                var newFontStyle = rtb.SelectionFont.Bold
-                    ? currentFont.Style & ~FontStyle.Bold
-                    : currentFont.Style | FontStyle.Bold;
-
-                rtb.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newFontStyle);
-            }
-
-            e.SuppressKeyPress = true;
-        }
-    }
+    }    
 }

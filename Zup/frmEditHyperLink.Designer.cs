@@ -38,6 +38,7 @@ partial class frmEditHyperLink
         // 
         // btnSave
         // 
+        btnSave.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         btnSave.Location = new Point(256, 199);
         btnSave.Name = "btnSave";
         btnSave.Size = new Size(75, 23);
@@ -48,6 +49,7 @@ partial class frmEditHyperLink
         // 
         // btnCancel
         // 
+        btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         btnCancel.Location = new Point(337, 199);
         btnCancel.Name = "btnCancel";
         btnCancel.Size = new Size(75, 23);
@@ -67,6 +69,7 @@ partial class frmEditHyperLink
         // 
         // txtLinkText
         // 
+        txtLinkText.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         txtLinkText.Location = new Point(60, 9);
         txtLinkText.Name = "txtLinkText";
         txtLinkText.Size = new Size(352, 23);
@@ -74,10 +77,11 @@ partial class frmEditHyperLink
         // 
         // txtLinkValue
         // 
+        txtLinkValue.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         txtLinkValue.Location = new Point(60, 48);
         txtLinkValue.Multiline = true;
         txtLinkValue.Name = "txtLinkValue";
-        txtLinkValue.Size = new Size(352, 121);
+        txtLinkValue.Size = new Size(352, 134);
         txtLinkValue.TabIndex = 1;
         // 
         // label2
@@ -102,7 +106,6 @@ partial class frmEditHyperLink
         Controls.Add(label1);
         Controls.Add(btnCancel);
         Controls.Add(btnSave);
-        FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "frmEditHyperLink";
