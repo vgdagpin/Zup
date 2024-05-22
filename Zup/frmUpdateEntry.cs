@@ -2,7 +2,7 @@
 
 using System.Data;
 using System.Diagnostics;
-
+using Zup.CustomControls;
 using Zup.Entities;
 using Zup.EventArguments;
 
@@ -18,6 +18,7 @@ public partial class frmUpdateEntry : Form
 
     public event OnDelete? OnDeleteEvent;
     public event EventHandler<SaveEventArgs>? OnSavedEvent;
+    public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -221,8 +222,10 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
+        var maxDate = currentTaskEntry.StartedOn ?? DateTime.MaxValue;
+
         var allIDs = await p_DbContext.TaskEntries
-            .Where(a => a.Task == txtTask.Text && a.ID != currentTaskEntry.ID && a.StartedOn < currentTaskEntry.StartedOn)
+            .Where(a => a.Task == txtTask.Text && a.ID != currentTaskEntry.ID && a.StartedOn < maxDate)
             .OrderByDescending(a => a.StartedOn)
             .Select(a => a.ID)
             .ToArrayAsync();
@@ -732,5 +735,10 @@ public partial class frmUpdateEntry : Form
     private void rtbNote_TextChanged(object sender, EventArgs e)
     {
 
+    }
+
+    private void tokenBoxTags_TokenDoubleClicked(object sender, TokenEventArgs e)
+    {
+        OnTokenDoubleClicked?.Invoke(sender, e);
     }
 }

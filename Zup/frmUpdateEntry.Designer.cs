@@ -29,7 +29,7 @@ partial class frmUpdateEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         btnDeleteNote = new Button();
@@ -262,6 +262,7 @@ partial class frmUpdateEntry
         tokenBoxTags.ShowDeleteCross = true;
         tokenBoxTags.Size = new Size(419, 57);
         tokenBoxTags.TabIndex = 20;
+        tokenBoxTags.TokenDoubleClicked += tokenBoxTags_TokenDoubleClicked;
         tokenBoxTags.TokenChanged += tokenBoxTags_TokenChanged;
         tokenBoxTags.PreviewKeyDown += tokenBoxTags_PreviewKeyDown;
         // 

@@ -120,4 +120,14 @@ public partial class frmTagEditor : Form
         txtName.Enabled = false;
         txtDescription.Enabled = false;
     }
+
+    public void SelectTag(string tagName)
+    {
+        var data = lbTags.Items.Cast<tbl_Tag>().FirstOrDefault(a => a.Name == tagName);
+
+        if (data != null)
+        {
+            lbTags.SelectedIndex = lbTags.Items.IndexOf(data);
+        }
+    }
 }

@@ -24,6 +24,7 @@ public partial class frmEntryList : Form
 
     public event EventHandler<ListReadyEventArgs>? OnListReadyEvent;
     public event EventHandler<QueueTaskUpdatedEventArgs>? OnQueueTaskUpdatedEvent;
+    public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
 
     #region Draggable Form
     public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -136,6 +137,7 @@ public partial class frmEntryList : Form
         m_FormNewEntry.OnNewEntryEvent += EachEntry_NewEntryEventHandler;
         m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
         m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
+        m_FormUpdateEntry.OnTokenDoubleClicked += FormUpdateEntry_OnTokenDoubleClicked;
 
         var list = LoadListToControl();
 
@@ -159,6 +161,11 @@ public partial class frmEntryList : Form
 
         ResizeForm();
         UpdateFormPosition();
+    }
+
+    private void FormUpdateEntry_OnTokenDoubleClicked(object? sender, TokenEventArgs e)
+    {
+        OnTokenDoubleClicked?.Invoke(sender, e);
     }
 
     private (bool HasItem, int QueueCount) LoadListToControl()
