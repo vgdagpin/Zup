@@ -115,11 +115,11 @@ public static class TagHelper
 
             if (tagKey.IndexPropertyValue.EndsWith("%"))
             {
-                property = data.FirstOrDefault(p => p.GetType().GetProperty(tagKey.IndexPropertyName)?.GetValue(p)?.ToString()?.StartsWith(tagKey.IndexPropertyValue.Substring(0, tagKey.IndexPropertyValue.Length - 2)) == true);
+                property = data.FirstOrDefault(p => p!.GetType().GetProperty(tagKey.IndexPropertyName)?.GetValue(p)?.ToString()?.StartsWith(tagKey.IndexPropertyValue.Substring(0, tagKey.IndexPropertyValue.Length - 2)) == true);
             }
             else
             {
-                property = data.FirstOrDefault(p => p.GetType().GetProperty(tagKey.IndexPropertyName)?.GetValue(p)?.ToString() == tagKey.IndexPropertyValue);
+                property = data.FirstOrDefault(p => p!.GetType().GetProperty(tagKey.IndexPropertyName)?.GetValue(p)?.ToString() == tagKey.IndexPropertyValue);
             }
 
             if (property != null)

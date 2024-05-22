@@ -62,10 +62,27 @@ public partial class frmMain : Form
 
                 frmEntryList.OnListReadyEvent += FrmEntryList_OnListReadyEvent;
                 frmEntryList.OnQueueTaskUpdatedEvent += FrmEntryList_OnQueueTaskUpdatedEvent;
+                frmEntryList.OnTokenDoubleClicked += FrmEntryList_OnTokenDoubleClicked;
             }
 
             return frmEntryList;
         }
+    }
+
+    private void FrmEntryList_OnTokenDoubleClicked(object? sender, CustomControls.TokenEventArgs e)
+    {
+        if (m_FormTagEditor.Visible)
+        {
+            m_FormTagEditor.Activate();
+
+            m_FormTagEditor.SelectTag(e.Text);
+
+            return;
+        }
+
+        m_FormTagEditor.Show();
+
+        m_FormTagEditor.SelectTag(e.Text);
     }
 
     private void FrmEntryList_OnQueueTaskUpdatedEvent(object? sender, QueueTaskUpdatedEventArgs args)
@@ -409,6 +426,7 @@ public partial class frmMain : Form
         }
 
         m_FormView.Show();
+        m_FormView.Activate();
     }
 
     private void notifIconZup_DoubleClick(object sender, EventArgs e)
@@ -421,6 +439,7 @@ public partial class frmMain : Form
         }
 
         m_FormView.Show();
+        m_FormView.Activate();
     }
 
     private void openNewEntryToolStripMenuItem_Click(object sender, EventArgs e)

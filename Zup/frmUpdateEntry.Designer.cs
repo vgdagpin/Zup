@@ -70,7 +70,7 @@ partial class frmUpdateEntry
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
-        rtbNote.TextChanged += rtbNote_TextChanged;
+        rtbNote.KeyDown += rtbNote_KeyDown;
         rtbNote.KeyPress += rtbNote_KeyPress;
         rtbNote.PreviewKeyDown += rtbNote_PreviewKeyDown;
         // 
@@ -262,8 +262,8 @@ partial class frmUpdateEntry
         tokenBoxTags.ShowDeleteCross = true;
         tokenBoxTags.Size = new Size(419, 57);
         tokenBoxTags.TabIndex = 20;
+        tokenBoxTags.TokenDoubleClicked += tokenBoxTags_TokenDoubleClicked;
         tokenBoxTags.TokenChanged += tokenBoxTags_TokenChanged;
-        tokenBoxTags.PreviewKeyDown += tokenBoxTags_PreviewKeyDown;
         // 
         // label4
         // 
@@ -320,6 +320,7 @@ partial class frmUpdateEntry
         numRank.Size = new Size(43, 23);
         numRank.TabIndex = 22;
         numRank.TextAlign = HorizontalAlignment.Center;
+        numRank.ValueChanged += numRank_ValueChanged;
         // 
         // frmUpdateEntry
         // 
