@@ -35,5 +35,14 @@
     <Setting Name="NumDaysOfDataToLoad" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">14</Value>
     </Setting>
+    <Setting Name="ShowQueuedTasks" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ShowRankedTasks" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ShowClosedTasks" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -310,7 +310,7 @@ public partial class frmMain : Form
 
     private void FormView_OnSelectedItemEvent(Guid entryID)
     {
-        m_FormEntryList.ShowUpdateEntry(entryID);
+        m_FormEntryList.ShowUpdateEntry(entryID, true);
     }
 
     protected bool IsNewWeek()

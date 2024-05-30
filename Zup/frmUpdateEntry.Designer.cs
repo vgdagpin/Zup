@@ -52,6 +52,7 @@ partial class frmUpdateEntry
         label1 = new Label();
         label5 = new Label();
         numRank = new NumericUpDown();
+        btnRerun = new Button();
         pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
@@ -229,9 +230,9 @@ partial class frmUpdateEntry
         // btnDelete
         // 
         btnDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnDelete.Location = new Point(638, 133);
+        btnDelete.Location = new Point(719, 104);
         btnDelete.Name = "btnDelete";
-        btnDelete.Size = new Size(75, 23);
+        btnDelete.Size = new Size(94, 23);
         btnDelete.TabIndex = 15;
         btnDelete.Text = "Delete Task";
         btnDelete.UseVisualStyleBackColor = true;
@@ -321,11 +322,24 @@ partial class frmUpdateEntry
         numRank.TextAlign = HorizontalAlignment.Center;
         numRank.ValueChanged += numRank_ValueChanged;
         // 
+        // btnRerun
+        // 
+        btnRerun.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRerun.Location = new Point(719, 162);
+        btnRerun.Name = "btnRerun";
+        btnRerun.Size = new Size(94, 23);
+        btnRerun.TabIndex = 23;
+        btnRerun.Text = "Re-run";
+        btnRerun.UseVisualStyleBackColor = true;
+        btnRerun.Visible = false;
+        btnRerun.Click += btnRerun_Click;
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(834, 561);
+        Controls.Add(btnRerun);
         Controls.Add(numRank);
         Controls.Add(label5);
         Controls.Add(btnDelete);
@@ -383,4 +397,5 @@ partial class frmUpdateEntry
     private CustomControls.TokenBox tokenBoxTags;
     private Label label5;
     private NumericUpDown numRank;
+    private Button btnRerun;
 }

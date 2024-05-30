@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
+using System.Collections;
 using System.Data;
 using System.Runtime.InteropServices;
 
@@ -138,10 +139,9 @@ public partial class frmEntryList : Form
         m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
         m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
         m_FormUpdateEntry.OnTokenDoubleClicked += FormUpdateEntry_OnTokenDoubleClicked;
+        m_FormUpdateEntry.OnReRunEvent += EachEntry_NewEntryEventHandler;
 
         var list = LoadListToControl();
-
-        SortTasks();
 
         ListIsReady = true;
 
@@ -161,6 +161,10 @@ public partial class frmEntryList : Form
 
         ResizeForm();
         UpdateFormPosition();
+
+        showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
+        showRankedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowRankedTasks;
+        showClosedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowClosedTasks;
     }
 
     private void FormUpdateEntry_OnTokenDoubleClicked(object? sender, TokenEventArgs e)
@@ -173,9 +177,11 @@ public partial class frmEntryList : Form
         var queueCount = 0;
         var hasItem = false;
 
-        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);        
 
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate))
+        var temp = new List<EachEntry>();
+
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate).ToList())
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
             {
@@ -189,7 +195,22 @@ public partial class frmEntryList : Form
             eachEntry.OnStartQueueEvent += EachEntry_NewEntryEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
 
-            flpTaskList.Controls.Add(eachEntry);
+            if (IsWithRanking(eachEntry) && !Properties.Settings.Default.ShowRankedTasks)
+            {
+                continue;
+            }
+
+            if (IsQueuedTask(eachEntry) && !Properties.Settings.Default.ShowQueuedTasks)
+            {
+                continue;
+            }
+
+            if (IsClosed(eachEntry) && !Properties.Settings.Default.ShowClosedTasks)
+            {
+                continue;
+            }
+
+            temp.Add(eachEntry);
 
             hasItem = true;
 
@@ -199,32 +220,43 @@ public partial class frmEntryList : Form
             }
         }
 
+        SortTasks(temp);
+
+        flpTaskList.SuspendLayout();
+        flpTaskList.Controls.Clear();
+        flpTaskList.Controls.AddRange(temp.ToArray());
+
+        var firstItem = flpTaskList.Controls.Count > 0 
+            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1] 
+            : null;
+
+
+        if (firstItem != null)
+        {
+            flpTaskList.ScrollControlIntoView(firstItem);
+
+            firstItem.IsFirstItem = true;
+        }
+
+        if (flpTaskList.Controls.Count > 0)
+        {
+            ActiveControl = flpTaskList.Controls[0];
+        }
+
+        flpTaskList.ResumeLayout();
+
         return (hasItem, queueCount);
     }
 
-    public void SortTasks()
+    public void SortTasks(IList entryList)
     {
         var stack = new Queue<EachEntry>();
-        var list = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToList();
-        var all = flpTaskList.Controls.Cast<EachEntry>().Where(a => a.Visible).ToArray();
+        var list =  entryList.OfType<EachEntry>().Where(a => a.Visible).ToList();
+        var all = entryList.OfType<EachEntry>().Where(a => a.Visible).ToArray();
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
-        flpTaskList.SuspendLayout();
-
         // running
-        foreach (var item in all.Where(a => a.IsRunning).OrderBy(a => a.CreatedOn))
-        {
-            if (!list.Contains(item))
-            {
-                continue;
-            }
-
-            stack.Enqueue(item);
-            list.Remove(item);
-        }
-
-        // with ranking
-        foreach (var item in all.Where(a => a.Rank != null).OrderBy(a => a.Rank))
+        foreach (var item in all.Where(IsRunning).OrderBy(a => a.CreatedOn))
         {
             if (!list.Contains(item))
             {
@@ -236,7 +268,19 @@ public partial class frmEntryList : Form
         }
 
         // started but not yet closed
-        foreach (var item in all.Where(a => a.StartedOn != null && a.EndedOn == null))
+        foreach (var item in all.Where(IsNotYetClosed))
+        {
+            if (!list.Contains(item))
+            {
+                continue;
+            }
+
+            stack.Enqueue(item);
+            list.Remove(item);
+        }
+
+        // with ranking
+        foreach (var item in all.Where(IsWithRanking).OrderBy(a => a.Rank))
         {
             if (!list.Contains(item))
             {
@@ -248,7 +292,7 @@ public partial class frmEntryList : Form
         }
 
         // not yet started
-        foreach (var item in all.Where(a => a.StartedOn == null).OrderByDescending(a => a.CreatedOn))
+        foreach (var item in all.Where(IsQueuedTask).OrderByDescending(a => a.CreatedOn))
         {
             if (!list.Contains(item))
             {
@@ -260,8 +304,7 @@ public partial class frmEntryList : Form
         }
 
         // closed items
-        foreach (var item in all.Where(a => a.StartedOn >= minDate && a.EndedOn != null)
-            .OrderByDescending(a => a.StartedOn))
+        foreach (var item in all.Where(IsClosed).OrderByDescending(a => a.StartedOn))
         {
             if (!list.Contains(item))
             {
@@ -280,44 +323,45 @@ public partial class frmEntryList : Form
         var i = 0;
         while (stack.TryDequeue(out var entry))
         {
-            flpTaskList.Controls.SetChildIndex(entry, i);
+            // Sorting also called when resuming tasks so the passed parameter entryList is a ControlCollection
+            // otherwise it is a list generated upon initialize or refresh
+            if (entryList is Control.ControlCollection controls)
+            {
+                controls.SetChildIndex(entry, i);
+            }
+            else
+            {
+                entryList.Remove(entry);
+                entryList.Insert(i, entry);
+            }
+
             i++;
-        }
-
-        EachEntry? firstItem = flpTaskList.Controls.Count > 0
-            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
-            : null;
-
-        if (firstItem != null)
-        {
-            flpTaskList.ScrollControlIntoView(firstItem);
-
-            firstItem.IsFirstItem = true;
-        }
-
-        flpTaskList.ResumeLayout();
+        }       
     }
 
-    private void ReorderQueuedTask()
+    protected bool IsRunning(EachEntry eachEntry)
     {
-        //var queue = new Queue<EachEntry>();
+        return eachEntry.IsRunning;
+    }
 
-        //foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn == null))
-        //{
-        //    queue.Enqueue(item);
-        //}
+    protected bool IsNotYetClosed(EachEntry eachEntry)
+    {
+        return eachEntry.StartedOn != null && eachEntry.EndedOn == null;
+    }
 
-        //foreach (var item in flpTaskList.Controls.Cast<EachEntry>().Where(a => a.StartedOn != null && a.EndedOn == null))
-        //{
-        //    queue.Enqueue(item);
-        //}
+    protected bool IsWithRanking(EachEntry eachEntry)
+    {
+        return eachEntry.Rank != null;
+    }
 
-        //var startIx = flpTaskList.Controls.Count - queue.Count;
+    protected bool IsQueuedTask(EachEntry eachEntry)
+    {
+        return eachEntry.StartedOn == null;
+    }
 
-        //for (int i = startIx; i < flpTaskList.Controls.Count; i++)
-        //{
-        //    flpTaskList.Controls.SetChildIndex(queue.Dequeue(), i);
-        //}
+    protected bool IsClosed(EachEntry eachEntry)
+    {
+        return eachEntry.StartedOn != null && eachEntry.EndedOn != null;
     }
 
     public void ResizeForm()
@@ -476,7 +520,7 @@ public partial class frmEntryList : Form
 
         AddEntryToFlowLayoutControl(eachEntry, args);
 
-        SortTasks();
+        SortTasks(flpTaskList.Controls);
 
         if (args.HideParent && args.ParentEntryID != null)
         {
@@ -506,25 +550,14 @@ public partial class frmEntryList : Form
         ShowUpdateEntry(id);
     }
 
-    public async void ShowUpdateEntry(Guid entryID)
+    public async void ShowUpdateEntry(Guid entryID, bool canReRun = false)
     {
-        await m_FormUpdateEntry.ShowUpdateEntry(entryID);
+        await m_FormUpdateEntry.ShowUpdateEntry(entryID, canReRun);
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, NewEntryEventArgs args)
     {
         flpTaskList.Controls.Add(newEntry);
-
-        //// if want it to only queue and there's nothing running
-        //// send it to the bottom of the queue
-        //if (!args.StartNow)
-        //{
-        //    var newIx = flpTaskList.Controls.Count - GetQueueCount(true) - 1;
-
-        //    flpTaskList.Controls.SetChildIndex(newEntry, newIx);
-        //}
-
-        //ActiveControl = flpTaskList.Controls[flpTaskList.Controls.Count - 1];
 
         if (!p_OnLoad)
         {
@@ -602,5 +635,40 @@ public partial class frmEntryList : Form
                 item.Start();
             }
         }
+    }
+
+    private void showQueuedTasksToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ShowQueuedTasks = !Properties.Settings.Default.ShowQueuedTasks;
+        Properties.Settings.Default.Save();
+
+        showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
+
+        LoadListToControl();
+    }
+
+    private void showRankedTasksToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ShowRankedTasks = !Properties.Settings.Default.ShowRankedTasks;
+        Properties.Settings.Default.Save();
+
+        showRankedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowRankedTasks;
+
+        LoadListToControl();
+    }
+
+    private void showClosedTasksToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ShowClosedTasks = !Properties.Settings.Default.ShowClosedTasks;
+        Properties.Settings.Default.Save();
+
+        showClosedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowClosedTasks;
+
+        LoadListToControl();
+    }
+
+    private void reorderToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        LoadListToControl();
     }
 }

@@ -30,22 +30,19 @@ partial class EachEntry
     {
         components = new System.ComponentModel.Container();
         lblText = new ZupLabel();
-        btnToggleStartStop = new Button();
+        btnToggleStartStop = new ZupButton();
         lblTimeInOut = new ZupLabel();
         tmr = new System.Windows.Forms.Timer(components);
         lblDuration = new ZupLabel();
         toolTip = new ToolTip(components);
         lblRank = new ZupLabel();
-        cmsEachEntry = new ContextMenuStrip(components);
-        clearTimerToolStripMenuItem = new ToolStripMenuItem();
-        cmsEachEntry.SuspendLayout();
         SuspendLayout();
         // 
         // lblText
         // 
         lblText.AutoEllipsis = true;
-        lblText.Font = new Font("Segoe UI", 7F);
-        lblText.Location = new Point(19, 4);
+        lblText.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
+        lblText.Location = new Point(21, 4);
         lblText.Name = "lblText";
         lblText.Size = new Size(200, 13);
         lblText.TabIndex = 0;
@@ -59,9 +56,9 @@ partial class EachEntry
         btnToggleStartStop.FlatStyle = FlatStyle.Flat;
         btnToggleStartStop.Font = new Font("Arial Narrow", 7F, FontStyle.Regular, GraphicsUnit.Pixel, 0);
         btnToggleStartStop.ForeColor = Color.Black;
-        btnToggleStartStop.Location = new Point(225, 2);
+        btnToggleStartStop.Location = new Point(226, 2);
         btnToggleStartStop.Name = "btnToggleStartStop";
-        btnToggleStartStop.Size = new Size(18, 18);
+        btnToggleStartStop.Size = new Size(17, 17);
         btnToggleStartStop.TabIndex = 1;
         btnToggleStartStop.TabStop = false;
         btnToggleStartStop.Text = "►";
@@ -71,7 +68,7 @@ partial class EachEntry
         // lblTimeInOut
         // 
         lblTimeInOut.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
-        lblTimeInOut.Location = new Point(19, 17);
+        lblTimeInOut.Location = new Point(21, 17);
         lblTimeInOut.Name = "lblTimeInOut";
         lblTimeInOut.Size = new Size(94, 12);
         lblTimeInOut.TabIndex = 2;
@@ -102,28 +99,15 @@ partial class EachEntry
         lblRank.Location = new Point(0, 0);
         lblRank.Name = "lblRank";
         lblRank.Padding = new Padding(0, 4, 0, 0);
-        lblRank.Size = new Size(17, 35);
+        lblRank.Size = new Size(19, 35);
         lblRank.TabIndex = 6;
         lblRank.Text = "#1";
-        // 
-        // cmsEachEntry
-        // 
-        cmsEachEntry.Items.AddRange(new ToolStripItem[] { clearTimerToolStripMenuItem });
-        cmsEachEntry.Name = "cmsEachEntry";
-        cmsEachEntry.Size = new Size(135, 26);
-        // 
-        // clearTimerToolStripMenuItem
-        // 
-        clearTimerToolStripMenuItem.Name = "clearTimerToolStripMenuItem";
-        clearTimerToolStripMenuItem.Size = new Size(180, 22);
-        clearTimerToolStripMenuItem.Text = "Clear Timer";
         // 
         // EachEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
-        ContextMenuStrip = cmsEachEntry;
         Controls.Add(lblRank);
         Controls.Add(lblDuration);
         Controls.Add(lblTimeInOut);
@@ -133,19 +117,16 @@ partial class EachEntry
         Name = "EachEntry";
         Size = new Size(247, 35);
         MouseDown += EachEntry_MouseDown;
-        cmsEachEntry.ResumeLayout(false);
         ResumeLayout(false);
     }
 
     #endregion
 
     private ZupLabel lblText;
-    private Button btnToggleStartStop;
+    private ZupButton btnToggleStartStop;
     private ZupLabel lblTimeInOut;
     private System.Windows.Forms.Timer tmr;
     private ZupLabel lblDuration;
     private ToolTip toolTip;
     private ZupLabel lblRank;
-    private ContextMenuStrip cmsEachEntry;
-    private ToolStripMenuItem clearTimerToolStripMenuItem;
 }

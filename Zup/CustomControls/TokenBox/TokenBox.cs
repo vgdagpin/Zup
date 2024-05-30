@@ -270,6 +270,11 @@ public partial class TokenBox : FlowLayoutPanel
     /// <param name="text">Text that will be shown in the Token.</param>
     public void AddToken(string text)
     {
+        if (Controls.OfType<Token>().Any(a => a.Text == text))
+        {
+            return;
+        }
+
         var newToken = new Token(text, ShowDeleteCross);
 
         newToken.TokenColor = DefaultTokenBackgroundColor;

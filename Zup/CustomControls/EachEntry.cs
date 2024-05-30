@@ -213,8 +213,8 @@ public partial class EachEntry : UserControl
                 Rank = null;
 
                 // if shift is pressed, create a new entry running in parallel
-                var args = new NewEntryEventArgs(Text) 
-                { 
+                var args = new NewEntryEventArgs(Text)
+                {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
                     ParentEntryID = EntryID,
@@ -235,15 +235,15 @@ public partial class EachEntry : UserControl
                 // because we are moving this rank to the new entry
                 Rank = null;
 
-                var args = new NewEntryEventArgs(Text) 
-                { 
+                var args = new NewEntryEventArgs(Text)
+                {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
-                    ParentEntryID = EntryID, 
-                    HideParent = true, 
+                    ParentEntryID = EntryID,
+                    HideParent = true,
                     BringNotes = true,
                     BringTags = true
-                };                
+                };
 
                 OnStartQueueEvent(this, args);
 
@@ -347,6 +347,6 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
-    } 
+    }
     #endregion
 }

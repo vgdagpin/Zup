@@ -135,14 +135,14 @@ partial class frmView
         DurationString.Name = "DurationString";
         DurationString.ReadOnly = true;
         DurationString.Resizable = DataGridViewTriState.False;
-        DurationString.Width = 60;
+        DurationString.Width = 80;
         // 
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(913, 450);
+        lblSelectedTotal.Location = new Point(897, 450);
         lblSelectedTotal.Name = "lblSelectedTotal";
-        lblSelectedTotal.Size = new Size(59, 23);
+        lblSelectedTotal.Size = new Size(75, 23);
         lblSelectedTotal.TabIndex = 1;
         lblSelectedTotal.Text = "00:00:00";
         lblSelectedTotal.TextAlign = ContentAlignment.MiddleRight;
@@ -369,12 +369,6 @@ partial class frmView
     private Button btnBrowseTimesheetFolder;
     private Button btnExportTimesheet;
     private DateTimePicker dtTimesheetDate;
-    private DataGridViewTextBoxColumn ID;
-    private DataGridViewTextBoxColumn Task;
-    private DataGridViewTextBoxColumn StartedOn;
-    private DataGridViewTextBoxColumn EndedOn;
-    private DataGridViewTextBoxColumn Duration;
-    private DataGridViewTextBoxColumn DurationString;
     private TextBox txtExtension;
     private Label label2;
     private TextBox txtSearch;
@@ -387,4 +381,10 @@ partial class frmView
     private Button btnRowFormatHelp;
     private Button btnRefresh;
     private ListBox lbWeek;
+    private DataGridViewTextBoxColumn ID;
+    private DataGridViewTextBoxColumn Task;
+    private DataGridViewTextBoxColumn StartedOn;
+    private DataGridViewTextBoxColumn EndedOn;
+    private DataGridViewTextBoxColumn Duration;
+    private DataGridViewTextBoxColumn DurationString;
 }

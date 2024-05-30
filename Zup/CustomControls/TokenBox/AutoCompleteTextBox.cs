@@ -51,28 +51,28 @@ public class AutoCompleteTextBox : TextBox
 
     private void _listBox_MouseMove(object? sender, MouseEventArgs e)
     {
-        var index = lbSuggestions.IndexFromPoint(e.Location);
+        //var index = lbSuggestions.IndexFromPoint(e.Location);
 
-        if (index != -1 && index != _MouseIndex)
-        {
-            if (_MouseIndex != -1)
-            {
-                lbSuggestions.SetSelected(_MouseIndex, false);
-            }
-            _MouseIndex = index;
-            lbSuggestions.SetSelected(_MouseIndex, true);
-            lbSuggestions.Invalidate();
+        //if (index != -1 && index != _MouseIndex)
+        //{
+        //    if (_MouseIndex != -1)
+        //    {
+        //        lbSuggestions.SetSelected(_MouseIndex, false);
+        //    }
+        //    _MouseIndex = index;
+        //    lbSuggestions.SetSelected(_MouseIndex, true);
+        //    lbSuggestions.Invalidate();
 
-        }
+        //}
     }
 
     private void _listBox_MouseClick(object? sender, MouseEventArgs e)
     {
-        var selectedToken = ((ListBox)sender!).SelectedItem!.ToString()!;
+        //var selectedToken = ((ListBox)sender!).SelectedItem!.ToString()!;
 
-        IntroduceToken(selectedToken);
+        //IntroduceToken(selectedToken);
 
-        Focus();
+        //Focus();
     }
 
     public void tokenBox_BackColorChanged(object? sender, EventArgs e)

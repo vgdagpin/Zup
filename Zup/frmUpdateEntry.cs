@@ -3,7 +3,6 @@
 using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 using Zup.CustomControls;
 using Zup.Entities;
@@ -22,6 +21,7 @@ public partial class frmUpdateEntry : Form
     public event OnDelete? OnDeleteEvent;
     public event EventHandler<SaveEventArgs>? OnSavedEvent;
     public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
+    public event EventHandler<NewEntryEventArgs>? OnReRunEvent;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -382,12 +382,14 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public async Task ShowUpdateEntry(Guid entryID)
+    public async Task ShowUpdateEntry(Guid entryID, bool canReRun = false)
     {
         Text = "Update Entry";
         startTracking = false;
         isEntryModified = false;
         isNotesModified = false;
+
+        btnRerun.Visible = canReRun;
 
         Show();
 
@@ -508,7 +510,7 @@ public partial class frmUpdateEntry : Form
         }
 
         lbPreviousNotes.BackColor = Color.White;
-    }   
+    }
 
     void DeleteNote()
     {
@@ -757,7 +759,7 @@ public partial class frmUpdateEntry : Form
     private void rtbNote_LinkClicked(object sender, LinkClickedEventArgs e)
     {
         OpenUrl(e.LinkText!);
-    } 
+    }
     #endregion
 
     private void tmrFocus_Tick(object sender, EventArgs e)
@@ -779,7 +781,7 @@ public partial class frmUpdateEntry : Form
     private void btnSaveChanges_Click(object sender, EventArgs e)
     {
         SaveEntry();
-    }    
+    }
 
     private void OpenUrl(string url)
     {
@@ -833,5 +835,19 @@ public partial class frmUpdateEntry : Form
     private void numRank_ValueChanged(object sender, EventArgs e)
     {
         IsEntryModified = true;
-    }    
+    }
+
+    private void btnRerun_Click(object sender, EventArgs e)
+    {
+        if (OnReRunEvent != null)
+        {
+            OnReRunEvent(this, new NewEntryEventArgs(txtTask.Text)
+            {
+                StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
+                StartNow = true,
+                ParentEntryID = selectedEntryID,
+                BringTags = true
+            });
+        }
+    }
 }

@@ -161,7 +161,7 @@ public partial class frmView : Form
                 ts += a!.Duration!.Value;
             });
 
-        lblSelectedTotal.Text = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
+        lblSelectedTotal.Text = $"{ts.Days:00}:{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
     }
 
     private void btnBrowseTimesheetFolder_Click(object sender, EventArgs e)
