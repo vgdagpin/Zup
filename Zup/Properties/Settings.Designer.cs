@@ -190,5 +190,41 @@ namespace Zup.Properties {
                 this["ShowClosedTasks"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("07:00:00")]
+        public global::System.TimeSpan DayStart {
+            get {
+                return ((global::System.TimeSpan)(this["DayStart"]));
+            }
+            set {
+                this["DayStart"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("04:00:00")]
+        public global::System.TimeSpan DayEnd {
+            get {
+                return ((global::System.TimeSpan)(this["DayEnd"]));
+            }
+            set {
+                this["DayEnd"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DayEndNextDay {
+            get {
+                return ((bool)(this["DayEndNextDay"]));
+            }
+            set {
+                this["DayEndNextDay"] = value;
+            }
+        }
     }
 }

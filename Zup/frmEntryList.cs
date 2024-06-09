@@ -181,7 +181,7 @@ public partial class frmEntryList : Form
 
         var temp = new List<EachEntry>();
 
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate).ToList())
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
             {

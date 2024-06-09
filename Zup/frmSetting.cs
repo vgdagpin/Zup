@@ -37,6 +37,11 @@ public partial class frmSetting : Form
         txtDbPath.Text = Properties.Settings.Default.DbPath;
         numKeepDaysOfData.Value = Properties.Settings.Default.TrimDaysToKeep;
         nMaxDaysDataToLoad.Value = Properties.Settings.Default.NumDaysOfDataToLoad;
+
+
+        mtDayStart.Text = $"{Properties.Settings.Default.DayStart.Hours:00}:{Properties.Settings.Default.DayStart.Minutes:00}";
+        mtDayEnd.Text = $"{Properties.Settings.Default.DayEnd.Hours:00}:{Properties.Settings.Default.DayEnd.Minutes:00}";
+        cbDayEndNextDay.Checked = Properties.Settings.Default.DayEndNextDay;
     }
 
     private void nMaxDaysDataToLoad_ValueChanged(object sender, EventArgs e)
@@ -133,6 +138,30 @@ public partial class frmSetting : Form
         if (e.KeyCode == Keys.Escape)
         {
             Close();
+        }
+    }
+
+    private void cbDayEndNextDay_CheckedChanged(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.DayEndNextDay = cbDayEndNextDay.Checked;
+        Properties.Settings.Default.Save();
+    }
+
+    private void mtDayStart_TextChanged(object sender, EventArgs e)
+    {
+        if (TimeSpan.TryParse(mtDayStart.Text, out var dayStart))
+        {
+            Properties.Settings.Default.DayStart = dayStart;
+            Properties.Settings.Default.Save();
+        }
+    }
+
+    private void mtDayEnd_TextChanged(object sender, EventArgs e)
+    {
+        if (TimeSpan.TryParse(mtDayEnd.Text, out var dayEnd))
+        {
+            Properties.Settings.Default.DayEnd = dayEnd;
+            Properties.Settings.Default.Save();
         }
     }
 }

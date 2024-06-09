@@ -14,5 +14,7 @@ public class TimeLogSummary
     public TimeSpan? Duration { get; set; }
     public string? DurationString { get; set; }
 
+    public DayOfWeek? DayOfWeek { get; set; }
+
     public string[] Tags { get; set; } = Array.Empty<string>();
 }

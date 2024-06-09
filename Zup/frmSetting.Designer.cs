@@ -28,7 +28,7 @@ partial class frmSetting
     /// </summary>
     private void InitializeComponent()
     {
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
         groupBox1 = new GroupBox();
         nMaxDaysDataToLoad = new NumericUpDown();
         label4 = new Label();
@@ -48,6 +48,11 @@ partial class frmSetting
         label3 = new Label();
         ofdDbFile = new OpenFileDialog();
         btnTrimDb = new Button();
+        groupBox4 = new GroupBox();
+        label5 = new Label();
+        cbDayEndNextDay = new CheckBox();
+        mtDayEnd = new MaskedTextBox();
+        mtDayStart = new MaskedTextBox();
         groupBox1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).BeginInit();
         ((System.ComponentModel.ISupportInitialize)tbOpacity).BeginInit();
@@ -55,6 +60,7 @@ partial class frmSetting
         groupBox2.SuspendLayout();
         groupBox3.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)numKeepDaysOfData).BeginInit();
+        groupBox4.SuspendLayout();
         SuspendLayout();
         // 
         // groupBox1
@@ -148,7 +154,7 @@ partial class frmSetting
         // groupBox2
         // 
         groupBox2.Controls.Add(cbAutoOpenUpdateWindow);
-        groupBox2.Location = new Point(12, 354);
+        groupBox2.Location = new Point(13, 405);
         groupBox2.Name = "groupBox2";
         groupBox2.Size = new Size(390, 62);
         groupBox2.TabIndex = 3;
@@ -256,11 +262,67 @@ partial class frmSetting
         btnTrimDb.UseVisualStyleBackColor = true;
         btnTrimDb.Click += btnTrimDb_Click;
         // 
+        // groupBox4
+        // 
+        groupBox4.Controls.Add(label5);
+        groupBox4.Controls.Add(cbDayEndNextDay);
+        groupBox4.Controls.Add(mtDayEnd);
+        groupBox4.Controls.Add(mtDayStart);
+        groupBox4.Location = new Point(12, 320);
+        groupBox4.Name = "groupBox4";
+        groupBox4.Size = new Size(391, 79);
+        groupBox4.TabIndex = 4;
+        groupBox4.TabStop = false;
+        groupBox4.Text = "Day Start/End (HH:mm)";
+        // 
+        // label5
+        // 
+        label5.AutoSize = true;
+        label5.Location = new Point(62, 34);
+        label5.Name = "label5";
+        label5.Size = new Size(18, 15);
+        label5.TabIndex = 3;
+        label5.Text = "to";
+        // 
+        // cbDayEndNextDay
+        // 
+        cbDayEndNextDay.AutoSize = true;
+        cbDayEndNextDay.Location = new Point(135, 34);
+        cbDayEndNextDay.Name = "cbDayEndNextDay";
+        cbDayEndNextDay.Size = new Size(93, 19);
+        cbDayEndNextDay.TabIndex = 2;
+        cbDayEndNextDay.Text = "The next day";
+        cbDayEndNextDay.UseVisualStyleBackColor = true;
+        cbDayEndNextDay.CheckedChanged += cbDayEndNextDay_CheckedChanged;
+        // 
+        // mtDayEnd
+        // 
+        mtDayEnd.Location = new Point(82, 31);
+        mtDayEnd.Mask = "00:00";
+        mtDayEnd.Name = "mtDayEnd";
+        mtDayEnd.Size = new Size(48, 23);
+        mtDayEnd.TabIndex = 1;
+        mtDayEnd.TextAlign = HorizontalAlignment.Center;
+        mtDayEnd.ValidatingType = typeof(DateTime);
+        mtDayEnd.TextChanged += mtDayEnd_TextChanged;
+        // 
+        // mtDayStart
+        // 
+        mtDayStart.Location = new Point(10, 31);
+        mtDayStart.Mask = "00:00";
+        mtDayStart.Name = "mtDayStart";
+        mtDayStart.Size = new Size(48, 23);
+        mtDayStart.TabIndex = 0;
+        mtDayStart.TextAlign = HorizontalAlignment.Center;
+        mtDayStart.ValidatingType = typeof(DateTime);
+        mtDayStart.TextChanged += mtDayStart_TextChanged;
+        // 
         // frmSetting
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(415, 428);
+        ClientSize = new Size(415, 479);
+        Controls.Add(groupBox4);
         Controls.Add(btnTrimDb);
         Controls.Add(groupBox3);
         Controls.Add(groupBox2);
@@ -286,6 +348,8 @@ partial class frmSetting
         groupBox3.ResumeLayout(false);
         groupBox3.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)numKeepDaysOfData).EndInit();
+        groupBox4.ResumeLayout(false);
+        groupBox4.PerformLayout();
         ResumeLayout(false);
     }
 
@@ -309,4 +373,9 @@ partial class frmSetting
     private NumericUpDown numKeepDaysOfData;
     private NumericUpDown nMaxDaysDataToLoad;
     private Label label4;
+    private GroupBox groupBox4;
+    private MaskedTextBox mtDayStart;
+    private Label label5;
+    private CheckBox cbDayEndNextDay;
+    private MaskedTextBox mtDayEnd;
 }
