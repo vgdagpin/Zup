@@ -137,27 +137,10 @@ public partial class frmView : Form
 
         foreach (var item in ds)
         {
-            item.DayOfWeek = GetDayOfWeek(item);
+            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn);
         }
 
         dgView.DataSource = ds;
-    }
-
-    protected DayOfWeek? GetDayOfWeek(TimeLogSummary timeLog)
-    {
-        if (timeLog.StartedOn == null)
-        {
-            return null;
-        }
-
-        var dt = new DateTime(timeLog.StartedOn.Value.Year, timeLog.StartedOn.Value.Month, timeLog.StartedOn.Value.Day);
-        TimeSpan tsStart = Properties.Settings.Default.DayStart;
-        TimeSpan tsEnd = Properties.Settings.Default.DayEnd;
-
-        dt = dt.AddHours(tsStart.Hours - 7);
-        dt = dt.AddMinutes(tsStart.Minutes);
-
-        return DayOfWeek.Monday;
     }
 
     private void dgView_DoubleClick(object sender, EventArgs e)

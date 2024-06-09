@@ -15,13 +15,6 @@ public partial class frmSetting : Form
         InitializeComponent();
     }
 
-    private void frmSetting_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        e.Cancel = true;
-
-        Hide();
-    }
-
     private void frmSetting_Load(object sender, EventArgs e)
     {
         var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -145,6 +138,8 @@ public partial class frmSetting : Form
     {
         Properties.Settings.Default.DayEndNextDay = cbDayEndNextDay.Checked;
         Properties.Settings.Default.Save();
+
+        RecalcDayStartAndEnd();
     }
 
     private void mtDayStart_TextChanged(object sender, EventArgs e)
@@ -153,6 +148,8 @@ public partial class frmSetting : Form
         {
             Properties.Settings.Default.DayStart = dayStart;
             Properties.Settings.Default.Save();
+
+            RecalcDayStartAndEnd();
         }
     }
 
@@ -162,6 +159,17 @@ public partial class frmSetting : Form
         {
             Properties.Settings.Default.DayEnd = dayEnd;
             Properties.Settings.Default.Save();
+
+            RecalcDayStartAndEnd();
         }
+    }
+
+    private void RecalcDayStartAndEnd()
+    {
+        var dayShift = Utility.GetDayShift(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+
+        // 01/01/2024 12:00am
+        lblDayStart.Text = $"{dayShift.start:MM/dd/yyyy hh:mmtt}";
+        lblDayEnd.Text = $"{dayShift.end:MM/dd/yyyy hh:mmtt}";
     }
 }

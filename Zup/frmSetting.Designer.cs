@@ -53,6 +53,10 @@ partial class frmSetting
         cbDayEndNextDay = new CheckBox();
         mtDayEnd = new MaskedTextBox();
         mtDayStart = new MaskedTextBox();
+        label6 = new Label();
+        label7 = new Label();
+        lblDayStart = new Label();
+        lblDayEnd = new Label();
         groupBox1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).BeginInit();
         ((System.ComponentModel.ISupportInitialize)tbOpacity).BeginInit();
@@ -154,7 +158,7 @@ partial class frmSetting
         // groupBox2
         // 
         groupBox2.Controls.Add(cbAutoOpenUpdateWindow);
-        groupBox2.Location = new Point(13, 405);
+        groupBox2.Location = new Point(12, 449);
         groupBox2.Name = "groupBox2";
         groupBox2.Size = new Size(390, 62);
         groupBox2.TabIndex = 3;
@@ -264,13 +268,17 @@ partial class frmSetting
         // 
         // groupBox4
         // 
+        groupBox4.Controls.Add(lblDayEnd);
+        groupBox4.Controls.Add(lblDayStart);
+        groupBox4.Controls.Add(label7);
+        groupBox4.Controls.Add(label6);
         groupBox4.Controls.Add(label5);
         groupBox4.Controls.Add(cbDayEndNextDay);
         groupBox4.Controls.Add(mtDayEnd);
         groupBox4.Controls.Add(mtDayStart);
         groupBox4.Location = new Point(12, 320);
         groupBox4.Name = "groupBox4";
-        groupBox4.Size = new Size(391, 79);
+        groupBox4.Size = new Size(391, 116);
         groupBox4.TabIndex = 4;
         groupBox4.TabStop = false;
         groupBox4.Text = "Day Start/End (HH:mm)";
@@ -317,11 +325,49 @@ partial class frmSetting
         mtDayStart.ValidatingType = typeof(DateTime);
         mtDayStart.TextChanged += mtDayStart_TextChanged;
         // 
+        // label6
+        // 
+        label6.AutoSize = true;
+        label6.Location = new Point(10, 69);
+        label6.Name = "label6";
+        label6.Size = new Size(57, 15);
+        label6.TabIndex = 4;
+        label6.Text = "Day Start:";
+        // 
+        // label7
+        // 
+        label7.AutoSize = true;
+        label7.Location = new Point(10, 87);
+        label7.Name = "label7";
+        label7.Size = new Size(53, 15);
+        label7.TabIndex = 5;
+        label7.Text = "Day End:";
+        // 
+        // lblDayStart
+        // 
+        lblDayStart.AutoSize = true;
+        lblDayStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblDayStart.Location = new Point(73, 69);
+        lblDayStart.Name = "lblDayStart";
+        lblDayStart.Size = new Size(124, 15);
+        lblDayStart.TabIndex = 6;
+        lblDayStart.Text = "01/01/2024 12:00am";
+        // 
+        // lblDayEnd
+        // 
+        lblDayEnd.AutoSize = true;
+        lblDayEnd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblDayEnd.Location = new Point(73, 87);
+        lblDayEnd.Name = "lblDayEnd";
+        lblDayEnd.Size = new Size(125, 15);
+        lblDayEnd.TabIndex = 7;
+        lblDayEnd.Text = "01/01/2024 11:59pm";
+        // 
         // frmSetting
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(415, 479);
+        ClientSize = new Size(415, 521);
         Controls.Add(groupBox4);
         Controls.Add(btnTrimDb);
         Controls.Add(groupBox3);
@@ -335,7 +381,6 @@ partial class frmSetting
         Name = "frmSetting";
         SizeGripStyle = SizeGripStyle.Hide;
         Text = "Setting";
-        FormClosing += frmSetting_FormClosing;
         Load += frmSetting_Load;
         KeyDown += frmSetting_KeyDown;
         groupBox1.ResumeLayout(false);
@@ -378,4 +423,8 @@ partial class frmSetting
     private Label label5;
     private CheckBox cbDayEndNextDay;
     private MaskedTextBox mtDayEnd;
+    private Label label7;
+    private Label label6;
+    private Label lblDayStart;
+    private Label lblDayEnd;
 }

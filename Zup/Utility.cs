@@ -91,6 +91,57 @@ public static class Utility
             .ToArray();
     }
 
+    public static DayOfWeek? GetDayOfWeek(DateTime? startedOn)
+    {
+        if (startedOn == null)
+        {
+            return null;
+        }
+
+        var dt = new DateTime(startedOn.Value.Year, startedOn.Value.Month, startedOn.Value.Day);
+
+        var ds1 = GetDayShift(dt.AddHours(-24));
+        var ds2 = GetDayShift(dt);
+        var ds3 = GetDayShift(dt.AddHours(24));
+
+        if (ds1.start <= startedOn.Value && startedOn.Value <= ds1.end)
+        {
+            return ds1.passedDT.DayOfWeek;
+        }
+        else if (ds2.start <= startedOn.Value && startedOn.Value <= ds2.end)
+        {
+            return ds2.passedDT.DayOfWeek;
+        }
+        else if (ds3.start <= startedOn.Value && startedOn.Value <= ds3.end)
+        {
+            return ds3.passedDT.DayOfWeek;
+        }
+
+        return null;
+    }
+
+    public static (DateTime start, DateTime end, DateTime passedDT) GetDayShift(DateTime date)
+    {
+        TimeSpan tsStart = Properties.Settings.Default.DayStart;
+        TimeSpan tsEnd = Properties.Settings.Default.DayEnd;
+
+        var s = date;
+        s = s.AddHours(tsStart.Hours - 7);
+        s = s.AddMinutes(tsStart.Minutes);
+
+        var e = date;
+        e = e.AddHours(tsEnd.Hours + 8);
+        e = e.AddMinutes(tsEnd.Minutes);
+        e = e.AddSeconds(-1);
+
+        if (Properties.Settings.Default.DayEndNextDay)
+        {
+            e = e.AddHours(24);
+        }
+
+        return (s, e, date);
+    }
+
     public static string DbPath
     {
         get
