@@ -29,7 +29,7 @@ partial class frmNewEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmNewEntry));
         txtEntry = new TextBox();
         tmrShowSuggest = new System.Windows.Forms.Timer(components);
         lbSuggestions = new ListBox();
@@ -66,6 +66,7 @@ partial class frmNewEntry
         lbSuggestions.Name = "lbSuggestions";
         lbSuggestions.Size = new Size(511, 109);
         lbSuggestions.TabIndex = 1;
+        lbSuggestions.Click += lbSuggestions_Click;
         lbSuggestions.DoubleClick += lbSuggestions_DoubleClick;
         // 
         // tmrFocus

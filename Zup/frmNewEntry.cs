@@ -46,6 +46,63 @@ public partial class frmNewEntry : Form
         return temp;
     }
 
+    private void AddToQueue(bool forceFromTextBox = false)
+    {
+        var temp = GetSelectedItem(forceFromTextBox);
+
+        Close();
+
+        if (!string.IsNullOrWhiteSpace(temp))
+        {
+            if (OnNewEntryEvent != null)
+            {
+                OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                {
+                    GetTags = true
+                });
+            }
+        }
+    }
+
+    private void RunInParallel(bool forceFromTextBox = false)
+    {
+        var temp = GetSelectedItem(forceFromTextBox);
+
+        Close();
+
+        if (!string.IsNullOrWhiteSpace(temp))
+        {
+            if (OnNewEntryEvent != null)
+            {
+                OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                {
+                    StartNow = true,
+                    GetTags = true
+                });
+            }
+        }
+    }
+
+    private void RunAndStopOtherTasks(bool forceFromTextBox = false)
+    {
+        var temp = GetSelectedItem(forceFromTextBox);
+
+        Close();
+
+        if (!string.IsNullOrWhiteSpace(temp))
+        {
+            if (OnNewEntryEvent != null)
+            {
+                OnNewEntryEvent(this, new NewEntryEventArgs(temp)
+                {
+                    StopOtherTask = true,
+                    StartNow = true,
+                    GetTags = true
+                });
+            }
+        }
+    }
+
     private void txtEntry_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Control)
@@ -64,20 +121,7 @@ public partial class frmNewEntry : Form
         {
             e.SuppressKeyPress = true;
 
-            var temp = GetSelectedItem(e.Control);
-
-            Close();
-
-            if (!string.IsNullOrWhiteSpace(temp))
-            {
-                if (OnNewEntryEvent != null)
-                {
-                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
-                    {
-                        GetTags = true
-                    });
-                }
-            }
+            AddToQueue(e.Control);
         }
         // run in parallel
         else if (e.KeyData == (Keys.Shift | Keys.Enter)
@@ -85,43 +129,14 @@ public partial class frmNewEntry : Form
         {
             e.SuppressKeyPress = true;
 
-            var temp = GetSelectedItem(e.Control);
-
-            Close();
-
-            if (!string.IsNullOrWhiteSpace(temp))
-            {
-                if (OnNewEntryEvent != null)
-                {
-                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
-                    {
-                        StartNow = true,
-                        GetTags = true
-                    });
-                }
-            }
+            RunInParallel(e.Control);
         }
         // run this and stop others
         else if (e.KeyCode == Keys.Enter)
         {
             e.SuppressKeyPress = true;
 
-            var temp = GetSelectedItem(e.Control);
-
-            Close();
-
-            if (!string.IsNullOrWhiteSpace(temp))
-            {
-                if (OnNewEntryEvent != null)
-                {
-                    OnNewEntryEvent(this, new NewEntryEventArgs(temp)
-                    {
-                        StopOtherTask = true,
-                        StartNow = true,
-                        GetTags = true
-                    });
-                }
-            }
+            RunAndStopOtherTasks(e.Control);
         }
         else if (e.KeyCode == Keys.Down)
         {
@@ -221,21 +236,22 @@ public partial class frmNewEntry : Form
 
     private void lbSuggestions_DoubleClick(object sender, EventArgs e)
     {
-        var temp = GetSelectedItem();
-
-        Close();
-
-        if (!string.IsNullOrWhiteSpace(temp))
+        if ((Control.ModifierKeys & Keys.Alt) != 0)
         {
-            if (OnNewEntryEvent != null)
-            {
-                OnNewEntryEvent(this, new NewEntryEventArgs(temp)
-                {
-                    StopOtherTask = true,
-                    StartNow = true,
-                    GetTags = true
-                });
-            }
+            AddToQueue();
         }
-    }    
+        else if ((Control.ModifierKeys & Keys.Shift) != 0)
+        {
+            RunInParallel();
+        }
+        else
+        {
+            RunAndStopOtherTasks();
+        }
+    }
+
+    private void lbSuggestions_Click(object sender, EventArgs e)
+    {
+        txtEntry.Focus();
+    }
 }
