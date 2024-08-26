@@ -181,7 +181,71 @@ public partial class frmMain : Form
 
 
     private readonly IServiceProvider p_ServiceProvider;
-    private frmSetting m_FormSetting;
+
+    private frmSetting? frmSetting = null;
+    private frmSetting m_FormSetting
+    {
+        get
+        {
+            if (frmSetting == null || frmSetting.IsDisposed)
+            {
+                frmSetting = p_ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<frmSetting>();
+
+                frmSetting.OnSettingUpdatedEvent += (name, value) =>
+                {
+                    if (name == "ItemsToShow")
+                    {
+                        m_FormEntryList.ResizeForm();
+                    }
+                    else if (name == "EntryListOpacity" && value is double opacity)
+                    {
+                        m_FormEntryList.Opacity = opacity;
+                    }
+                    else if (name == "UpdateDbPath")
+                    {
+                        m_FormEntryList.Close();
+
+                        dbContext = null;
+                        serviceProvider = null;
+                        frmEntryList = null;
+
+                        m_FormEntryList.Show();
+                    }
+                };
+
+                frmSetting.OnDbTrimEvent += (daysToKeep) =>
+                {
+                    m_DbContext.BackupDb();
+
+                    var keepDate = DateTime.Now.AddDays(-daysToKeep);
+
+                    var toDel = m_DbContext.TaskEntries
+                        .Where(a => a.StartedOn < keepDate)
+                        .ToList();
+
+                    var toDelNotes = m_DbContext.TaskEntryNotes
+                        .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
+                        .ToList();
+
+                    m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
+                    m_DbContext.TaskEntries.RemoveRange(toDel);
+
+                    m_DbContext.SaveChanges();
+
+                    MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
+                };
+
+                frmSetting.OnDbBackupEvent += () =>
+                {
+                    m_DbContext.BackupDb();
+
+                    MessageBox.Show("Backup done!", "Zup");
+                };
+            }
+
+            return frmSetting;
+        }
+    }
 
     #region Initialize
     [DllImport("user32.dll")]
@@ -218,94 +282,8 @@ public partial class frmMain : Form
         RegisterHotKey(this.Handle, Constants.ShowViewAll, 5, (int)Keys.P);
 
         p_ServiceProvider = serviceProvider;
-        m_FormSetting = frmSetting;
-
-        m_FormSetting.OnSettingUpdatedEvent += FormSetting_OnSettingUpdatedEvent;
-        m_FormSetting.OnDbTrimEvent += FormSetting_OnDbTrimEvent;
-        m_FormSetting.OnDbBackupEvent += FormSetting_OnDbBackupEvent;
 
         SetIcon();
-    }
-
-    private void FormSetting_OnDbBackupEvent()
-    {
-        //foreach (var log in m_DbContext.TimeLogs)
-        //{
-        //    var task = new tbl_TaskEntry
-        //    {
-        //        ID = Guid.NewGuid(),
-        //        Task = log.Task,
-        //        StartedOn = log.StartedOn,
-        //        EndedOn = log.EndedOn
-        //    };
-
-        //    m_DbContext.TaskEntries.Add(task);
-
-        //    foreach (var note in m_DbContext.Notes.Where(a => a.LogID == log.ID))
-        //    {
-        //        var taskNote = new tbl_TaskEntryNote
-        //        {
-        //            ID = Guid.NewGuid(),
-        //            TaskID = task.ID,
-        //            Notes = note.Notes,
-        //            CreatedOn = note.CreatedOn,
-        //            UpdatedOn = note.UpdatedOn,
-        //            RTF = note.RTF
-        //        };
-
-        //        m_DbContext.TaskEntryNotes.Add(taskNote);
-        //    }
-        //}
-
-        //m_DbContext.SaveChanges();
-
-        m_DbContext.BackupDb();
-
-        MessageBox.Show("Backup done!", "Zup");
-    }
-
-    private void FormSetting_OnDbTrimEvent(int daysToKeep)
-    {
-        m_DbContext.BackupDb();
-
-        var keepDate = DateTime.Now.AddDays(-daysToKeep);
-
-        var toDel = m_DbContext.TaskEntries
-            .Where(a => a.StartedOn < keepDate)
-            .ToList();
-
-        var toDelNotes = m_DbContext.TaskEntryNotes
-            .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
-            .ToList();
-
-        m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
-        m_DbContext.TaskEntries.RemoveRange(toDel);
-
-        m_DbContext.SaveChanges();
-
-        MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
-    }
-
-    private void FormSetting_OnSettingUpdatedEvent(string name, object value)
-    {
-        if (name == "ItemsToShow")
-        {
-            m_FormEntryList.ResizeForm();
-        }
-        else if (name == "EntryListOpacity" && value is double opacity)
-        {
-            m_FormEntryList.Opacity = opacity;
-        }
-        else if (name == "UpdateDbPath")
-        {
-            m_FormEntryList.Close();
-
-            dbContext = null;
-            serviceProvider = null;
-            frmEntryList = null;
-
-            m_FormEntryList.Show();
-        }
     }
 
     private void FormView_OnSelectedItemEvent(Guid entryID)
@@ -406,13 +384,6 @@ public partial class frmMain : Form
 
     private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (m_FormSetting.Visible)
-        {
-            m_FormSetting.Activate();
-
-            return;
-        }
-
         m_FormSetting.Show();
     }
 
@@ -470,5 +441,10 @@ public partial class frmMain : Form
         }
 
         m_FormTagEditor.Show();
+    }
+
+    private void moveToCenterToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        m_FormEntryList.MoveToCenter();
     }
 }

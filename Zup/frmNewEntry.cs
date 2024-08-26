@@ -174,7 +174,7 @@ public partial class frmNewEntry : Form
         Suggestions = suggestions;
         tmrFocus.Enabled = true;
 
-        ShowDialog();
+        Show();
     }
 
     private void frmNewEntry_VisibleChanged(object sender, EventArgs e)

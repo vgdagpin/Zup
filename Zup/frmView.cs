@@ -98,7 +98,7 @@ public partial class frmView : Form
             filter = a => a.Task.ToLower().Contains(search.ToLower());
         }
 
-        dgView.DataSource = (from te in p_DbContext.TaskEntries.Where(filter)
+        var ds = (from te in p_DbContext.TaskEntries.Where(filter)
                              join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID into tet
                              from tet2 in tet.DefaultIfEmpty()
                              join tag in p_DbContext.Tags on tet2.TagID equals tag.ID into tag
@@ -134,6 +134,13 @@ public partial class frmView : Form
                                     };
                                 })
                                 .ToList();
+
+        foreach (var item in ds)
+        {
+            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn);
+        }
+
+        dgView.DataSource = ds;
     }
 
     private void dgView_DoubleClick(object sender, EventArgs e)

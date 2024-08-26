@@ -61,6 +61,12 @@ public partial class frmEntryList : Form
         tmrSaveSetting.Enabled = false;
     }
 
+    public void MoveToCenter()
+    {
+        Left = (Screen.PrimaryScreen!.WorkingArea.Width / 2) - (Width / 2);
+        Top = (Screen.PrimaryScreen!.WorkingArea.Height / 2) - (Height / 2);
+    }
+
     private void UpdateFormPosition()
     {
         if (Properties.Settings.Default.FormLocationX == 0
@@ -110,9 +116,8 @@ public partial class frmEntryList : Form
         var suggestions = new List<string>();
 
         var currentList = flpTaskList.Controls.Cast<EachEntry>()
-            .Where(a => a.Visible)
+            .Where(a => a.Visible && IsClosed(a))
             .Select(a => a.Text)
-            .Reverse()
             .ToArray();
 
         if (currentList.Length > 1)
@@ -181,7 +186,7 @@ public partial class frmEntryList : Form
 
         var temp = new List<EachEntry>();
 
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate).ToList())
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
             {

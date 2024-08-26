@@ -29,7 +29,7 @@ partial class frmUpdateEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         btnDeleteNote = new Button();
@@ -67,7 +67,7 @@ partial class frmUpdateEntry
         rtbNote.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         rtbNote.Location = new Point(0, 0);
         rtbNote.Name = "rtbNote";
-        rtbNote.Size = new Size(564, 305);
+        rtbNote.Size = new Size(510, 325);
         rtbNote.TabIndex = 3;
         rtbNote.Text = "";
         rtbNote.LinkClicked += rtbNote_LinkClicked;
@@ -83,7 +83,7 @@ partial class frmUpdateEntry
         lbNotes.ItemHeight = 15;
         lbNotes.Location = new Point(0, 0);
         lbNotes.Name = "lbNotes";
-        lbNotes.Size = new Size(238, 169);
+        lbNotes.Size = new Size(289, 154);
         lbNotes.TabIndex = 4;
         lbNotes.DrawItem += lbNotes_DrawItem;
         lbNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -92,7 +92,7 @@ partial class frmUpdateEntry
         // btnDeleteNote
         // 
         btnDeleteNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnDeleteNote.Location = new Point(109, 308);
+        btnDeleteNote.Location = new Point(109, 328);
         btnDeleteNote.Name = "btnDeleteNote";
         btnDeleteNote.Size = new Size(105, 23);
         btnDeleteNote.TabIndex = 7;
@@ -104,7 +104,7 @@ partial class frmUpdateEntry
         // btnNewNote
         // 
         btnNewNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-        btnNewNote.Location = new Point(3, 308);
+        btnNewNote.Location = new Point(3, 328);
         btnNewNote.Name = "btnNewNote";
         btnNewNote.Size = new Size(102, 23);
         btnNewNote.TabIndex = 8;
@@ -115,7 +115,7 @@ partial class frmUpdateEntry
         // btnSaveNote
         // 
         btnSaveNote.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        btnSaveNote.Location = new Point(435, 308);
+        btnSaveNote.Location = new Point(381, 328);
         btnSaveNote.Name = "btnSaveNote";
         btnSaveNote.Size = new Size(126, 23);
         btnSaveNote.TabIndex = 9;
@@ -144,7 +144,7 @@ partial class frmUpdateEntry
         dtFrom.Format = DateTimePickerFormat.Custom;
         dtFrom.Location = new Point(111, 44);
         dtFrom.Name = "dtFrom";
-        dtFrom.Size = new Size(164, 23);
+        dtFrom.Size = new Size(193, 23);
         dtFrom.TabIndex = 11;
         dtFrom.ValueChanged += dtFrom_ValueChanged;
         // 
@@ -154,7 +154,7 @@ partial class frmUpdateEntry
         dtTo.Format = DateTimePickerFormat.Custom;
         dtTo.Location = new Point(111, 69);
         dtTo.Name = "dtTo";
-        dtTo.Size = new Size(164, 23);
+        dtTo.Size = new Size(193, 23);
         dtTo.TabIndex = 12;
         dtTo.ValueChanged += dtTo_ValueChanged;
         // 
@@ -162,9 +162,9 @@ partial class frmUpdateEntry
         // 
         pnlNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         pnlNotes.Controls.Add(splitContainer1);
-        pnlNotes.Location = new Point(7, 200);
+        pnlNotes.Location = new Point(7, 180);
         pnlNotes.Name = "pnlNotes";
-        pnlNotes.Size = new Size(815, 356);
+        pnlNotes.Size = new Size(815, 376);
         pnlNotes.TabIndex = 13;
         pnlNotes.TabStop = false;
         pnlNotes.Text = "&Notes";
@@ -188,8 +188,8 @@ partial class frmUpdateEntry
         splitContainer1.Panel2.Controls.Add(btnNewNote);
         splitContainer1.Panel2.Controls.Add(btnSaveNote);
         splitContainer1.Panel2.Controls.Add(btnDeleteNote);
-        splitContainer1.Size = new Size(809, 334);
-        splitContainer1.SplitterDistance = 241;
+        splitContainer1.Size = new Size(809, 354);
+        splitContainer1.SplitterDistance = 292;
         splitContainer1.TabIndex = 0;
         // 
         // label7
@@ -211,7 +211,7 @@ partial class frmUpdateEntry
         lbPreviousNotes.ItemHeight = 15;
         lbPreviousNotes.Location = new Point(0, 191);
         lbPreviousNotes.Name = "lbPreviousNotes";
-        lbPreviousNotes.Size = new Size(238, 94);
+        lbPreviousNotes.Size = new Size(289, 124);
         lbPreviousNotes.TabIndex = 10;
         lbPreviousNotes.DrawItem += lbNotes_DrawItem;
         lbPreviousNotes.SelectedIndexChanged += lbNotes_SelectedIndexChanged;
@@ -357,7 +357,7 @@ partial class frmUpdateEntry
         KeyPreview = true;
         MaximizeBox = false;
         MinimizeBox = false;
-        MinimumSize = new Size(850, 600);
+        MinimumSize = new Size(850, 598);
         Name = "frmUpdateEntry";
         Text = "Update Entry";
         FormClosing += frmUpdateEntry_FormClosing;

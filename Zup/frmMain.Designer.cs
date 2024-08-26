@@ -32,6 +32,7 @@ partial class frmMain
         notifIconZup = new NotifyIcon(components);
         notifCms = new ContextMenuStrip(components);
         viewToolStripMenuItem = new ToolStripMenuItem();
+        tagEditorToolStripMenuItem = new ToolStripMenuItem();
         settingsToolStripMenuItem = new ToolStripMenuItem();
         openNewEntryToolStripMenuItem = new ToolStripMenuItem();
         updateCurrentRunningTaskToolStripMenuItem = new ToolStripMenuItem();
@@ -39,7 +40,7 @@ partial class frmMain
         toolStripSeparator1 = new ToolStripSeparator();
         exitToolStripMenuItem = new ToolStripMenuItem();
         tmrDelayShowList = new System.Windows.Forms.Timer(components);
-        tagEditorToolStripMenuItem = new ToolStripMenuItem();
+        moveToCenterToolStripMenuItem = new ToolStripMenuItem();
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -55,17 +56,25 @@ partial class frmMain
         // 
         // notifCms
         // 
-        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, moveToCenterToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(298, 186);
+        notifCms.Size = new Size(298, 208);
         // 
         // viewToolStripMenuItem
         // 
         viewToolStripMenuItem.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+        viewToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.P;
         viewToolStripMenuItem.Size = new Size(297, 22);
         viewToolStripMenuItem.Text = "View";
         viewToolStripMenuItem.Click += viewToolStripMenuItem_Click;
+        // 
+        // tagEditorToolStripMenuItem
+        // 
+        tagEditorToolStripMenuItem.Name = "tagEditorToolStripMenuItem";
+        tagEditorToolStripMenuItem.Size = new Size(297, 22);
+        tagEditorToolStripMenuItem.Text = "Tag Editor";
+        tagEditorToolStripMenuItem.Click += tagEditorToolStripMenuItem_Click;
         // 
         // settingsToolStripMenuItem
         // 
@@ -116,12 +125,12 @@ partial class frmMain
         tmrDelayShowList.Interval = 300;
         tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
-        // tagEditorToolStripMenuItem
+        // moveToCenterToolStripMenuItem
         // 
-        tagEditorToolStripMenuItem.Name = "tagEditorToolStripMenuItem";
-        tagEditorToolStripMenuItem.Size = new Size(297, 22);
-        tagEditorToolStripMenuItem.Text = "Tag Editor";
-        tagEditorToolStripMenuItem.Click += tagEditorToolStripMenuItem_Click;
+        moveToCenterToolStripMenuItem.Name = "moveToCenterToolStripMenuItem";
+        moveToCenterToolStripMenuItem.Size = new Size(297, 22);
+        moveToCenterToolStripMenuItem.Text = "Move to Center";
+        moveToCenterToolStripMenuItem.Click += moveToCenterToolStripMenuItem_Click;
         // 
         // frmMain
         // 
@@ -152,4 +161,5 @@ partial class frmMain
     private ToolStripMenuItem updateCurrentRunningTaskToolStripMenuItem;
     private ToolStripMenuItem toggleLastRunningTaskToolStripMenuItem;
     private ToolStripMenuItem tagEditorToolStripMenuItem;
+    private ToolStripMenuItem moveToCenterToolStripMenuItem;
 }
