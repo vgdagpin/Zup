@@ -36,7 +36,11 @@ partial class frmEntryList
         showRankedTasksToolStripMenuItem = new ToolStripMenuItem();
         showClosedTasksToolStripMenuItem = new ToolStripMenuItem();
         tmrSaveSetting = new System.Windows.Forms.Timer(components);
+        flpQueuedTaskList = new FlowLayoutPanel();
+        flpRankedTasks = new FlowLayoutPanel();
+        tblLayoutPanel = new TableLayoutPanel();
         cmsList.SuspendLayout();
+        tblLayoutPanel.SuspendLayout();
         SuspendLayout();
         // 
         // flpTaskList
@@ -45,9 +49,9 @@ partial class frmEntryList
         flpTaskList.ContextMenuStrip = cmsList;
         flpTaskList.Dock = DockStyle.Fill;
         flpTaskList.FlowDirection = FlowDirection.TopDown;
-        flpTaskList.Location = new Point(0, 0);
+        flpTaskList.Location = new Point(3, 3);
         flpTaskList.Name = "flpTaskList";
-        flpTaskList.Size = new Size(271, 86);
+        flpTaskList.Size = new Size(268, 186);
         flpTaskList.TabIndex = 0;
         flpTaskList.WrapContents = false;
         // 
@@ -96,13 +100,54 @@ partial class frmEntryList
         tmrSaveSetting.Interval = 1000;
         tmrSaveSetting.Tick += tmrSaveSetting_Tick;
         // 
+        // flpQueuedTaskList
+        // 
+        flpQueuedTaskList.AutoScroll = true;
+        flpQueuedTaskList.ContextMenuStrip = cmsList;
+        flpQueuedTaskList.Dock = DockStyle.Fill;
+        flpQueuedTaskList.FlowDirection = FlowDirection.TopDown;
+        flpQueuedTaskList.Location = new Point(3, 195);
+        flpQueuedTaskList.Name = "flpQueuedTaskList";
+        flpQueuedTaskList.Size = new Size(268, 90);
+        flpQueuedTaskList.TabIndex = 1;
+        flpQueuedTaskList.WrapContents = false;
+        // 
+        // flpRankedTasks
+        // 
+        flpRankedTasks.AutoScroll = true;
+        flpRankedTasks.ContextMenuStrip = cmsList;
+        flpRankedTasks.Dock = DockStyle.Fill;
+        flpRankedTasks.FlowDirection = FlowDirection.TopDown;
+        flpRankedTasks.Location = new Point(3, 291);
+        flpRankedTasks.Name = "flpRankedTasks";
+        flpRankedTasks.Size = new Size(268, 90);
+        flpRankedTasks.TabIndex = 2;
+        flpRankedTasks.WrapContents = false;
+        // 
+        // tblLayoutPanel
+        // 
+        tblLayoutPanel.ColumnCount = 1;
+        tblLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tblLayoutPanel.Controls.Add(flpTaskList, 0, 0);
+        tblLayoutPanel.Controls.Add(flpQueuedTaskList, 0, 1);
+        tblLayoutPanel.Controls.Add(flpRankedTasks, 0, 2);
+        tblLayoutPanel.Dock = DockStyle.Fill;
+        tblLayoutPanel.Location = new Point(0, 0);
+        tblLayoutPanel.Name = "tblLayoutPanel";
+        tblLayoutPanel.RowCount = 3;
+        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+        tblLayoutPanel.Size = new Size(274, 384);
+        tblLayoutPanel.TabIndex = 3;
+        // 
         // frmEntryList
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.LawnGreen;
-        ClientSize = new Size(271, 86);
-        Controls.Add(flpTaskList);
+        ClientSize = new Size(274, 384);
+        Controls.Add(tblLayoutPanel);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
         Opacity = 0.9D;
@@ -116,6 +161,7 @@ partial class frmEntryList
         Load += frmEntryList_Load;
         Move += frmEntryList_Move;
         cmsList.ResumeLayout(false);
+        tblLayoutPanel.ResumeLayout(false);
         ResumeLayout(false);
     }
 
@@ -128,4 +174,7 @@ partial class frmEntryList
     private ToolStripMenuItem showQueuedTasksToolStripMenuItem;
     private ToolStripMenuItem showRankedTasksToolStripMenuItem;
     private ToolStripMenuItem showClosedTasksToolStripMenuItem;
+    private FlowLayoutPanel flpQueuedTaskList;
+    private FlowLayoutPanel flpRankedTasks;
+    private TableLayoutPanel tblLayoutPanel;
 }
