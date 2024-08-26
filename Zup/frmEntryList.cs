@@ -182,7 +182,7 @@ public partial class frmEntryList : Form
         var queueCount = 0;
         var hasItem = false;
 
-        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);        
+        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
         var temp = new List<EachEntry>();
 
@@ -190,8 +190,12 @@ public partial class frmEntryList : Form
         {
             var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
             {
-                Rank = task.Rank
+                Rank = task.Rank,
+                TabStop = false,
+                
             };
+
+            eachEntry.GotFocus += (sender, e) => ActiveControl = null;
 
             eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
             eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
@@ -231,8 +235,8 @@ public partial class frmEntryList : Form
         flpTaskList.Controls.Clear();
         flpTaskList.Controls.AddRange(temp.ToArray());
 
-        var firstItem = flpTaskList.Controls.Count > 0 
-            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1] 
+        var firstItem = flpTaskList.Controls.Count > 0
+            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
             : null;
 
 
@@ -256,7 +260,7 @@ public partial class frmEntryList : Form
     public void SortTasks(IList entryList)
     {
         var stack = new Queue<EachEntry>();
-        var list =  entryList.OfType<EachEntry>().Where(a => a.Visible).ToList();
+        var list = entryList.OfType<EachEntry>().Where(a => a.Visible).ToList();
         var all = entryList.OfType<EachEntry>().Where(a => a.Visible).ToArray();
         var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
 
@@ -341,7 +345,7 @@ public partial class frmEntryList : Form
             }
 
             i++;
-        }       
+        }
     }
 
     protected bool IsRunning(EachEntry eachEntry)
@@ -446,7 +450,7 @@ public partial class frmEntryList : Form
 
         m_DbContext.TaskEntries.Add(newE);
 
-        tbl_TaskEntry? parentEntry = args.ParentEntryID != null
+        var parentEntry = args.ParentEntryID != null
             ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
             : null;
 
@@ -515,6 +519,8 @@ public partial class frmEntryList : Form
         {
             eachEntry.Rank = newE.Rank;
         }
+
+        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
 
         eachEntry.OnResumeEvent += EachEntry_NewEntryEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;

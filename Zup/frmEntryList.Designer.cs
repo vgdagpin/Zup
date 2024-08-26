@@ -34,8 +34,8 @@ partial class frmEntryList
         reorderToolStripMenuItem = new ToolStripMenuItem();
         showQueuedTasksToolStripMenuItem = new ToolStripMenuItem();
         showRankedTasksToolStripMenuItem = new ToolStripMenuItem();
-        tmrSaveSetting = new System.Windows.Forms.Timer(components);
         showClosedTasksToolStripMenuItem = new ToolStripMenuItem();
+        tmrSaveSetting = new System.Windows.Forms.Timer(components);
         cmsList.SuspendLayout();
         SuspendLayout();
         // 
@@ -55,12 +55,12 @@ partial class frmEntryList
         // 
         cmsList.Items.AddRange(new ToolStripItem[] { reorderToolStripMenuItem, showQueuedTasksToolStripMenuItem, showRankedTasksToolStripMenuItem, showClosedTasksToolStripMenuItem });
         cmsList.Name = "contextMenuStrip1";
-        cmsList.Size = new Size(181, 114);
+        cmsList.Size = new Size(179, 92);
         // 
         // reorderToolStripMenuItem
         // 
         reorderToolStripMenuItem.Name = "reorderToolStripMenuItem";
-        reorderToolStripMenuItem.Size = new Size(180, 22);
+        reorderToolStripMenuItem.Size = new Size(178, 22);
         reorderToolStripMenuItem.Text = "Reorder";
         reorderToolStripMenuItem.Click += reorderToolStripMenuItem_Click;
         // 
@@ -69,7 +69,7 @@ partial class frmEntryList
         showQueuedTasksToolStripMenuItem.Checked = true;
         showQueuedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showQueuedTasksToolStripMenuItem.Name = "showQueuedTasksToolStripMenuItem";
-        showQueuedTasksToolStripMenuItem.Size = new Size(180, 22);
+        showQueuedTasksToolStripMenuItem.Size = new Size(178, 22);
         showQueuedTasksToolStripMenuItem.Text = "Show Queued Tasks";
         showQueuedTasksToolStripMenuItem.Click += showQueuedTasksToolStripMenuItem_Click;
         // 
@@ -78,23 +78,23 @@ partial class frmEntryList
         showRankedTasksToolStripMenuItem.Checked = true;
         showRankedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showRankedTasksToolStripMenuItem.Name = "showRankedTasksToolStripMenuItem";
-        showRankedTasksToolStripMenuItem.Size = new Size(180, 22);
+        showRankedTasksToolStripMenuItem.Size = new Size(178, 22);
         showRankedTasksToolStripMenuItem.Text = "Show Ranked Tasks";
         showRankedTasksToolStripMenuItem.Click += showRankedTasksToolStripMenuItem_Click;
-        // 
-        // tmrSaveSetting
-        // 
-        tmrSaveSetting.Interval = 1000;
-        tmrSaveSetting.Tick += tmrSaveSetting_Tick;
         // 
         // showClosedTasksToolStripMenuItem
         // 
         showClosedTasksToolStripMenuItem.Checked = true;
         showClosedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showClosedTasksToolStripMenuItem.Name = "showClosedTasksToolStripMenuItem";
-        showClosedTasksToolStripMenuItem.Size = new Size(180, 22);
+        showClosedTasksToolStripMenuItem.Size = new Size(178, 22);
         showClosedTasksToolStripMenuItem.Text = "Show Closed Tasks";
         showClosedTasksToolStripMenuItem.Click += showClosedTasksToolStripMenuItem_Click;
+        // 
+        // tmrSaveSetting
+        // 
+        tmrSaveSetting.Interval = 1000;
+        tmrSaveSetting.Tick += tmrSaveSetting_Tick;
         // 
         // frmEntryList
         // 
