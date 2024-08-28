@@ -32,10 +32,16 @@ partial class frmEntryList
         flpTaskList = new FlowLayoutPanel();
         cmsList = new ContextMenuStrip(components);
         reorderToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator2 = new ToolStripSeparator();
         showQueuedTasksToolStripMenuItem = new ToolStripMenuItem();
         showRankedTasksToolStripMenuItem = new ToolStripMenuItem();
         showClosedTasksToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator1 = new ToolStripSeparator();
+        deleteEntryToolStripMenuItem = new ToolStripMenuItem();
         tmrSaveSetting = new System.Windows.Forms.Timer(components);
+        flpQueuedTaskList = new FlowLayoutPanel();
+        flpRankedTasks = new FlowLayoutPanel();
+        tblLayoutPanel = new TableLayoutPanel();
         cmsList.SuspendLayout();
         SuspendLayout();
         // 
@@ -45,17 +51,17 @@ partial class frmEntryList
         flpTaskList.ContextMenuStrip = cmsList;
         flpTaskList.Dock = DockStyle.Fill;
         flpTaskList.FlowDirection = FlowDirection.TopDown;
-        flpTaskList.Location = new Point(0, 0);
+        flpTaskList.Location = new Point(3, 3);
         flpTaskList.Name = "flpTaskList";
-        flpTaskList.Size = new Size(271, 86);
+        flpTaskList.Size = new Size(268, 186);
         flpTaskList.TabIndex = 0;
         flpTaskList.WrapContents = false;
         // 
         // cmsList
         // 
-        cmsList.Items.AddRange(new ToolStripItem[] { reorderToolStripMenuItem, showQueuedTasksToolStripMenuItem, showRankedTasksToolStripMenuItem, showClosedTasksToolStripMenuItem });
+        cmsList.Items.AddRange(new ToolStripItem[] { reorderToolStripMenuItem, toolStripSeparator2, showQueuedTasksToolStripMenuItem, showRankedTasksToolStripMenuItem, showClosedTasksToolStripMenuItem, toolStripSeparator1, deleteEntryToolStripMenuItem });
         cmsList.Name = "contextMenuStrip1";
-        cmsList.Size = new Size(179, 92);
+        cmsList.Size = new Size(179, 126);
         // 
         // reorderToolStripMenuItem
         // 
@@ -63,6 +69,11 @@ partial class frmEntryList
         reorderToolStripMenuItem.Size = new Size(178, 22);
         reorderToolStripMenuItem.Text = "Reorder";
         reorderToolStripMenuItem.Click += reorderToolStripMenuItem_Click;
+        // 
+        // toolStripSeparator2
+        // 
+        toolStripSeparator2.Name = "toolStripSeparator2";
+        toolStripSeparator2.Size = new Size(175, 6);
         // 
         // showQueuedTasksToolStripMenuItem
         // 
@@ -91,18 +102,65 @@ partial class frmEntryList
         showClosedTasksToolStripMenuItem.Text = "Show Closed Tasks";
         showClosedTasksToolStripMenuItem.Click += showClosedTasksToolStripMenuItem_Click;
         // 
+        // toolStripSeparator1
+        // 
+        toolStripSeparator1.Name = "toolStripSeparator1";
+        toolStripSeparator1.Size = new Size(175, 6);
+        // 
+        // deleteEntryToolStripMenuItem
+        // 
+        deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
+        deleteEntryToolStripMenuItem.Size = new Size(178, 22);
+        deleteEntryToolStripMenuItem.Text = "Delete Entry";
+        deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;
+        // 
         // tmrSaveSetting
         // 
         tmrSaveSetting.Interval = 1000;
         tmrSaveSetting.Tick += tmrSaveSetting_Tick;
+        // 
+        // flpQueuedTaskList
+        // 
+        flpQueuedTaskList.AutoScroll = true;
+        flpQueuedTaskList.ContextMenuStrip = cmsList;
+        flpQueuedTaskList.Dock = DockStyle.Fill;
+        flpQueuedTaskList.FlowDirection = FlowDirection.TopDown;
+        flpQueuedTaskList.Location = new Point(3, 195);
+        flpQueuedTaskList.Name = "flpQueuedTaskList";
+        flpQueuedTaskList.Size = new Size(268, 90);
+        flpQueuedTaskList.TabIndex = 1;
+        flpQueuedTaskList.WrapContents = false;
+        // 
+        // flpRankedTasks
+        // 
+        flpRankedTasks.AutoScroll = true;
+        flpRankedTasks.ContextMenuStrip = cmsList;
+        flpRankedTasks.Dock = DockStyle.Fill;
+        flpRankedTasks.FlowDirection = FlowDirection.TopDown;
+        flpRankedTasks.Location = new Point(3, 291);
+        flpRankedTasks.Name = "flpRankedTasks";
+        flpRankedTasks.Size = new Size(268, 90);
+        flpRankedTasks.TabIndex = 2;
+        flpRankedTasks.WrapContents = false;
+        // 
+        // tblLayoutPanel
+        // 
+        tblLayoutPanel.BackColor = Color.LawnGreen;
+        tblLayoutPanel.ColumnCount = 1;
+        tblLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tblLayoutPanel.Dock = DockStyle.Fill;
+        tblLayoutPanel.Location = new Point(0, 0);
+        tblLayoutPanel.Name = "tblLayoutPanel";
+        tblLayoutPanel.Size = new Size(274, 259);
+        tblLayoutPanel.TabIndex = 3;
         // 
         // frmEntryList
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.LawnGreen;
-        ClientSize = new Size(271, 86);
-        Controls.Add(flpTaskList);
+        ClientSize = new Size(274, 259);
+        Controls.Add(tblLayoutPanel);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
         Opacity = 0.9D;
@@ -128,4 +186,10 @@ partial class frmEntryList
     private ToolStripMenuItem showQueuedTasksToolStripMenuItem;
     private ToolStripMenuItem showRankedTasksToolStripMenuItem;
     private ToolStripMenuItem showClosedTasksToolStripMenuItem;
+    private FlowLayoutPanel flpQueuedTaskList;
+    private FlowLayoutPanel flpRankedTasks;
+    private TableLayoutPanel tblLayoutPanel;
+    private ToolStripSeparator toolStripSeparator2;
+    private ToolStripSeparator toolStripSeparator1;
+    private ToolStripMenuItem deleteEntryToolStripMenuItem;
 }

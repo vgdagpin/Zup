@@ -1,25 +1,77 @@
-﻿namespace Zup.CustomControls;
+﻿using Zup.EventArguments;
+
+namespace Zup.CustomControls;
+
+public enum TaskStatus
+{
+    Ongoing,
+    Queued,
+    Ranked,
+    Closed,
+    Unclosed,
+    Running
+}
 
 public partial class EachEntry : UserControl
 {
     public const string StartChar = "►";
     public const string StopChar = "■";
+    public const string ReminderChar = "Ѧ";
 
     Color RunningColor = Color.LightPink;
+
+    public const float OngoingRowHeight = 37;
+    public const float RowHeight = 26;
+
+    public const int ExpandedHeight = 35;
+    public const int CollapsedHeight = 22;
 
     public bool IsStarted { get; private set; }
 
     public delegate void OnStop(Guid id, DateTime endOn);
     public delegate void OnUpdate(Guid id);
-    public delegate void OnStart(Guid id);
 
     public event EventHandler<NewEntryEventArgs>? OnResumeEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
-    public event OnStart? OnStartEvent;
+    public event EventHandler<OnStartEventArgs>? OnStartEvent;
     public event EventHandler<NewEntryEventArgs>? OnStartQueueEvent;
 
     public event MouseEventHandler? TaskMouseDown;
+    public event MouseEventHandler? TaskRightClick;
+
+    public TaskStatus TaskStatus
+    {
+        get
+        {
+            if (tmr.Enabled)
+            {
+                return TaskStatus.Running;
+            }
+
+            if (Rank != null)
+            {
+                return TaskStatus.Ranked;
+            }
+
+            if (StartedOn == null)
+            {
+                return TaskStatus.Queued;
+            }
+
+            if (StartedOn != null && EndedOn == null)
+            {
+                return TaskStatus.Unclosed;
+            }
+
+            if (StartedOn != null && EndedOn != null)
+            {
+                return TaskStatus.Closed;
+            }
+
+            return TaskStatus.Ongoing;
+        }
+    }
 
     public override string Text
     {
@@ -28,15 +80,22 @@ public partial class EachEntry : UserControl
         {
             lblText.Text = value;
 
-            if (!string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrEmpty(value))
             {
-                toolTip.SetToolTip(lblText, value);
+                lblText.Text = "Blank Task";
+                lblText.ForeColor = Color.Gray;
+            }
+            else
+            {
+                lblText.ForeColor = SystemColors.ControlText;
+            }
+
+            if (!string.IsNullOrWhiteSpace(lblText.Text))
+            {
+                toolTip.SetToolTip(lblText, lblText.Text);
             }
         }
     }
-
-    public const int ExpandedHeight = 35;
-    public const int CollapsedHeight = 22;
 
     byte? rank;
     public byte? Rank
@@ -105,6 +164,8 @@ public partial class EachEntry : UserControl
     }
 
     DateTime? endedOn;
+    private DateTime? taskReminder;
+
     public DateTime? EndedOn
     {
         get
@@ -119,7 +180,15 @@ public partial class EachEntry : UserControl
         }
     }
 
-    public bool IsRunning => tmr.Enabled;
+    public DateTime? TaskReminder 
+    { 
+        get => taskReminder; 
+        set
+        {
+            taskReminder = value;
+            btnReminder.Visible = value.GetValueOrDefault(DateTime.MinValue) > DateTime.MinValue;
+        }
+    }
 
     public EachEntry(string text)
     {
@@ -130,7 +199,7 @@ public partial class EachEntry : UserControl
         WriteTime();
     }
 
-    public EachEntry(Guid entryID, string text, DateTime createdOn, DateTime? startedOn, DateTime? endedOn = null)
+    public EachEntry(Guid entryID, string text, DateTime createdOn, DateTime? startedOn, DateTime? endedOn = null, DateTime? taskReminder = null)
     {
         InitializeComponent();
 
@@ -140,6 +209,7 @@ public partial class EachEntry : UserControl
         StartedOn = startedOn;
         EndedOn = endedOn;
         Rank = null;
+        TaskReminder = taskReminder;
 
         WriteTime();
 
@@ -204,6 +274,8 @@ public partial class EachEntry : UserControl
 
     public void Start()
     {
+        var curStatus = TaskStatus;
+
         if (EndedOn != null)
         {
             if (OnResumeEvent != null)
@@ -231,16 +303,12 @@ public partial class EachEntry : UserControl
         {
             if (OnStartQueueEvent != null)
             {
-                // we need to set this to null
-                // because we are moving this rank to the new entry
-                Rank = null;
-
                 var args = new NewEntryEventArgs(Text)
                 {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
                     ParentEntryID = EntryID,
-                    HideParent = true,
+                    HideParent = TaskStatus == TaskStatus.Queued, // only hide if it is started from queued tasks
                     BringNotes = true,
                     BringTags = true
                 };
@@ -265,7 +333,10 @@ public partial class EachEntry : UserControl
 
         if (OnStartEvent != null)
         {
-            OnStartEvent(EntryID);
+            OnStartEvent(this, new OnStartEventArgs
+            {
+                PreviousStatus = curStatus
+            });
         }
     }
 
@@ -302,6 +373,10 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
+        }
     }
 
     private void lblTimeInOut_MouseDown(object sender, MouseEventArgs e)
@@ -316,6 +391,10 @@ public partial class EachEntry : UserControl
             {
                 OnUpdateEvent?.Invoke(EntryID);
             }
+        }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
         }
     }
 
@@ -332,6 +411,10 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
+        }
     }
 
     private void EachEntry_MouseDown(object sender, MouseEventArgs e)
@@ -347,6 +430,15 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
+        }
     }
     #endregion
+
+    private void btnReminder_Click(object sender, EventArgs e)
+    {
+
+    }
 }

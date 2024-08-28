@@ -41,6 +41,8 @@ partial class frmNewEntry
         label5 = new Label();
         label6 = new Label();
         label7 = new Label();
+        label8 = new Label();
+        label9 = new Label();
         SuspendLayout();
         // 
         // txtEntry
@@ -143,11 +145,33 @@ partial class frmNewEntry
         label7.TabIndex = 8;
         label7.Text = "History";
         // 
+        // label8
+        // 
+        label8.AutoSize = true;
+        label8.Font = new Font("Segoe UI", 6.75F);
+        label8.Location = new Point(48, 81);
+        label8.Name = "label8";
+        label8.Size = new Size(73, 12);
+        label8.TabIndex = 10;
+        label8.Text = "Queue blank task";
+        // 
+        // label9
+        // 
+        label9.AutoSize = true;
+        label9.Font = new Font("Segoe UI", 6.75F, FontStyle.Bold);
+        label9.Location = new Point(11, 81);
+        label9.Name = "label9";
+        label9.Size = new Size(37, 12);
+        label9.TabIndex = 9;
+        label9.Text = "Ctrl+N:";
+        // 
         // frmNewEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(537, 237);
+        Controls.Add(label8);
+        Controls.Add(label9);
         Controls.Add(label7);
         Controls.Add(label5);
         Controls.Add(label6);
@@ -185,4 +209,6 @@ partial class frmNewEntry
     private Label label5;
     private Label label6;
     private Label label7;
+    private Label label8;
+    private Label label9;
 }

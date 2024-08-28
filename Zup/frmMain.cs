@@ -63,6 +63,8 @@ public partial class frmMain : Form
                 frmEntryList.OnListReadyEvent += FrmEntryList_OnListReadyEvent;
                 frmEntryList.OnQueueTaskUpdatedEvent += FrmEntryList_OnQueueTaskUpdatedEvent;
                 frmEntryList.OnTokenDoubleClicked += FrmEntryList_OnTokenDoubleClicked;
+
+                frmEntryList.SetFormMain(this);
             }
 
             return frmEntryList;
@@ -284,6 +286,11 @@ public partial class frmMain : Form
         p_ServiceProvider = serviceProvider;
 
         SetIcon();
+    }
+
+    public void Notify(string message, string title= "Zup")
+    {
+        notifIconZup.ShowBalloonTip(0, title, message, ToolTipIcon.Info);
     }
 
     private void FormView_OnSelectedItemEvent(Guid entryID)
