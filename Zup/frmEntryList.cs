@@ -19,7 +19,8 @@ public partial class frmEntryList : Form
     const int maxRankedTaskRow = 4;
 
     private frmNewEntry m_FormNewEntry;
-    private frmUpdateEntry m_FormUpdateEntry;
+    private frmUpdateEntry m_FormUpdateEntry; // need to make this as singleton to minimize loading
+    private frmMain m_FormMain = null!;
 
     private bool p_OnLoad = true;
     private readonly ZupDbContext m_DbContext;
@@ -71,6 +72,12 @@ public partial class frmEntryList : Form
     {
         Left = (Screen.PrimaryScreen!.WorkingArea.Width / 2) - (Width / 2);
         Top = (Screen.PrimaryScreen!.WorkingArea.Height / 2) - (Height / 2);
+    }
+
+    public void SetFormMain(frmMain frmMain)
+    {
+        m_FormMain = frmMain;
+        m_FormUpdateEntry.SetFormMain(frmMain);
     }
 
     private void UpdateFormPosition()
@@ -290,7 +297,7 @@ public partial class frmEntryList : Form
 
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn)
+            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
             {
                 Rank = task.Rank,
                 TabStop = false,
@@ -474,15 +481,16 @@ public partial class frmEntryList : Form
 
     private void FormUpdateEntry_OnSavedEventHandler(object? sender, SaveEventArgs args)
     {
-        foreach (var entry in flpTaskList.Controls.Cast<EachEntry>())
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID);
+
+        if (eachEntry != null)
         {
-            if (entry.EntryID == args.Task.ID)
-            {
-                entry.Text = args.Task.Task;
-                entry.StartedOn = args.Task.StartedOn;
-                entry.EndedOn = args.Task.EndedOn;
-                entry.Rank = args.Task.Rank;
-            }
+            eachEntry.Text = args.Task.Task;
+            eachEntry.StartedOn = args.Task.StartedOn;
+            eachEntry.EndedOn = args.Task.EndedOn;
+            eachEntry.Rank = args.Task.Rank;
         }
     }
 
@@ -689,7 +697,14 @@ public partial class frmEntryList : Form
 
     public async void ShowUpdateEntry(Guid entryID, bool canReRun = false)
     {
-        await m_FormUpdateEntry.ShowUpdateEntry(entryID, canReRun);
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
+
+        if (eachEntry != null)
+        {
+            await m_FormUpdateEntry.ShowUpdateEntry(eachEntry);
+        }
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, NewEntryEventArgs args)
@@ -746,7 +761,7 @@ public partial class frmEntryList : Form
             return;
         }
 
-        ShowUpdateEntry(CurrentRunningTaskID.Value);
+        ShowUpdateEntry(CurrentRunningTaskID.Value);        
     }
 
     public void ToggleLastRunningTask()

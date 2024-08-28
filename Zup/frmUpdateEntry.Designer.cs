@@ -53,6 +53,7 @@ partial class frmUpdateEntry
         label5 = new Label();
         numRank = new NumericUpDown();
         btnRerun = new Button();
+        btnRemind = new Button();
         pnlNotes.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
@@ -134,6 +135,7 @@ partial class frmUpdateEntry
         txtTask.Font = new Font("Segoe UI", 10F);
         txtTask.Location = new Point(111, 13);
         txtTask.Name = "txtTask";
+        txtTask.PlaceholderText = "Alt+A";
         txtTask.Size = new Size(627, 25);
         txtTask.TabIndex = 10;
         txtTask.TextChanged += txtTask_TextChanged;
@@ -334,11 +336,23 @@ partial class frmUpdateEntry
         btnRerun.Visible = false;
         btnRerun.Click += btnRerun_Click;
         // 
+        // btnRemind
+        // 
+        btnRemind.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRemind.Location = new Point(719, 75);
+        btnRemind.Name = "btnRemind";
+        btnRemind.Size = new Size(94, 23);
+        btnRemind.TabIndex = 24;
+        btnRemind.Text = "Remind";
+        btnRemind.UseVisualStyleBackColor = true;
+        btnRemind.Click += btnRemind_Click;
+        // 
         // frmUpdateEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(834, 561);
+        Controls.Add(btnRemind);
         Controls.Add(btnRerun);
         Controls.Add(numRank);
         Controls.Add(label5);
@@ -398,4 +412,5 @@ partial class frmUpdateEntry
     private Label label5;
     private NumericUpDown numRank;
     private Button btnRerun;
+    private Button btnRemind;
 }

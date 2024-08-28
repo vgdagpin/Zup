@@ -16,6 +16,7 @@ public partial class EachEntry : UserControl
 {
     public const string StartChar = "►";
     public const string StopChar = "■";
+    public const string ReminderChar = "Ѧ";
 
     Color RunningColor = Color.LightPink;
 
@@ -66,7 +67,7 @@ public partial class EachEntry : UserControl
             if (StartedOn != null && EndedOn != null)
             {
                 return TaskStatus.Closed;
-            }            
+            }
 
             return TaskStatus.Ongoing;
         }
@@ -79,9 +80,19 @@ public partial class EachEntry : UserControl
         {
             lblText.Text = value;
 
-            if (!string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrEmpty(value))
             {
-                toolTip.SetToolTip(lblText, value);
+                lblText.Text = "Blank Task";
+                lblText.ForeColor = Color.Gray;
+            }
+            else
+            {
+                lblText.ForeColor = SystemColors.ControlText;
+            }
+
+            if (!string.IsNullOrWhiteSpace(lblText.Text))
+            {
+                toolTip.SetToolTip(lblText, lblText.Text);
             }
         }
     }
@@ -153,6 +164,8 @@ public partial class EachEntry : UserControl
     }
 
     DateTime? endedOn;
+    private DateTime? taskReminder;
+
     public DateTime? EndedOn
     {
         get
@@ -167,6 +180,16 @@ public partial class EachEntry : UserControl
         }
     }
 
+    public DateTime? TaskReminder 
+    { 
+        get => taskReminder; 
+        set
+        {
+            taskReminder = value;
+            btnReminder.Visible = value.GetValueOrDefault(DateTime.MinValue) > DateTime.MinValue;
+        }
+    }
+
     public EachEntry(string text)
     {
         InitializeComponent();
@@ -176,7 +199,7 @@ public partial class EachEntry : UserControl
         WriteTime();
     }
 
-    public EachEntry(Guid entryID, string text, DateTime createdOn, DateTime? startedOn, DateTime? endedOn = null)
+    public EachEntry(Guid entryID, string text, DateTime createdOn, DateTime? startedOn, DateTime? endedOn = null, DateTime? taskReminder = null)
     {
         InitializeComponent();
 
@@ -186,6 +209,7 @@ public partial class EachEntry : UserControl
         StartedOn = startedOn;
         EndedOn = endedOn;
         Rank = null;
+        TaskReminder = taskReminder;
 
         WriteTime();
 
@@ -412,4 +436,9 @@ public partial class EachEntry : UserControl
         }
     }
     #endregion
+
+    private void btnReminder_Click(object sender, EventArgs e)
+    {
+
+    }
 }

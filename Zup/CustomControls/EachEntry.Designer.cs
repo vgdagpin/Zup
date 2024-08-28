@@ -36,6 +36,7 @@ partial class EachEntry
         lblDuration = new ZupLabel();
         toolTip = new ToolTip(components);
         lblRank = new ZupLabel();
+        btnReminder = new ZupButton();
         SuspendLayout();
         // 
         // lblText
@@ -44,7 +45,7 @@ partial class EachEntry
         lblText.Font = new Font("Segoe UI", 7F, FontStyle.Bold);
         lblText.Location = new Point(21, 4);
         lblText.Name = "lblText";
-        lblText.Size = new Size(200, 13);
+        lblText.Size = new Size(180, 13);
         lblText.TabIndex = 0;
         lblText.Text = "Task #1";
         toolTip.SetToolTip(lblText, "Test");
@@ -103,11 +104,28 @@ partial class EachEntry
         lblRank.TabIndex = 6;
         lblRank.Text = "#1";
         // 
+        // btnReminder
+        // 
+        btnReminder.FlatAppearance.BorderColor = Color.Gray;
+        btnReminder.FlatStyle = FlatStyle.Flat;
+        btnReminder.Font = new Font("Arial", 7F, FontStyle.Regular, GraphicsUnit.Pixel, 0);
+        btnReminder.ForeColor = Color.Black;
+        btnReminder.Location = new Point(207, 2);
+        btnReminder.Name = "btnReminder";
+        btnReminder.Size = new Size(17, 17);
+        btnReminder.TabIndex = 7;
+        btnReminder.TabStop = false;
+        btnReminder.Text = "₼";
+        btnReminder.UseVisualStyleBackColor = true;
+        btnReminder.Visible = false;
+        btnReminder.Click += btnReminder_Click;
+        // 
         // EachEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.Gainsboro;
+        Controls.Add(btnReminder);
         Controls.Add(lblRank);
         Controls.Add(lblDuration);
         Controls.Add(lblTimeInOut);
@@ -129,4 +147,5 @@ partial class EachEntry
     private ZupLabel lblDuration;
     private ToolTip toolTip;
     private ZupLabel lblRank;
+    private ZupButton btnReminder;
 }

@@ -48,6 +48,16 @@ public partial class frmNewEntry : Form
         return temp;
     }
 
+    private void CreateBlankTask()
+    {
+        Close();
+
+        if (OnNewEntryEvent != null)
+        {
+            OnNewEntryEvent(this, new NewEntryEventArgs(string.Empty));
+        }
+    }
+
     private void AddToQueue(bool forceFromTextBox = false)
     {
         var temp = GetSelectedItem(forceFromTextBox);
@@ -116,6 +126,13 @@ public partial class frmNewEntry : Form
         {
             e.SuppressKeyPress = true;
             Close();
+        }
+        // create blank task
+        else if (e.KeyData == (Keys.Control | Keys.N))
+        {
+            e.SuppressKeyPress = true;
+
+            CreateBlankTask();
         }
         // add to queue
         else if (e.KeyData == (Keys.Alt | Keys.Enter)

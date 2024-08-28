@@ -7,11 +7,14 @@ using System.Runtime.InteropServices;
 using Zup.CustomControls;
 using Zup.Entities;
 using Zup.EventArguments;
+using TaskStatus = Zup.CustomControls.TaskStatus;
 
 namespace Zup;
 
 public partial class frmUpdateEntry : Form
 {
+    private frmMain m_FormMain = null!;
+
     private readonly ZupDbContext p_DbContext;
     private Guid? selectedEntryID;
     private Guid? selectedNoteID;
@@ -92,6 +95,8 @@ public partial class frmUpdateEntry : Form
             }
         }
     }
+
+    private EachEntry m_EachEntryObject = null!;
 
     public frmUpdateEntry(ZupDbContext dbContext)
     {
@@ -382,18 +387,21 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public async Task ShowUpdateEntry(Guid entryID, bool canReRun = false)
+    public async Task ShowUpdateEntry(EachEntry eachEntry, bool canReRun = false)
     {
+        m_EachEntryObject = eachEntry;
+
         Text = "Update Entry";
         startTracking = false;
         isEntryModified = false;
         isNotesModified = false;
 
         btnRerun.Visible = canReRun;
+        btnRemind.Visible = eachEntry.TaskStatus == TaskStatus.Queued || eachEntry.TaskStatus == TaskStatus.Ranked;
 
         Show();
 
-        selectedEntry = await p_DbContext.TaskEntries.FindAsync(entryID);
+        selectedEntry = await p_DbContext.TaskEntries.FindAsync(eachEntry.EntryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -406,7 +414,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        selectedEntryID = entryID;
+        selectedEntryID = eachEntry.EntryID;
 
         txtTask.Text = selectedEntry.Task;
 
@@ -665,6 +673,11 @@ public partial class frmUpdateEntry : Form
     }
     #endregion
 
+    public void SetFormMain(frmMain frmMain)
+    {
+        m_FormMain = frmMain;
+    }
+
     private void btnDelete_Click(object sender, EventArgs e)
     {
         var result = MessageBox.Show("Delete this entry?", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
@@ -849,5 +862,10 @@ public partial class frmUpdateEntry : Form
                 BringTags = true
             });
         }
+    }
+
+    private void btnRemind_Click(object sender, EventArgs e)
+    {
+        m_FormMain.Notify("Reminder! lol");
     }
 }
