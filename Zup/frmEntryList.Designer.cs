@@ -40,7 +40,6 @@ partial class frmEntryList
         flpRankedTasks = new FlowLayoutPanel();
         tblLayoutPanel = new TableLayoutPanel();
         cmsList.SuspendLayout();
-        tblLayoutPanel.SuspendLayout();
         SuspendLayout();
         // 
         // flpTaskList
@@ -115,7 +114,6 @@ partial class frmEntryList
         // flpRankedTasks
         // 
         flpRankedTasks.AutoScroll = true;
-        flpRankedTasks.ContextMenuStrip = cmsList;
         flpRankedTasks.Dock = DockStyle.Fill;
         flpRankedTasks.FlowDirection = FlowDirection.TopDown;
         flpRankedTasks.Location = new Point(3, 291);
@@ -126,19 +124,13 @@ partial class frmEntryList
         // 
         // tblLayoutPanel
         // 
+        tblLayoutPanel.BackColor = Color.Yellow;
         tblLayoutPanel.ColumnCount = 1;
         tblLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        tblLayoutPanel.Controls.Add(flpTaskList, 0, 0);
-        tblLayoutPanel.Controls.Add(flpQueuedTaskList, 0, 1);
-        tblLayoutPanel.Controls.Add(flpRankedTasks, 0, 2);
         tblLayoutPanel.Dock = DockStyle.Fill;
         tblLayoutPanel.Location = new Point(0, 0);
         tblLayoutPanel.Name = "tblLayoutPanel";
-        tblLayoutPanel.RowCount = 3;
-        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-        tblLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-        tblLayoutPanel.Size = new Size(274, 384);
+        tblLayoutPanel.Size = new Size(274, 259);
         tblLayoutPanel.TabIndex = 3;
         // 
         // frmEntryList
@@ -146,7 +138,7 @@ partial class frmEntryList
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.LawnGreen;
-        ClientSize = new Size(274, 384);
+        ClientSize = new Size(274, 259);
         Controls.Add(tblLayoutPanel);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmEntryList";
@@ -156,12 +148,10 @@ partial class frmEntryList
         StartPosition = FormStartPosition.Manual;
         Text = "frmEntryList";
         TopMost = true;
-        TransparencyKey = Color.LawnGreen;
         FormClosing += frmEntryList_FormClosing;
         Load += frmEntryList_Load;
         Move += frmEntryList_Move;
         cmsList.ResumeLayout(false);
-        tblLayoutPanel.ResumeLayout(false);
         ResumeLayout(false);
     }
 

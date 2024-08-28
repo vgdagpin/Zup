@@ -1,4 +1,4 @@
-﻿namespace Zup;
+﻿namespace Zup.EventArguments;
 
 public class NewEntryEventArgs : EventArgs
 {

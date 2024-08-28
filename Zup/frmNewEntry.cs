@@ -1,4 +1,6 @@
-﻿namespace Zup;
+﻿using Zup.EventArguments;
+
+namespace Zup;
 
 
 public partial class frmNewEntry : Form

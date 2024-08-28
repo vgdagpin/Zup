@@ -1,4 +1,16 @@
-﻿namespace Zup.CustomControls;
+﻿using Zup.EventArguments;
+
+namespace Zup.CustomControls;
+
+public enum TaskStatus
+{
+    Ongoing,
+    Queued,
+    Ranked,
+    Closed,
+    Unclosed,
+    Running
+}
 
 public partial class EachEntry : UserControl
 {
@@ -7,19 +19,57 @@ public partial class EachEntry : UserControl
 
     Color RunningColor = Color.LightPink;
 
+    public const float OngoingRowHeight = 42;
+    public const float RowHeight = 28;
+
+    public const int ExpandedHeight = 35;
+    public const int CollapsedHeight = 22;
+
     public bool IsStarted { get; private set; }
 
     public delegate void OnStop(Guid id, DateTime endOn);
     public delegate void OnUpdate(Guid id);
-    public delegate void OnStart(Guid id);
 
     public event EventHandler<NewEntryEventArgs>? OnResumeEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
-    public event OnStart? OnStartEvent;
+    public event EventHandler<OnStartEventArgs>? OnStartEvent;
     public event EventHandler<NewEntryEventArgs>? OnStartQueueEvent;
 
     public event MouseEventHandler? TaskMouseDown;
+
+    public TaskStatus TaskStatus
+    {
+        get
+        {
+            if (tmr.Enabled)
+            {
+                return TaskStatus.Running;
+            }
+
+            if (Rank != null)
+            {
+                return TaskStatus.Ranked;
+            }
+
+            if (StartedOn == null)
+            {
+                return TaskStatus.Queued;
+            }
+
+            if (StartedOn != null && EndedOn == null)
+            {
+                return TaskStatus.Unclosed;
+            }
+
+            if (StartedOn != null && EndedOn != null)
+            {
+                return TaskStatus.Closed;
+            }            
+
+            return TaskStatus.Ongoing;
+        }
+    }
 
     public override string Text
     {
@@ -34,9 +84,6 @@ public partial class EachEntry : UserControl
             }
         }
     }
-
-    public const int ExpandedHeight = 35;
-    public const int CollapsedHeight = 22;
 
     byte? rank;
     public byte? Rank
@@ -118,8 +165,6 @@ public partial class EachEntry : UserControl
             WriteTime();
         }
     }
-
-    public bool IsRunning => tmr.Enabled;
 
     public EachEntry(string text)
     {
@@ -204,6 +249,8 @@ public partial class EachEntry : UserControl
 
     public void Start()
     {
+        var curStatus = TaskStatus;
+
         if (EndedOn != null)
         {
             if (OnResumeEvent != null)
@@ -231,16 +278,12 @@ public partial class EachEntry : UserControl
         {
             if (OnStartQueueEvent != null)
             {
-                // we need to set this to null
-                // because we are moving this rank to the new entry
-                Rank = null;
-
                 var args = new NewEntryEventArgs(Text)
                 {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
                     ParentEntryID = EntryID,
-                    HideParent = true,
+                    HideParent = TaskStatus == TaskStatus.Queued, // only hide if it is started from queued tasks
                     BringNotes = true,
                     BringTags = true
                 };
@@ -265,7 +308,10 @@ public partial class EachEntry : UserControl
 
         if (OnStartEvent != null)
         {
-            OnStartEvent(EntryID);
+            OnStartEvent(this, new OnStartEventArgs
+            {
+                PreviousStatus = curStatus
+            });
         }
     }
 
