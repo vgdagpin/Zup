@@ -16,7 +16,7 @@ public partial class frmEntryList : Form
 {
     const int maxOngoingTaskRow = 4;
     const int maxQueuedTaskRow = 2;
-    const int maxRankedTaskRow = 2;
+    const int maxRankedTaskRow = 4;
 
     private frmNewEntry m_FormNewEntry;
     private frmUpdateEntry m_FormUpdateEntry;
@@ -136,14 +136,27 @@ public partial class frmEntryList : Form
 
         Opacity = Properties.Settings.Default.EntryListOpacity;
 
-        UpdateTablePanel();
-        SetListScrollAndActiveControl();
-        ResizeForm();
+        RefreshList();
         UpdateFormPosition();
 
         showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
         showRankedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowRankedTasks;
         showClosedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowClosedTasks;
+    }
+
+    private void RefreshList()
+    {
+        UpdateTablePanel();
+        SetListScrollAndActiveControl();
+        ConfigureFlowLayoutPanel();
+        ResizeForm();
+    }
+
+    private void ConfigureFlowLayoutPanel()
+    {
+        flpTaskList.AutoScroll = flpTaskList.Controls.Count > 1;
+        flpQueuedTaskList.AutoScroll = flpQueuedTaskList.Controls.Count > 1;
+        flpRankedTasks.AutoScroll = flpRankedTasks.Controls.Count > 1;
     }
 
     private void UpdateTablePanel()
@@ -258,7 +271,7 @@ public partial class frmEntryList : Form
         m_FormNewEntry.ShowNewEntryDialog(suggestions.ToArray());
     }
 
-   
+
 
     private void FormUpdateEntry_OnTokenDoubleClicked(object? sender, TokenEventArgs e)
     {
@@ -281,7 +294,7 @@ public partial class frmEntryList : Form
             {
                 Rank = task.Rank,
                 TabStop = false,
-                
+
             };
 
             eachEntry.GotFocus += (sender, e) => ActiveControl = null;
@@ -292,6 +305,7 @@ public partial class frmEntryList : Form
             eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
             eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
             eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+            eachEntry.TaskRightClick += EachEntry_TaskRightClick;
 
             if (eachEntry.TaskStatus == TaskStatus.Ranked)
             {
@@ -342,10 +356,10 @@ public partial class frmEntryList : Form
         flpRankedTasks.SuspendLayout();
         flpRankedTasks.Controls.Clear();
         flpRankedTasks.Controls.AddRange(rankedTasks.OrderBy(a => a.Rank).ToArray());
-        flpRankedTasks.ResumeLayout();        
+        flpRankedTasks.ResumeLayout();
 
         return result;
-    }
+    }    
 
     public void SortTasks(IList entryList)
     {
@@ -441,7 +455,7 @@ public partial class frmEntryList : Form
     public void ResizeForm()
     {
         var itemCount = CommonUtility.GetMin(flpTaskList.Controls.Count, maxOngoingTaskRow);
-        
+
         itemCount += CommonUtility.GetMin(flpQueuedTaskList.Controls.Count, maxQueuedTaskRow);
         itemCount += CommonUtility.GetMin(flpRankedTasks.Controls.Count, maxRankedTaskRow);
 
@@ -453,7 +467,7 @@ public partial class frmEntryList : Form
         totalHeight += (int)EachEntry.RowHeight * CommonUtility.GetMin(flpRankedTasks.Controls.Count, maxRankedTaskRow);
 
         // margin-bottom
-        totalHeight += 1 * itemCount;
+        // totalHeight += 1 * itemCount;
 
         Height = totalHeight;
     }
@@ -532,7 +546,7 @@ public partial class frmEntryList : Form
             flpQueuedTaskList.Controls.Remove(queuedEntry);
         }
 
-        EachEntry_NewEntryEventHandler(sender, args);        
+        EachEntry_NewEntryEventHandler(sender, args);
     }
 
     private void EachEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
@@ -627,6 +641,7 @@ public partial class frmEntryList : Form
         eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
         eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
         eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
 
         //if (eachEntry.TaskStatus == TaskStatus.Ranked)
         //{
@@ -654,8 +669,7 @@ public partial class frmEntryList : Form
             ShowUpdateEntry(newE.ID);
         }
 
-        UpdateTablePanel();
-        ResizeForm();
+        RefreshList();
 
         if (OnQueueTaskUpdatedEvent != null)
         {
@@ -766,11 +780,10 @@ public partial class frmEntryList : Form
         Properties.Settings.Default.Save();
 
         showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
-        
+
         LoadListToControl();
 
-        UpdateTablePanel();
-        ResizeForm();
+        RefreshList();
     }
 
     private void showRankedTasksToolStripMenuItem_Click(object sender, EventArgs e)
@@ -782,8 +795,7 @@ public partial class frmEntryList : Form
 
         LoadListToControl();
 
-        UpdateTablePanel();
-        ResizeForm();
+        RefreshList();
     }
 
     private void showClosedTasksToolStripMenuItem_Click(object sender, EventArgs e)
@@ -795,15 +807,23 @@ public partial class frmEntryList : Form
 
         LoadListToControl();
 
-        UpdateTablePanel();
-        ResizeForm();
+        RefreshList();
     }
 
     private void reorderToolStripMenuItem_Click(object sender, EventArgs e)
     {
         LoadListToControl();
 
-        UpdateTablePanel();
-        ResizeForm();
+        RefreshList();
+    }
+
+    private void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void EachEntry_TaskRightClick(object? sender, MouseEventArgs e)
+    {
+
     }
 }

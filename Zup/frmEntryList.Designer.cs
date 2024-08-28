@@ -32,9 +32,12 @@ partial class frmEntryList
         flpTaskList = new FlowLayoutPanel();
         cmsList = new ContextMenuStrip(components);
         reorderToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator2 = new ToolStripSeparator();
         showQueuedTasksToolStripMenuItem = new ToolStripMenuItem();
         showRankedTasksToolStripMenuItem = new ToolStripMenuItem();
         showClosedTasksToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator1 = new ToolStripSeparator();
+        deleteEntryToolStripMenuItem = new ToolStripMenuItem();
         tmrSaveSetting = new System.Windows.Forms.Timer(components);
         flpQueuedTaskList = new FlowLayoutPanel();
         flpRankedTasks = new FlowLayoutPanel();
@@ -56,23 +59,28 @@ partial class frmEntryList
         // 
         // cmsList
         // 
-        cmsList.Items.AddRange(new ToolStripItem[] { reorderToolStripMenuItem, showQueuedTasksToolStripMenuItem, showRankedTasksToolStripMenuItem, showClosedTasksToolStripMenuItem });
+        cmsList.Items.AddRange(new ToolStripItem[] { reorderToolStripMenuItem, toolStripSeparator2, showQueuedTasksToolStripMenuItem, showRankedTasksToolStripMenuItem, showClosedTasksToolStripMenuItem, toolStripSeparator1, deleteEntryToolStripMenuItem });
         cmsList.Name = "contextMenuStrip1";
-        cmsList.Size = new Size(179, 92);
+        cmsList.Size = new Size(181, 148);
         // 
         // reorderToolStripMenuItem
         // 
         reorderToolStripMenuItem.Name = "reorderToolStripMenuItem";
-        reorderToolStripMenuItem.Size = new Size(178, 22);
+        reorderToolStripMenuItem.Size = new Size(180, 22);
         reorderToolStripMenuItem.Text = "Reorder";
         reorderToolStripMenuItem.Click += reorderToolStripMenuItem_Click;
+        // 
+        // toolStripSeparator2
+        // 
+        toolStripSeparator2.Name = "toolStripSeparator2";
+        toolStripSeparator2.Size = new Size(177, 6);
         // 
         // showQueuedTasksToolStripMenuItem
         // 
         showQueuedTasksToolStripMenuItem.Checked = true;
         showQueuedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showQueuedTasksToolStripMenuItem.Name = "showQueuedTasksToolStripMenuItem";
-        showQueuedTasksToolStripMenuItem.Size = new Size(178, 22);
+        showQueuedTasksToolStripMenuItem.Size = new Size(180, 22);
         showQueuedTasksToolStripMenuItem.Text = "Show Queued Tasks";
         showQueuedTasksToolStripMenuItem.Click += showQueuedTasksToolStripMenuItem_Click;
         // 
@@ -81,7 +89,7 @@ partial class frmEntryList
         showRankedTasksToolStripMenuItem.Checked = true;
         showRankedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showRankedTasksToolStripMenuItem.Name = "showRankedTasksToolStripMenuItem";
-        showRankedTasksToolStripMenuItem.Size = new Size(178, 22);
+        showRankedTasksToolStripMenuItem.Size = new Size(180, 22);
         showRankedTasksToolStripMenuItem.Text = "Show Ranked Tasks";
         showRankedTasksToolStripMenuItem.Click += showRankedTasksToolStripMenuItem_Click;
         // 
@@ -90,9 +98,21 @@ partial class frmEntryList
         showClosedTasksToolStripMenuItem.Checked = true;
         showClosedTasksToolStripMenuItem.CheckState = CheckState.Checked;
         showClosedTasksToolStripMenuItem.Name = "showClosedTasksToolStripMenuItem";
-        showClosedTasksToolStripMenuItem.Size = new Size(178, 22);
+        showClosedTasksToolStripMenuItem.Size = new Size(180, 22);
         showClosedTasksToolStripMenuItem.Text = "Show Closed Tasks";
         showClosedTasksToolStripMenuItem.Click += showClosedTasksToolStripMenuItem_Click;
+        // 
+        // toolStripSeparator1
+        // 
+        toolStripSeparator1.Name = "toolStripSeparator1";
+        toolStripSeparator1.Size = new Size(177, 6);
+        // 
+        // deleteEntryToolStripMenuItem
+        // 
+        deleteEntryToolStripMenuItem.Name = "deleteEntryToolStripMenuItem";
+        deleteEntryToolStripMenuItem.Size = new Size(180, 22);
+        deleteEntryToolStripMenuItem.Text = "Delete Entry";
+        deleteEntryToolStripMenuItem.Click += deleteEntryToolStripMenuItem_Click;
         // 
         // tmrSaveSetting
         // 
@@ -114,6 +134,7 @@ partial class frmEntryList
         // flpRankedTasks
         // 
         flpRankedTasks.AutoScroll = true;
+        flpRankedTasks.ContextMenuStrip = cmsList;
         flpRankedTasks.Dock = DockStyle.Fill;
         flpRankedTasks.FlowDirection = FlowDirection.TopDown;
         flpRankedTasks.Location = new Point(3, 291);
@@ -167,4 +188,7 @@ partial class frmEntryList
     private FlowLayoutPanel flpQueuedTaskList;
     private FlowLayoutPanel flpRankedTasks;
     private TableLayoutPanel tblLayoutPanel;
+    private ToolStripSeparator toolStripSeparator2;
+    private ToolStripSeparator toolStripSeparator1;
+    private ToolStripMenuItem deleteEntryToolStripMenuItem;
 }

@@ -19,8 +19,8 @@ public partial class EachEntry : UserControl
 
     Color RunningColor = Color.LightPink;
 
-    public const float OngoingRowHeight = 42;
-    public const float RowHeight = 28;
+    public const float OngoingRowHeight = 37;
+    public const float RowHeight = 26;
 
     public const int ExpandedHeight = 35;
     public const int CollapsedHeight = 22;
@@ -37,6 +37,7 @@ public partial class EachEntry : UserControl
     public event EventHandler<NewEntryEventArgs>? OnStartQueueEvent;
 
     public event MouseEventHandler? TaskMouseDown;
+    public event MouseEventHandler? TaskRightClick;
 
     public TaskStatus TaskStatus
     {
@@ -348,6 +349,10 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
+        }
     }
 
     private void lblTimeInOut_MouseDown(object sender, MouseEventArgs e)
@@ -362,6 +367,10 @@ public partial class EachEntry : UserControl
             {
                 OnUpdateEvent?.Invoke(EntryID);
             }
+        }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
         }
     }
 
@@ -378,6 +387,10 @@ public partial class EachEntry : UserControl
                 OnUpdateEvent?.Invoke(EntryID);
             }
         }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
+        }
     }
 
     private void EachEntry_MouseDown(object sender, MouseEventArgs e)
@@ -392,6 +405,10 @@ public partial class EachEntry : UserControl
             {
                 OnUpdateEvent?.Invoke(EntryID);
             }
+        }
+        else if (e.Button == MouseButtons.Right)
+        {
+            TaskRightClick?.Invoke(this, e);
         }
     }
     #endregion
