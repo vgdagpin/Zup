@@ -28,6 +28,8 @@ public partial class frmEntryList : Form
     private Guid? CurrentRunningTaskID;
     private Guid? LastRunningTaskID;
 
+    private EachEntry? m_SelectedEntryToDelete;
+
     public bool ListIsReady { get; set; }
 
     public event EventHandler<ListReadyEventArgs>? OnListReadyEvent;
@@ -832,13 +834,40 @@ public partial class frmEntryList : Form
         RefreshList();
     }
 
-    private void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void deleteEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (m_SelectedEntryToDelete == null)
+        {
+            return;
+        }
 
+        if (MessageBox.Show("Continue to delete this task?", "Delete", MessageBoxButtons.YesNo) != DialogResult.Yes)
+        {
+            m_SelectedEntryToDelete = null;
+
+            return;
+        }
+
+        var task = await m_DbContext.TaskEntries.SingleOrDefaultAsync(a => a.ID == m_SelectedEntryToDelete.EntryID);
+
+        if (task != null)
+        {
+            m_DbContext.TaskEntries.Remove(task);
+            await m_DbContext.SaveChangesAsync();
+        }
+
+        var cms = ((ToolStripMenuItem)sender).Owner as ContextMenuStrip;
+
+        if (cms != null && cms.SourceControl is FlowLayoutPanel flp)
+        {
+            flp.Controls.Remove(m_SelectedEntryToDelete);
+        }
+
+        m_SelectedEntryToDelete = null;
     }
 
     private void EachEntry_TaskRightClick(object? sender, MouseEventArgs e)
     {
-
+        m_SelectedEntryToDelete = (EachEntry)sender!;
     }
 }

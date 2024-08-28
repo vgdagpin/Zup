@@ -57,7 +57,7 @@ partial class EachEntry
         btnToggleStartStop.FlatStyle = FlatStyle.Flat;
         btnToggleStartStop.Font = new Font("Arial Narrow", 7F, FontStyle.Regular, GraphicsUnit.Pixel, 0);
         btnToggleStartStop.ForeColor = Color.Black;
-        btnToggleStartStop.Location = new Point(226, 2);
+        btnToggleStartStop.Location = new Point(228, 2);
         btnToggleStartStop.Name = "btnToggleStartStop";
         btnToggleStartStop.Size = new Size(17, 17);
         btnToggleStartStop.TabIndex = 1;
@@ -84,7 +84,7 @@ partial class EachEntry
         // lblDuration
         // 
         lblDuration.Font = new Font("Segoe UI Light", 7F, FontStyle.Regular, GraphicsUnit.Point, 0);
-        lblDuration.Location = new Point(192, 21);
+        lblDuration.Location = new Point(192, 19);
         lblDuration.Name = "lblDuration";
         lblDuration.RightToLeft = RightToLeft.Yes;
         lblDuration.Size = new Size(55, 12);
@@ -110,7 +110,7 @@ partial class EachEntry
         btnReminder.FlatStyle = FlatStyle.Flat;
         btnReminder.Font = new Font("Arial", 7F, FontStyle.Regular, GraphicsUnit.Pixel, 0);
         btnReminder.ForeColor = Color.Black;
-        btnReminder.Location = new Point(207, 2);
+        btnReminder.Location = new Point(209, 2);
         btnReminder.Name = "btnReminder";
         btnReminder.Size = new Size(17, 17);
         btnReminder.TabIndex = 7;
