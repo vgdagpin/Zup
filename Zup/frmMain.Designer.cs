@@ -37,10 +37,11 @@ partial class frmMain
         openNewEntryToolStripMenuItem = new ToolStripMenuItem();
         updateCurrentRunningTaskToolStripMenuItem = new ToolStripMenuItem();
         toggleLastRunningTaskToolStripMenuItem = new ToolStripMenuItem();
+        moveToCenterToolStripMenuItem = new ToolStripMenuItem();
         toolStripSeparator1 = new ToolStripSeparator();
         exitToolStripMenuItem = new ToolStripMenuItem();
         tmrDelayShowList = new System.Windows.Forms.Timer(components);
-        moveToCenterToolStripMenuItem = new ToolStripMenuItem();
+        aboutToolStripMenuItem = new ToolStripMenuItem();
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -56,9 +57,9 @@ partial class frmMain
         // 
         // notifCms
         // 
-        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, moveToCenterToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, moveToCenterToolStripMenuItem, toolStripSeparator1, aboutToolStripMenuItem, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(298, 208);
+        notifCms.Size = new Size(298, 230);
         // 
         // viewToolStripMenuItem
         // 
@@ -107,6 +108,13 @@ partial class frmMain
         toggleLastRunningTaskToolStripMenuItem.Text = "Toggle Last Running Task";
         toggleLastRunningTaskToolStripMenuItem.Click += toggleLastRunningTaskToolStripMenuItem_Click;
         // 
+        // moveToCenterToolStripMenuItem
+        // 
+        moveToCenterToolStripMenuItem.Name = "moveToCenterToolStripMenuItem";
+        moveToCenterToolStripMenuItem.Size = new Size(297, 22);
+        moveToCenterToolStripMenuItem.Text = "Move to Center";
+        moveToCenterToolStripMenuItem.Click += moveToCenterToolStripMenuItem_Click;
+        // 
         // toolStripSeparator1
         // 
         toolStripSeparator1.Name = "toolStripSeparator1";
@@ -125,12 +133,11 @@ partial class frmMain
         tmrDelayShowList.Interval = 300;
         tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
-        // moveToCenterToolStripMenuItem
+        // aboutToolStripMenuItem
         // 
-        moveToCenterToolStripMenuItem.Name = "moveToCenterToolStripMenuItem";
-        moveToCenterToolStripMenuItem.Size = new Size(297, 22);
-        moveToCenterToolStripMenuItem.Text = "Move to Center";
-        moveToCenterToolStripMenuItem.Click += moveToCenterToolStripMenuItem_Click;
+        aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+        aboutToolStripMenuItem.Size = new Size(297, 22);
+        aboutToolStripMenuItem.Text = "About";
         // 
         // frmMain
         // 
@@ -162,4 +169,5 @@ partial class frmMain
     private ToolStripMenuItem toggleLastRunningTaskToolStripMenuItem;
     private ToolStripMenuItem tagEditorToolStripMenuItem;
     private ToolStripMenuItem moveToCenterToolStripMenuItem;
+    private ToolStripMenuItem aboutToolStripMenuItem;
 }

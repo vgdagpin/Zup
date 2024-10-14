@@ -9,9 +9,10 @@ using Zup.Entities;
 
 namespace Zup;
 
-public partial class frmView : Form
+public partial class frmViewList : Form
 {
     private readonly ZupDbContext p_DbContext;
+    private readonly SettingHelper settingHelper;
 
     public delegate void OnSelectedItem(Guid entryID);
     public delegate void OnExported();
@@ -21,21 +22,22 @@ public partial class frmView : Form
 
     private IEnumerable<WeekData> WeekDataList = null!;
 
-    public frmView(ZupDbContext dbContext)
+    public frmViewList(ZupDbContext dbContext, SettingHelper settingHelper)
     {
         InitializeComponent();
         p_DbContext = dbContext;
+        this.settingHelper = settingHelper;
     }
 
     private void frmView_Load(object sender, EventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.TimesheetsFolder))
+        if (!string.IsNullOrWhiteSpace(settingHelper.TimesheetsFolder))
         {
-            txtTimesheetFolder.Text = Properties.Settings.Default.TimesheetsFolder;
+            txtTimesheetFolder.Text = settingHelper.TimesheetsFolder;
         }
 
-        txtRowFormat.Text = Properties.Settings.Default.ExportRowFormat;
-        txtExtension.Text = Properties.Settings.Default.ExportFileExtension;
+        txtRowFormat.Text = settingHelper.ExportRowFormat;
+        txtExtension.Text = settingHelper.ExportFileExtension;
 
         SetLabelOutput();
 
@@ -137,7 +139,7 @@ public partial class frmView : Form
 
         foreach (var item in ds)
         {
-            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn);
+            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn, settingHelper.DayStart, settingHelper.DayEnd, settingHelper.DayEndNextDay);
         }
 
         dgView.DataSource = ds;
@@ -177,8 +179,8 @@ public partial class frmView : Form
 
         if (result == DialogResult.OK)
         {
-            Properties.Settings.Default.TimesheetsFolder = fbdTimesheetFolder.SelectedPath;
-            Properties.Settings.Default.Save();
+            settingHelper.TimesheetsFolder = fbdTimesheetFolder.SelectedPath;
+            settingHelper.Save();
 
             txtTimesheetFolder.Text = fbdTimesheetFolder.SelectedPath;
 
@@ -235,10 +237,10 @@ public partial class frmView : Form
                 }
             }
 
-            Properties.Settings.Default.ExportRowFormat = txtRowFormat.Text;
-            Properties.Settings.Default.ExportFileExtension = txtExtension.Text;
+            settingHelper.ExportRowFormat = txtRowFormat.Text;
+            settingHelper.ExportFileExtension = txtExtension.Text;
 
-            Properties.Settings.Default.Save();
+            settingHelper.Save();
         }
         catch (Exception ex)
         {

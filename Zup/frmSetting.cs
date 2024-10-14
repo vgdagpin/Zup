@@ -2,6 +2,8 @@
 
 public partial class frmSetting : Form
 {
+    private readonly SettingHelper settingHelper;
+
     public delegate void OnSettingUpdated(string name, object value);
     public delegate void OnDbTrim(int daysToKeep);
     public delegate void OnDbBackup();
@@ -10,9 +12,10 @@ public partial class frmSetting : Form
     public event OnDbTrim? OnDbTrimEvent;
     public event OnDbBackup? OnDbBackupEvent;
 
-    public frmSetting()
+    public frmSetting(SettingHelper settingHelper)
     {
         InitializeComponent();
+        this.settingHelper = settingHelper;
     }
 
     private void frmSetting_Load(object sender, EventArgs e)
@@ -23,35 +26,35 @@ public partial class frmSetting : Form
         ofdDbFile.InitialDirectory = path;
         ofdDbFile.Filter = "Database Files (*.db)|*.db";
 
-        numTxtItemsToShow.Value = Properties.Settings.Default.ItemsToShow;
-        cbAutoOpenUpdateWindow.Checked = Properties.Settings.Default.AutoOpenUpdateWindow;
-        lblOpacityVal.Text = $"{Properties.Settings.Default.EntryListOpacity * 100}%";
-        tbOpacity.Value = Convert.ToInt32(Properties.Settings.Default.EntryListOpacity * 100);
-        txtDbPath.Text = Properties.Settings.Default.DbPath;
-        numKeepDaysOfData.Value = Properties.Settings.Default.TrimDaysToKeep;
-        nMaxDaysDataToLoad.Value = Properties.Settings.Default.NumDaysOfDataToLoad;
+        numTxtItemsToShow.Value = settingHelper.ItemsToShow;
+        cbAutoOpenUpdateWindow.Checked = settingHelper.AutoOpenUpdateWindow;
+        lblOpacityVal.Text = $"{settingHelper.EntryListOpacity * 100}%";
+        tbOpacity.Value = Convert.ToInt32(settingHelper.EntryListOpacity * 100);
+        txtDbPath.Text = settingHelper.DbPath;
+        numKeepDaysOfData.Value = settingHelper.TrimDaysToKeep;
+        nMaxDaysDataToLoad.Value = settingHelper.NumDaysOfDataToLoad;
 
 
-        mtDayStart.Text = $"{Properties.Settings.Default.DayStart.Hours:00}:{Properties.Settings.Default.DayStart.Minutes:00}";
-        mtDayEnd.Text = $"{Properties.Settings.Default.DayEnd.Hours:00}:{Properties.Settings.Default.DayEnd.Minutes:00}";
-        cbDayEndNextDay.Checked = Properties.Settings.Default.DayEndNextDay;
+        mtDayStart.Text = $"{settingHelper.DayStart.Hours:00}:{settingHelper.DayStart.Minutes:00}";
+        mtDayEnd.Text = $"{settingHelper.DayEnd.Hours:00}:{settingHelper.DayEnd.Minutes:00}";
+        cbDayEndNextDay.Checked = settingHelper.DayEndNextDay;
     }
 
     private void nMaxDaysDataToLoad_ValueChanged(object sender, EventArgs e)
     {
-        Properties.Settings.Default.NumDaysOfDataToLoad = Convert.ToInt32(nMaxDaysDataToLoad.Value);
-        Properties.Settings.Default.Save();
+        settingHelper.NumDaysOfDataToLoad = Convert.ToInt32(nMaxDaysDataToLoad.Value);
+        settingHelper.Save();
 
         if (OnSettingUpdatedEvent != null)
         {
-            OnSettingUpdatedEvent(nameof(Properties.Settings.Default.NumDaysOfDataToLoad), Convert.ToInt32(nMaxDaysDataToLoad.Value));
+            OnSettingUpdatedEvent(nameof(settingHelper.NumDaysOfDataToLoad), Convert.ToInt32(nMaxDaysDataToLoad.Value));
         }
     }
 
     private void numTxtItemsToShow_ValueChanged(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ItemsToShow = Convert.ToInt32(numTxtItemsToShow.Value);
-        Properties.Settings.Default.Save();
+        settingHelper.ItemsToShow = Convert.ToInt32(numTxtItemsToShow.Value);
+        settingHelper.Save();
 
         if (OnSettingUpdatedEvent != null)
         {
@@ -61,8 +64,8 @@ public partial class frmSetting : Form
 
     private void cbAutoOpenUpdateWindow_CheckedChanged(object sender, EventArgs e)
     {
-        Properties.Settings.Default.AutoOpenUpdateWindow = cbAutoOpenUpdateWindow.Checked;
-        Properties.Settings.Default.Save();
+        settingHelper.AutoOpenUpdateWindow = cbAutoOpenUpdateWindow.Checked;
+        settingHelper.Save();
 
         if (OnSettingUpdatedEvent != null)
         {
@@ -76,8 +79,8 @@ public partial class frmSetting : Form
 
         var val = Convert.ToDouble(tbOpacity.Value / 100.0);
 
-        Properties.Settings.Default.EntryListOpacity = val;
-        Properties.Settings.Default.Save();
+        settingHelper.EntryListOpacity = val;
+        settingHelper.Save();
 
         if (OnSettingUpdatedEvent != null)
         {
@@ -92,8 +95,8 @@ public partial class frmSetting : Form
         if (result == DialogResult.OK)
         {
             txtDbPath.Text = ofdDbFile.FileName;
-            Properties.Settings.Default.DbPath = ofdDbFile.FileName;
-            Properties.Settings.Default.Save();
+            settingHelper.DbPath = ofdDbFile.FileName;
+            settingHelper.Save();
 
             if (OnSettingUpdatedEvent != null)
             {
@@ -112,8 +115,8 @@ public partial class frmSetting : Form
 
     private void numKeepDaysOfData_ValueChanged(object sender, EventArgs e)
     {
-        Properties.Settings.Default.TrimDaysToKeep = Convert.ToInt32(numKeepDaysOfData.Value);
-        Properties.Settings.Default.Save();
+        settingHelper.TrimDaysToKeep = Convert.ToInt32(numKeepDaysOfData.Value);
+        settingHelper.Save();
 
         lblKeepDaysData.Text = $"Keep {numKeepDaysOfData.Value} days of data";
     }
@@ -136,8 +139,8 @@ public partial class frmSetting : Form
 
     private void cbDayEndNextDay_CheckedChanged(object sender, EventArgs e)
     {
-        Properties.Settings.Default.DayEndNextDay = cbDayEndNextDay.Checked;
-        Properties.Settings.Default.Save();
+        settingHelper.DayEndNextDay = cbDayEndNextDay.Checked;
+        settingHelper.Save();
 
         RecalcDayStartAndEnd();
     }
@@ -146,8 +149,8 @@ public partial class frmSetting : Form
     {
         if (TimeSpan.TryParse(mtDayStart.Text, out var dayStart))
         {
-            Properties.Settings.Default.DayStart = dayStart;
-            Properties.Settings.Default.Save();
+            settingHelper.DayStart = dayStart;
+            settingHelper.Save();
 
             RecalcDayStartAndEnd();
         }
@@ -157,8 +160,8 @@ public partial class frmSetting : Form
     {
         if (TimeSpan.TryParse(mtDayEnd.Text, out var dayEnd))
         {
-            Properties.Settings.Default.DayEnd = dayEnd;
-            Properties.Settings.Default.Save();
+            settingHelper.DayEnd = dayEnd;
+            settingHelper.Save();
 
             RecalcDayStartAndEnd();
         }
@@ -166,7 +169,7 @@ public partial class frmSetting : Form
 
     private void RecalcDayStartAndEnd()
     {
-        var dayShift = Utility.GetDayShift(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+        var dayShift = Utility.GetDayShift(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), settingHelper.DayStart, settingHelper.DayEnd, settingHelper.DayEndNextDay);
 
         // 01/01/2024 12:00am
         lblDayStart.Text = $"{dayShift.start:MM/dd/yyyy hh:mmtt}";

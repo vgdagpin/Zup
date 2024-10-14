@@ -20,6 +20,7 @@ public partial class frmEntryList : Form
 
     private frmNewEntry m_FormNewEntry;
     private frmUpdateEntry m_FormUpdateEntry; // need to make this as singleton to minimize loading
+    private readonly SettingHelper settingHelper;
     private frmMain m_FormMain = null!;
 
     private bool p_OnLoad = true;
@@ -63,17 +64,19 @@ public partial class frmEntryList : Form
 
     private void tmrSaveSetting_Tick(object sender, EventArgs e)
     {
-        Properties.Settings.Default.FormLocationX = Left;
-        Properties.Settings.Default.FormLocationY = Top;
-        Properties.Settings.Default.Save();
+        settingHelper.FormLocationX = Left;
+        settingHelper.FormLocationY = Top;
+        settingHelper.Save();
 
         tmrSaveSetting.Enabled = false;
     }
 
-    public void MoveToCenter()
+    public void MoveToCenterAndBringToFront()
     {
         Left = (Screen.PrimaryScreen!.WorkingArea.Width / 2) - (Width / 2);
         Top = (Screen.PrimaryScreen!.WorkingArea.Height / 2) - (Height / 2);
+        BringToFront();
+        Activate();
     }
 
     public void SetFormMain(frmMain frmMain)
@@ -84,16 +87,16 @@ public partial class frmEntryList : Form
 
     private void UpdateFormPosition()
     {
-        if (Properties.Settings.Default.FormLocationX == 0
-            && Properties.Settings.Default.FormLocationY == 0)
+        if (settingHelper.FormLocationX == 0
+            && settingHelper.FormLocationY == 0)
         {
             Left = Screen.PrimaryScreen!.WorkingArea.Width - Width - 2;
             Top = Screen.PrimaryScreen!.WorkingArea.Height - Height - 2;
         }
         else
         {
-            Left = Properties.Settings.Default.FormLocationX;
-            Top = Properties.Settings.Default.FormLocationY;
+            Left = settingHelper.FormLocationX;
+            Top = settingHelper.FormLocationY;
         }
     }
     #endregion
@@ -108,14 +111,14 @@ public partial class frmEntryList : Form
         }
     }
 
-    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry)
+    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry, SettingHelper settingHelper)
     {
         InitializeComponent();
 
         m_DbContext = dbContext;
         m_FormNewEntry = frmNewEntry;
         m_FormUpdateEntry = frmUpdateEntry;
-
+        this.settingHelper = settingHelper;
         m_DbContext.Database.Migrate();
     }
 
@@ -143,14 +146,14 @@ public partial class frmEntryList : Form
 
         p_OnLoad = false;
 
-        Opacity = Properties.Settings.Default.EntryListOpacity;
+        Opacity = settingHelper.EntryListOpacity;
 
         RefreshList();
         UpdateFormPosition();
 
-        showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
-        showRankedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowRankedTasks;
-        showClosedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowClosedTasks;
+        showQueuedTasksToolStripMenuItem.Checked = settingHelper.ShowQueuedTasks;
+        showRankedTasksToolStripMenuItem.Checked = settingHelper.ShowRankedTasks;
+        showClosedTasksToolStripMenuItem.Checked = settingHelper.ShowClosedTasks;
     }
 
     private void RefreshList()
@@ -229,7 +232,7 @@ public partial class frmEntryList : Form
     private void SetListScrollAndActiveControl()
     {
         var firstItem = flpTaskList.Controls.Count > 0
-            ? (EachEntry)flpTaskList.Controls[flpTaskList.Controls.Count - 1]
+            ? (EachEntry)flpTaskList.Controls[0]
             : null;
 
 
@@ -238,11 +241,8 @@ public partial class frmEntryList : Form
             flpTaskList.ScrollControlIntoView(firstItem);
 
             firstItem.IsFirstItem = true;
-        }
 
-        if (flpTaskList.Controls.Count > 0)
-        {
-            ActiveControl = flpTaskList.Controls[0];
+            ActiveControl = firstItem;
         }
     }
 
@@ -287,11 +287,33 @@ public partial class frmEntryList : Form
         OnTokenDoubleClicked?.Invoke(sender, e);
     }
 
+    private EachEntry Translate(tbl_TaskEntry task)
+    {
+        var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
+        {
+            Rank = task.Rank,
+            TabStop = false,
+
+        };
+
+        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
+
+        eachEntry.OnResumeEvent += EachEntry_OnResumeEventHandler;
+        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+        eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
+        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
+
+        return eachEntry;
+    }
+
     private LoadedListControlDetail LoadListToControl()
     {
         var result = new LoadedListControlDetail();
 
-        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+        var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
 
         var ongoingTasks = new List<EachEntry>();
         var queuedTasks = new List<EachEntry>();
@@ -299,26 +321,11 @@ public partial class frmEntryList : Form
 
         foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
         {
-            var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
-            {
-                Rank = task.Rank,
-                TabStop = false,
-
-            };
-
-            eachEntry.GotFocus += (sender, e) => ActiveControl = null;
-
-            eachEntry.OnResumeEvent += EachEntry_OnResumeEventHandler;
-            eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
-            eachEntry.OnStartEvent += EachEntry_OnStartEvent;
-            eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
-            eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
-            eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
-            eachEntry.TaskRightClick += EachEntry_TaskRightClick;
+            var eachEntry = Translate(task);
 
             if (eachEntry.TaskStatus == TaskStatus.Ranked)
             {
-                if (!Properties.Settings.Default.ShowRankedTasks)
+                if (!settingHelper.ShowRankedTasks)
                 {
                     continue;
                 }
@@ -330,7 +337,7 @@ public partial class frmEntryList : Form
 
             if (eachEntry.TaskStatus == TaskStatus.Queued)
             {
-                if (!Properties.Settings.Default.ShowQueuedTasks)
+                if (!settingHelper.ShowQueuedTasks)
                 {
                     continue;
                 }
@@ -340,7 +347,7 @@ public partial class frmEntryList : Form
                 continue;
             }
 
-            if (eachEntry.TaskStatus == TaskStatus.Closed && !Properties.Settings.Default.ShowClosedTasks)
+            if (eachEntry.TaskStatus == TaskStatus.Closed && !settingHelper.ShowClosedTasks)
             {
                 continue;
             }
@@ -375,7 +382,7 @@ public partial class frmEntryList : Form
         var stack = new Queue<EachEntry>();
         var list = entryList.OfType<EachEntry>().Where(a => a.Visible).ToList();
         var all = entryList.OfType<EachEntry>().Where(a => a.Visible).ToArray();
-        var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+        var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
 
         // running
         foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Running).OrderBy(a => a.CreatedOn))
@@ -468,7 +475,7 @@ public partial class frmEntryList : Form
         itemCount += CommonUtility.GetMin(flpQueuedTaskList.Controls.Count, maxQueuedTaskRow);
         itemCount += CommonUtility.GetMin(flpRankedTasks.Controls.Count, maxRankedTaskRow);
 
-        // itemCount = Properties.Settings.Default.ItemsToShow;
+        // itemCount = settingHelper.ItemsToShow;
 
         int totalHeight = (int)EachEntry.OngoingRowHeight * CommonUtility.GetMin(flpTaskList.Controls.Count, maxOngoingTaskRow);
 
@@ -614,7 +621,7 @@ public partial class frmEntryList : Form
 
         if (args.GetTags && parentEntry == null)
         {
-            var minDate = DateTime.Now.AddDays(-Properties.Settings.Default.NumDaysOfDataToLoad);
+            var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
 
             var tagIDs = (from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
                           join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
@@ -674,16 +681,18 @@ public partial class frmEntryList : Form
             DeleteTimeLog(args.ParentEntryID.Value);
         }
 
-        if (Properties.Settings.Default.AutoOpenUpdateWindow)
-        {
-            ShowUpdateEntry(newE.ID);
-        }
-
         RefreshList();
 
         if (OnQueueTaskUpdatedEvent != null)
         {
             OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
+        }
+
+        if (settingHelper.AutoOpenUpdateWindow)
+        {
+            var ee = GetEachEntryByID(newE.ID);
+
+            ShowUpdateEntry(ee);
         }
     }
 
@@ -694,18 +703,35 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnUpdateEvent(Guid id)
     {
-        ShowUpdateEntry(id);
+        var eachEntry = GetEachEntryByID(id);
+
+        ShowUpdateEntry(eachEntry, eachEntry?.TaskStatus == TaskStatus.Closed);
     }
 
-    public async void ShowUpdateEntry(Guid entryID, bool canReRun = false)
+    public EachEntry? GetEachEntryByID(Guid entryID)
     {
         var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
             ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
             ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
 
+        if (eachEntry == null)
+        {
+            var entryFromDb = m_DbContext.TaskEntries.Find(entryID);
+
+            if (entryFromDb != null)
+            {
+                eachEntry = Translate(entryFromDb);
+            }
+        }
+
+        return eachEntry;
+    }
+
+    public async void ShowUpdateEntry(EachEntry? eachEntry, bool canReRun = false)
+    {
         if (eachEntry != null)
         {
-            await m_FormUpdateEntry.ShowUpdateEntry(eachEntry);
+            await m_FormUpdateEntry.ShowUpdateEntry(eachEntry, canReRun);
         }
     }
 
@@ -763,7 +789,9 @@ public partial class frmEntryList : Form
             return;
         }
 
-        ShowUpdateEntry(CurrentRunningTaskID.Value);        
+        var ee = GetEachEntryByID(CurrentRunningTaskID.Value);
+
+        ShowUpdateEntry(ee);        
     }
 
     public void ToggleLastRunningTask()
@@ -793,10 +821,10 @@ public partial class frmEntryList : Form
 
     private void showQueuedTasksToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ShowQueuedTasks = !Properties.Settings.Default.ShowQueuedTasks;
-        Properties.Settings.Default.Save();
+        settingHelper.ShowQueuedTasks = !settingHelper.ShowQueuedTasks;
+        settingHelper.Save();
 
-        showQueuedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowQueuedTasks;
+        showQueuedTasksToolStripMenuItem.Checked = settingHelper.ShowQueuedTasks;
 
         LoadListToControl();
 
@@ -805,10 +833,10 @@ public partial class frmEntryList : Form
 
     private void showRankedTasksToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ShowRankedTasks = !Properties.Settings.Default.ShowRankedTasks;
-        Properties.Settings.Default.Save();
+        settingHelper.ShowRankedTasks = !settingHelper.ShowRankedTasks;
+        settingHelper.Save();
 
-        showRankedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowRankedTasks;
+        showRankedTasksToolStripMenuItem.Checked = settingHelper.ShowRankedTasks;
 
         LoadListToControl();
 
@@ -817,10 +845,10 @@ public partial class frmEntryList : Form
 
     private void showClosedTasksToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ShowClosedTasks = !Properties.Settings.Default.ShowClosedTasks;
-        Properties.Settings.Default.Save();
+        settingHelper.ShowClosedTasks = !settingHelper.ShowClosedTasks;
+        settingHelper.Save();
 
-        showClosedTasksToolStripMenuItem.Checked = Properties.Settings.Default.ShowClosedTasks;
+        showClosedTasksToolStripMenuItem.Checked = settingHelper.ShowClosedTasks;
 
         LoadListToControl();
 

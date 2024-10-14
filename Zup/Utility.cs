@@ -91,7 +91,7 @@ public static class Utility
             .ToArray();
     }
 
-    public static DayOfWeek? GetDayOfWeek(DateTime? startedOn)
+    public static DayOfWeek? GetDayOfWeek(DateTime? startedOn, TimeSpan dayStart, TimeSpan dayEnd, bool dayEndNextDay)
     {
         if (startedOn == null)
         {
@@ -100,9 +100,9 @@ public static class Utility
 
         var dt = new DateTime(startedOn.Value.Year, startedOn.Value.Month, startedOn.Value.Day);
 
-        var ds1 = GetDayShift(dt.AddHours(-24));
-        var ds2 = GetDayShift(dt);
-        var ds3 = GetDayShift(dt.AddHours(24));
+        var ds1 = GetDayShift(dt.AddHours(-24), dayStart, dayEnd, dayEndNextDay);
+        var ds2 = GetDayShift(dt, dayStart, dayEnd, dayEndNextDay);
+        var ds3 = GetDayShift(dt.AddHours(24), dayStart, dayEnd, dayEndNextDay);
 
         if (ds1.start <= startedOn.Value && startedOn.Value <= ds1.end)
         {
@@ -120,55 +120,22 @@ public static class Utility
         return null;
     }
 
-    public static (DateTime start, DateTime end, DateTime passedDT) GetDayShift(DateTime date)
+    public static (DateTime start, DateTime end, DateTime passedDT) GetDayShift(DateTime date, TimeSpan dayStart, TimeSpan dayEnd, bool dayEndNextDay)
     {
-        TimeSpan tsStart = Properties.Settings.Default.DayStart;
-        TimeSpan tsEnd = Properties.Settings.Default.DayEnd;
-
         var s = date;
-        s = s.AddHours(tsStart.Hours - 7);
-        s = s.AddMinutes(tsStart.Minutes);
+        s = s.AddHours(dayStart.Hours - 7);
+        s = s.AddMinutes(dayStart.Minutes);
 
         var e = date;
-        e = e.AddHours(tsEnd.Hours + 8);
-        e = e.AddMinutes(tsEnd.Minutes);
+        e = e.AddHours(dayEnd.Hours + 8);
+        e = e.AddMinutes(dayEnd.Minutes);
         e = e.AddSeconds(-1);
 
-        if (Properties.Settings.Default.DayEndNextDay)
+        if (dayEndNextDay)
         {
             e = e.AddHours(24);
         }
 
         return (s, e, date);
-    }
-
-    public static string DbPath
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.DbPath))
-            {
-                var myDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                var path = Path.Combine(myDoc, "Zup");
-
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-
-                Properties.Settings.Default.DbPath = Path.Combine(path, $"Zup.db");
-
-                Properties.Settings.Default.Save();
-            }
-
-            var dir = Path.GetDirectoryName(Properties.Settings.Default.DbPath)!;
-
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-
-            return Properties.Settings.Default.DbPath;
-        }
     }
 }

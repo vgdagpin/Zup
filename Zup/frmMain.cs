@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Zup.EventArguments;
@@ -150,14 +151,14 @@ public partial class frmMain : Form
         }
     }
 
-    frmView? frmView = null;
-    private frmView m_FormView
+    frmViewList? frmView = null;
+    private frmViewList m_FormView
     {
         get
         {
             if (frmView == null || frmView.IsDisposed)
             {
-                frmView = m_ServiceProvider.GetRequiredService<frmView>();
+                frmView = m_ServiceProvider.GetRequiredService<frmViewList>();
 
                 frmView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
             }
@@ -295,7 +296,9 @@ public partial class frmMain : Form
 
     private void FormView_OnSelectedItemEvent(Guid entryID)
     {
-        m_FormEntryList.ShowUpdateEntry(entryID, true);
+        var ee = m_FormEntryList.GetEachEntryByID(entryID);
+
+        m_FormEntryList.ShowUpdateEntry(ee, true);
     }
 
     protected bool IsNewWeek()
@@ -376,6 +379,8 @@ public partial class frmMain : Form
     private void frmMain_Load(object sender, EventArgs e)
     {
         Visible = false;
+
+        aboutToolStripMenuItem.Text = $"About - {Assembly.GetExecutingAssembly().GetName().Version}";
     }
 
     private void tmrDelayShowList_Tick(object sender, EventArgs e)
@@ -452,6 +457,6 @@ public partial class frmMain : Form
 
     private void moveToCenterToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        m_FormEntryList.MoveToCenter();
+        m_FormEntryList.MoveToCenterAndBringToFront();
     }
 }

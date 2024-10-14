@@ -33,3 +33,6 @@ Shortcuts:
 ### Setting
 ![Right Click Icon](https://raw.githubusercontent.com/vgdagpin/Zup/main/Docs/Screenshots/Right_Click_Icon.png)   
 ![Setting](https://raw.githubusercontent.com/vgdagpin/Zup/main/Docs/Screenshots/Setting.png)
+
+
+```~StartedOnTicks~^~Task~^~Comments~^~Tag[Name=Bill%].Description~^~Duration~^False^False```

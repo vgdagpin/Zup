@@ -1,6 +1,6 @@
 ﻿namespace Zup;
 
-partial class frmView
+partial class frmViewList
 {
     /// <summary>
     /// Required designer variable.
@@ -31,7 +31,7 @@ partial class frmView
         components = new System.ComponentModel.Container();
         DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
         DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmView));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmViewList));
         dgView = new DataGridView();
         lblSelectedTotal = new Label();
         label1 = new Label();

@@ -18,16 +18,19 @@ internal static class Program
                 services.AddTransient<frmMain>();
                 services.AddTransient<frmEntryList>();
                 services.AddTransient<frmSetting>();
-                services.AddTransient<frmView>();
+                services.AddTransient<frmViewList>();
                 services.AddTransient<frmNewEntry>();
                 services.AddTransient<frmUpdateEntry>();
                 services.AddTransient<frmTagEditor>();
+                services.AddSingleton<SettingHelper>();
 
-                services.AddDbContext<ZupDbContext>(optionsAction =>
+                services.AddDbContext<ZupDbContext>((sp, optionsAction) =>
                 {
+                    var settingsHelper = sp.GetRequiredService<SettingHelper>();
+
                     optionsAction.UseSqlite
                     (
-                        connectionString: $"Filename={Utility.DbPath}",
+                        connectionString: $"Filename={settingsHelper.DbPath}",
                         sqliteOptionsAction: opt =>
                         {
                             opt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
