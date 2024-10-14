@@ -106,6 +106,48 @@ public partial class frmUpdateEntry : Form
         SetControlsEnable(false);
     }
 
+    public DateTime? StartedOn
+    {
+        get
+        {
+            return dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
+        }
+        set
+        {
+            if (value == null)
+            {
+                dtFrom.Value = dtFrom.MinDate;
+                dtFrom.CustomFormat = " ";
+            }
+            else
+            {
+                dtFrom.Value = value.Value;
+                dtFrom.CustomFormat = DateTimeCustomFormat;
+            }
+        }
+    }
+
+    public DateTime? EndedOn
+    {
+        get
+        {
+            return dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
+        }
+        set
+        {
+            if (value == null)
+            {
+                dtTo.Value = dtTo.MinDate;
+                dtTo.CustomFormat = " ";
+            }
+            else
+            {
+                dtTo.Value = value.Value;
+                dtTo.CustomFormat = DateTimeCustomFormat;
+            }
+        }
+    }
+
     #region Save
     private void SaveEntry()
     {
@@ -114,8 +156,8 @@ public partial class frmUpdateEntry : Form
         if (task != null)
         {
             task.Task = txtTask.Text;
-            task.StartedOn = dtFrom.MinDate == dtFrom.Value ? null : dtFrom.Value;
-            task.EndedOn = dtTo.MinDate == dtTo.Value ? null : dtTo.Value;
+            task.StartedOn = StartedOn;
+            task.EndedOn = EndedOn;
 
             if (numRank.Value <= 0)
             {
@@ -418,22 +460,8 @@ public partial class frmUpdateEntry : Form
 
         txtTask.Text = selectedEntry.Task;
 
-        dtFrom.Value = selectedEntry.StartedOn != null
-            ? selectedEntry.StartedOn.Value
-            : dtFrom.MinDate;
-
-        dtFrom.CustomFormat = selectedEntry.StartedOn != null
-            ? DateTimeCustomFormat
-            : " ";
-
-
-        dtTo.Value = selectedEntry.EndedOn != null
-            ? selectedEntry.EndedOn.Value
-            : dtTo.MinDate;
-
-        dtTo.CustomFormat = selectedEntry.EndedOn != null
-            ? DateTimeCustomFormat
-            : " ";
+        StartedOn = selectedEntry.StartedOn;
+        EndedOn = selectedEntry.EndedOn;
 
         numRank.Value = selectedEntry.Rank ?? 0;
 
