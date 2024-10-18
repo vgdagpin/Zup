@@ -568,6 +568,8 @@ public partial class frmEntryList : Form
 
     private void EachEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
+        m_DbContext.BackupDb();
+
         var newE = new tbl_TaskEntry
         {
             ID = Guid.NewGuid(),
