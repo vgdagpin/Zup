@@ -551,6 +551,13 @@ public partial class frmEntryList : Form
             FloatingButtons.Remove((frmFloatingButton)sender!);
         };
 
+        newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
+        {
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            ShowUpdateEntry(entry);
+        };
+
         newFloatingButton.Text = eachEntry.Text;
         newFloatingButton.StartedOn = eachEntry.StartedOn;
 

@@ -37,6 +37,7 @@ public partial class frmFloatingButton : Form
     public event EventHandler<StopEventArgs>? OnStopEvent;
     public event EventHandler? OnResetEvent;
     public event EventHandler? OnDeleteEvent;
+    public event EventHandler? OnTaskTextDoubleClick;
 
     #region Properties
     // Override Text property to refresh UI when changed
@@ -365,7 +366,8 @@ public partial class frmFloatingButton : Form
             DrawControlButton(g, buttonRect);
 
             // Draw task text below (left aligned with small margin)
-            float taskX = bounds.Left + (TASK_TEXT_LEFT_MARGIN * BITMAP_SCALE); // Left margin
+            // Center task text horizontally beneath the time/button group
+            float taskX = bounds.Left + (bounds.Width - taskSize.Width) / 2f;
             float taskY = startY + timeSize.Height + lineSpacing;
             g.DrawString(taskText, taskFont, textBrush, taskX, taskY);
 
@@ -538,6 +540,13 @@ public partial class frmFloatingButton : Form
             // Show context menu at cursor position (anywhere on the form)
             controlButtonMenu?.Show(Cursor.Position);
             return;
+        }
+
+        // Task text double-click detection
+        if (e.Button == MouseButtons.Left && e.Clicks == 2 && taskTextBounds.HasValue && taskTextBounds.Value.Contains(e.Location))
+        {
+            OnTaskTextDoubleClick?.Invoke(this, EventArgs.Empty);
+            return; // swallow double-click so it doesn't drag window
         }
 
         if (controlButtonBounds.HasValue && controlButtonBounds.Value.Contains(e.Location))
