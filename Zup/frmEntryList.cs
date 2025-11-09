@@ -716,6 +716,13 @@ public partial class frmEntryList : Form
         if (eachEntry.TaskStatus == TaskStatus.Queued)
         {
             flpQueuedTaskList.Controls.Add(eachEntry);
+
+            if (settingHelper.UsePillTimer)
+            {
+                Hide();
+
+                ShowFloatingButton(eachEntry);
+            }
         }
         else
         {

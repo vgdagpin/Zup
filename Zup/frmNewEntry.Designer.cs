@@ -43,6 +43,8 @@ partial class frmNewEntry
         label7 = new Label();
         label8 = new Label();
         label9 = new Label();
+        label10 = new Label();
+        label11 = new Label();
         SuspendLayout();
         // 
         // txtEntry
@@ -64,7 +66,7 @@ partial class frmNewEntry
         // 
         lbSuggestions.FormattingEnabled = true;
         lbSuggestions.ItemHeight = 15;
-        lbSuggestions.Location = new Point(12, 115);
+        lbSuggestions.Location = new Point(12, 132);
         lbSuggestions.Name = "lbSuggestions";
         lbSuggestions.Size = new Size(511, 109);
         lbSuggestions.TabIndex = 1;
@@ -91,19 +93,19 @@ partial class frmNewEntry
         label2.Font = new Font("Segoe UI", 6.75F);
         label2.Location = new Point(41, 41);
         label2.Name = "label2";
-        label2.Size = new Size(138, 12);
+        label2.Size = new Size(202, 12);
         label2.TabIndex = 3;
-        label2.Text = "Stop other task and start new task";
+        label2.Text = "Stop other task and start new (use history if found)";
         // 
         // label3
         // 
         label3.AutoSize = true;
         label3.Font = new Font("Segoe UI", 6.75F);
-        label3.Location = new Point(66, 54);
+        label3.Location = new Point(62, 54);
         label3.Name = "label3";
-        label3.Size = new Size(82, 12);
+        label3.Size = new Size(215, 12);
         label3.TabIndex = 5;
-        label3.Text = "Start task in parallel";
+        label3.Text = "Stop other task and start new (will not use the history)";
         // 
         // label4
         // 
@@ -111,25 +113,25 @@ partial class frmNewEntry
         label4.Font = new Font("Segoe UI", 6.75F, FontStyle.Bold);
         label4.Location = new Point(11, 54);
         label4.Name = "label4";
-        label4.Size = new Size(56, 12);
+        label4.Size = new Size(53, 12);
         label4.TabIndex = 4;
-        label4.Text = "Shift+Enter:";
+        label4.Text = "Ctrl+Enter:";
         // 
         // label5
         // 
         label5.AutoSize = true;
         label5.Font = new Font("Segoe UI", 6.75F);
-        label5.Location = new Point(60, 68);
+        label5.Location = new Point(60, 77);
         label5.Name = "label5";
-        label5.Size = new Size(80, 12);
+        label5.Size = new Size(43, 12);
         label5.TabIndex = 7;
-        label5.Text = "Queue as next task";
+        label5.Text = "Track only";
         // 
         // label6
         // 
         label6.AutoSize = true;
         label6.Font = new Font("Segoe UI", 6.75F, FontStyle.Bold);
-        label6.Location = new Point(11, 68);
+        label6.Location = new Point(11, 77);
         label6.Name = "label6";
         label6.Size = new Size(49, 12);
         label6.TabIndex = 6;
@@ -139,7 +141,7 @@ partial class frmNewEntry
         // 
         label7.AutoSize = true;
         label7.Font = new Font("Segoe UI", 6.75F);
-        label7.Location = new Point(11, 100);
+        label7.Location = new Point(11, 117);
         label7.Name = "label7";
         label7.Size = new Size(32, 12);
         label7.TabIndex = 8;
@@ -149,7 +151,7 @@ partial class frmNewEntry
         // 
         label8.AutoSize = true;
         label8.Font = new Font("Segoe UI", 6.75F);
-        label8.Location = new Point(48, 81);
+        label8.Location = new Point(48, 90);
         label8.Name = "label8";
         label8.Size = new Size(73, 12);
         label8.TabIndex = 10;
@@ -159,17 +161,39 @@ partial class frmNewEntry
         // 
         label9.AutoSize = true;
         label9.Font = new Font("Segoe UI", 6.75F, FontStyle.Bold);
-        label9.Location = new Point(11, 81);
+        label9.Location = new Point(11, 90);
         label9.Name = "label9";
         label9.Size = new Size(37, 12);
         label9.TabIndex = 9;
         label9.Text = "Ctrl+N:";
         // 
+        // label10
+        // 
+        label10.AutoSize = true;
+        label10.Font = new Font("Segoe UI", 6.75F);
+        label10.Location = new Point(66, 66);
+        label10.Name = "label10";
+        label10.Size = new Size(82, 12);
+        label10.TabIndex = 12;
+        label10.Text = "Start task in parallel";
+        // 
+        // label11
+        // 
+        label11.AutoSize = true;
+        label11.Font = new Font("Segoe UI", 6.75F, FontStyle.Bold);
+        label11.Location = new Point(11, 66);
+        label11.Name = "label11";
+        label11.Size = new Size(56, 12);
+        label11.TabIndex = 11;
+        label11.Text = "Shift+Enter:";
+        // 
         // frmNewEntry
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(537, 237);
+        ClientSize = new Size(537, 255);
+        Controls.Add(label10);
+        Controls.Add(label11);
         Controls.Add(label8);
         Controls.Add(label9);
         Controls.Add(label7);
@@ -211,4 +235,6 @@ partial class frmNewEntry
     private Label label7;
     private Label label8;
     private Label label9;
+    private Label label10;
+    private Label label11;
 }
