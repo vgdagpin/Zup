@@ -49,6 +49,7 @@ public partial class frmViewList : Form
         TagHelper.Register<TimeLogSummary>("Tag", (tagKey, dicAction) => ExtractTag(tagKey, dicAction.ID));
         TagHelper.Register<TimeLogSummary>("Comments", (tagKey, dicAction) => ExtractComments(dicAction.ID));
         TagHelper.Register<TimeLogSummary>("Duration", (tagKey, dicAction) => dicAction.DurationString!);
+        TagHelper.Register<TimeLogSummary>("TimesheetDate", (tagKey, dicAction) => dtTimesheetDate.Value.ToString(dtTimesheetDate.CustomFormat));
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
@@ -217,6 +218,21 @@ public partial class frmViewList : Form
         return Path.Combine(txtTimesheetFolder.Text, $"{fileName}{txtExtension.Text}");
     }
 
+    private string GetContentWrapperPath(string wrapperFilename)
+    {
+        if (string.IsNullOrWhiteSpace(txtTimesheetFolder.Text))
+        {
+            throw new Exception("Timesheet directory is empty!");
+        }
+
+        if (!Path.Exists(txtTimesheetFolder.Text))
+        {
+            throw new Exception("Timesheet directory doesn't exist!");
+        }
+
+        return Path.Combine(txtTimesheetFolder.Text, wrapperFilename);
+    }
+
     private void btnExportTimesheet_Click(object sender, EventArgs e)
     {
         try
@@ -224,12 +240,18 @@ public partial class frmViewList : Form
             var path = GetOutputPath();
 
             var content = GetContent(txtRowFormat.Text);
+            var contentWrapper = GetContentWrapper();
+
+            if (!string.IsNullOrWhiteSpace(contentWrapper))
+            {
+                content = contentWrapper.Replace("/// ~TimesheetEntries~ ///", content);
+            }
 
             var confirm = MessageBox.Show("Exporting to: \n\n" + path + "\n\nThis will replace existing records.", "Zup", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
 
             if (confirm == DialogResult.OK)
             {
-                File.WriteAllText(path, content);
+                File.WriteAllText(path, content.Trim());
 
                 if (OnExportedEvent != null)
                 {
@@ -246,6 +268,18 @@ public partial class frmViewList : Form
         {
             MessageBox.Show(ex.Message, "Zup");
         }
+    }
+
+    private string? GetContentWrapper()
+    {
+        var contentWrapperPath = GetContentWrapperPath("data-wrapper.js");
+
+        if (!File.Exists(contentWrapperPath))
+        {
+            return null;
+        }
+
+        return File.ReadAllText(contentWrapperPath);
     }
 
     private string GetContent(string format)
