@@ -114,6 +114,12 @@ public class SettingHelper
         set => SetSetting(nameof(AutoOpenUpdateWindow), value);
     }
 
+    public bool UsePillTimer
+    {
+        get => GetSetting(nameof(UsePillTimer), Properties.Settings.Default.UsePillTimer);
+        set => SetSetting(nameof(UsePillTimer), value);
+    }
+
     public TimeSpan DayStart
     {
         get => GetSetting(nameof(DayStart), Properties.Settings.Default.DayStart);

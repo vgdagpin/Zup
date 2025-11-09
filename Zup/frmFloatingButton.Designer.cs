@@ -24,10 +24,11 @@ partial class frmFloatingButton
         ClientSize = new Size(120, 60);
         FormBorderStyle = FormBorderStyle.None;
         Name = "frmFloatingButton";
+        Opacity = 0.5D;
         ShowIcon = false;
         ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterScreen;
-        Text = "Floating Button";
+        StartPosition = FormStartPosition.Manual;
+        Text = "Store task text bounds for tooltip detection (scaled down to 1x, accounting for padding)";
         TopMost = true;
         ResumeLayout(false);
     }

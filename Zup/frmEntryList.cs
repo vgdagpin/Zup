@@ -37,6 +37,8 @@ public partial class frmEntryList : Form
     public event EventHandler<QueueTaskUpdatedEventArgs>? OnQueueTaskUpdatedEvent;
     public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
 
+    private List<frmFloatingButton> FloatingButtons = new List<frmFloatingButton>();
+
     #region Draggable Form
     public const int WM_NCLBUTTONDOWN = 0xA1;
     public const int HT_CAPTION = 0x2;
@@ -298,7 +300,7 @@ public partial class frmEntryList : Form
 
         eachEntry.GotFocus += (sender, e) => ActiveControl = null;
 
-        eachEntry.OnResumeEvent += EachEntry_OnResumeEventHandler;
+        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
         eachEntry.OnStartEvent += EachEntry_OnStartEvent;
         eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
@@ -509,6 +511,50 @@ public partial class frmEntryList : Form
 
         CurrentRunningTaskID = eachEntry.EntryID;
         LastRunningTaskID = eachEntry.EntryID;
+
+        if (settingHelper.UsePillTimer)
+        {
+            ShowFloatingButton(eachEntry);
+
+            Hide();
+
+            return;
+        }
+    }
+
+    private void ShowFloatingButton(EachEntry eachEntry)
+    {
+        var newFloatingButton = new frmFloatingButton
+        {
+            StartPosition = FormStartPosition.Manual,
+            Tag = eachEntry,
+            Left = Left,
+            Top = Top
+        };
+
+        FloatingButtons.Add(newFloatingButton);
+
+        newFloatingButton.OnStopEvent += (sender, ts) =>
+        {
+            if (ts.IsClosed && FloatingButtons.Count == 1)
+            {
+                Show();
+            }
+
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            entry?.Stop();
+        };
+
+        newFloatingButton.FormClosed += (sender, e) =>
+        {
+            FloatingButtons.Remove((frmFloatingButton)sender!);
+        };
+
+        newFloatingButton.Text = eachEntry.Text;
+        newFloatingButton.StartedOn = eachEntry.StartedOn;
+
+        newFloatingButton.Show();
     }
 
     private void FormUpdateEntry_OnDeleteEventHandler(Guid entryID)
@@ -547,7 +593,7 @@ public partial class frmEntryList : Form
         EachEntry_NewEntryEventHandler(sender, args);
     }
 
-    private void EachEntry_OnResumeEventHandler(object? sender, NewEntryEventArgs args)
+    private void EachEntry_OnReRunEventHandler(object? sender, NewEntryEventArgs args)
     {
         EachEntry_NewEntryEventHandler(sender, args);
     }
@@ -654,7 +700,7 @@ public partial class frmEntryList : Form
 
         eachEntry.GotFocus += (sender, e) => ActiveControl = null;
 
-        eachEntry.OnResumeEvent += EachEntry_OnResumeEventHandler;
+        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
         eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
         eachEntry.OnStartEvent += EachEntry_OnStartEvent;
         eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
@@ -692,6 +738,11 @@ public partial class frmEntryList : Form
 
         if (settingHelper.AutoOpenUpdateWindow)
         {
+            if (settingHelper.UsePillTimer)
+            {
+                return;
+            }
+
             var ee = GetEachEntryByID(newE.ID);
 
             ShowUpdateEntry(ee);
@@ -751,7 +802,17 @@ public partial class frmEntryList : Form
                 {
                     if (item.IsStarted)
                     {
-                        item.Stop();
+                        // if we are using pill timer, stopping the pill timer will also stop the EachEntry
+                        if (settingHelper.UsePillTimer)
+                        {
+                            var pillTimer = FloatingButtons.Single(a => ((EachEntry)a.Tag!).EntryID == item.EntryID);
+
+                            pillTimer.Stop();
+                        }
+                        else
+                        {
+                            item.Stop();
+                        }
                     }
 
                     if (item.StartedOn == null)

@@ -31,7 +31,7 @@ public partial class EachEntry : UserControl
     public delegate void OnStop(Guid id, DateTime endOn);
     public delegate void OnUpdate(Guid id);
 
-    public event EventHandler<NewEntryEventArgs>? OnResumeEvent;
+    public event EventHandler<NewEntryEventArgs>? OnReRunEvent;
     public event OnStop? OnStopEvent;
     public event OnUpdate? OnUpdateEvent;
     public event EventHandler<OnStartEventArgs>? OnStartEvent;
@@ -278,7 +278,7 @@ public partial class EachEntry : UserControl
 
         if (EndedOn != null)
         {
-            if (OnResumeEvent != null)
+            if (OnReRunEvent != null)
             {
                 // we need to set this to null
                 // because we are moving this rank to the new entry
@@ -293,7 +293,7 @@ public partial class EachEntry : UserControl
                     BringTags = true
                 };
 
-                OnResumeEvent(this, args);
+                OnReRunEvent(this, args);
 
                 return;
             }

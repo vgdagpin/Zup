@@ -16,6 +16,7 @@ internal static class Program
             .ConfigureServices((context, services) => 
             {
                 services.AddTransient<frmMain>();
+                services.AddTransient<frmFloatingButton>();
                 services.AddTransient<frmEntryList>();
                 services.AddTransient<frmSetting>();
                 services.AddTransient<frmViewList>();
