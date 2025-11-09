@@ -5,6 +5,7 @@ namespace Zup;
 public partial class frmFloatingButton : Form
 {
     private Bitmap? buttonBitmap;
+    private GraphicsPath? buttonPath;
 
     public frmFloatingButton()
     {
@@ -12,98 +13,145 @@ public partial class frmFloatingButton : Form
         
         // Set form properties for transparent background and custom shape
         this.FormBorderStyle = FormBorderStyle.None;
-        //this.BackColor = Color.FromArgb(255, 1, 1, 1); // Use near-black instead of magenta
-        //this.TransparencyKey = Color.FromArgb(255, 1, 1, 1);
         this.StartPosition = FormStartPosition.CenterScreen;
-        this.Size = new Size(120, 60); // Pill shape - wider than tall
-        this.TopMost = true; // Always on top
+        this.Size = new Size(140, 70);
+        this.TopMost = true;
+        this.AllowTransparency = true;
+
+        //this.BackColor = Color.Red;
+        //this.TransparencyKey = Color.Red;
         
         // Create the button bitmap once
         CreateButtonBitmap();
     }
 
+    float b = 12;
+
     private void CreateButtonBitmap()
     {
-        buttonBitmap = new Bitmap(this.Width, this.Height);
+        // Create 2x resolution bitmap for ultra-smooth rendering with alpha channel
+        buttonBitmap = new Bitmap(this.Width * 2, this.Height * 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         using (Graphics g = Graphics.FromImage(buttonBitmap))
         {
-            // Enable high-quality rendering
-            g.SmoothingMode = SmoothingMode.HighQuality;
+            // Enable maximum quality rendering
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.CompositingQuality = CompositingQuality.HighQuality;
+            g.CompositingMode = CompositingMode.SourceOver;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
             
-            // Clear with transparent background - use the same near-black color
-           // g.Clear(Color.FromArgb(255, 1, 1, 1));
+            // Clear with fully transparent background
+            g.Clear(Color.Transparent);
             
-            // Create bounds for the pill
-            Rectangle pillBounds = new Rectangle(5, 5, this.Width - 10, this.Height - 10);
+            // Create bounds for the pill at 2x resolution with proper padding
+            RectangleF pillBounds = new RectangleF(b, b, this.Width * 2 - (b * 2), this.Height * 2 - (b * 2));
             
-            // Draw the pill with fading transparency
-            DrawPillWithFadingEdge(g, pillBounds);
+            // Draw drop shadow
+            DrawDropShadow(g, pillBounds);
             
-            // Draw gray border on top
-            DrawGrayBorder(g, pillBounds);
+            // Draw the pill with premium gradient
+            DrawPremiumPill(g, pillBounds);
+            
+            // Draw inner highlight for depth
+            DrawInnerHighlight(g, pillBounds);
+            
+            // Draw border
+            DrawBorder(g, pillBounds);
         }
         
-        // Set the region to include everything visible
-        SetRegionFromBitmap();
+        // Set the region to use the graphics path for smooth edges
+        SetRegionFromPath();
     }
 
-    private void DrawGrayBorder(Graphics g, Rectangle bounds)
+    private void DrawDropShadow(Graphics g, RectangleF bounds)
     {
-        // Create the pill path for the border
-        using (GraphicsPath borderPath = CreatePillPath(bounds))
+        // Create shadow effect with multiple layers
+        int shadowLayers = 10;
+        for (int i = shadowLayers; i >= 1; i--)
         {
-            // Draw the border with a gray pen
-            using (Pen borderPen = new Pen(Color.FromArgb(200, 128, 128, 128), 2f))
+            float shadowAlpha = 8f * (shadowLayers - i + 1) / shadowLayers;
+            float shadowOffset = i * 1.2f;
+            
+            RectangleF shadowBounds = new RectangleF(
+                bounds.Left + shadowOffset,
+                bounds.Top + shadowOffset * 1.5f,
+                bounds.Width,
+                bounds.Height
+            );
+            
+            using (GraphicsPath shadowPath = CreatePillPathF(shadowBounds))
             {
+                using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb((int)shadowAlpha, 0, 0, 0)))
+                {
+                    g.FillPath(shadowBrush, shadowPath);
+                }
+            }
+        }
+    }
+
+    private void DrawPremiumPill(Graphics g, RectangleF bounds)
+    {
+        // Draw main body with gradient
+        using (GraphicsPath pillPath = CreatePillPathF(bounds))
+        {
+            // Create a smooth gradient from light white to subtle gray
+            LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                new PointF(bounds.Left, bounds.Top),
+                new PointF(bounds.Left, bounds.Bottom),
+                Color.FromArgb(255, 252, 252, 252),
+                Color.FromArgb(255, 235, 235, 235)
+            );
+            gradientBrush.SetSigmaBellShape(0.5f, 1f);
+            
+            g.FillPath(gradientBrush, pillPath);
+            gradientBrush.Dispose();
+        }
+    }
+
+    private void DrawInnerHighlight(Graphics g, RectangleF bounds)
+    {
+        // Create a subtle inner highlight on top for depth
+        float highlightInset = 5f;
+        RectangleF highlightBounds = new RectangleF(
+            bounds.Left + highlightInset,
+            bounds.Top + highlightInset,
+            bounds.Width - (highlightInset * 2),
+            bounds.Height * 0.3f
+        );
+        
+        using (GraphicsPath highlightPath = CreatePillPathF(highlightBounds))
+        {
+            using (SolidBrush highlightBrush = new SolidBrush(Color.FromArgb(100, 255, 255, 255)))
+            {
+                g.FillPath(highlightBrush, highlightPath);
+            }
+        }
+    }
+
+    private void DrawBorder(Graphics g, RectangleF bounds)
+    {
+        // Draw a refined border
+        using (GraphicsPath borderPath = CreatePillPathF(bounds))
+        {
+            using (Pen borderPen = new Pen(Color.FromArgb(220, 160, 160, 160), 2f))
+            {
+                borderPen.LineJoin = LineJoin.Round;
+                borderPen.EndCap = LineCap.Round;
+                borderPen.StartCap = LineCap.Round;
                 g.DrawPath(borderPen, borderPath);
             }
         }
     }
 
-    private void SetRegionFromBitmap()
+    private void SetRegionFromPath()
     {
         if (buttonBitmap == null) return;
         
-        // Create region from non-transparent pixels in the bitmap
-        Region region = new Region();
-        region.MakeEmpty();
-        
-        Color transparentKey = Color.FromArgb(255, 1, 1, 1);
-        
-        // Scan the bitmap and add rectangles for non-transparent pixels
-        for (int y = 0; y < buttonBitmap.Height; y++)
-        {
-            int startX = -1;
-            for (int x = 0; x < buttonBitmap.Width; x++)
-            {
-                Color pixel = buttonBitmap.GetPixel(x, y);
-                // Only consider pixels that are significantly different from the transparency key
-                bool isVisible = pixel.A > 10 && 
-                    (Math.Abs(pixel.R - transparentKey.R) > 5 || 
-                     Math.Abs(pixel.G - transparentKey.G) > 5 || 
-                     Math.Abs(pixel.B - transparentKey.B) > 5);
-                
-                if (isVisible && startX == -1)
-                {
-                    startX = x;
-                }
-                else if (!isVisible && startX != -1)
-                {
-                    region.Union(new Rectangle(startX, y, x - startX, 1));
-                    startX = -1;
-                }
-            }
-            
-            if (startX != -1)
-            {
-                region.Union(new Rectangle(startX, y, buttonBitmap.Width - startX, 1));
-            }
-        }
-        
-        this.Region = region;
+        // Create region from a graphics path for smooth edges
+        Rectangle pillBounds = new Rectangle(0, 0, this.Width, this.Height);
+        buttonPath = CreatePillPath(pillBounds);
+        this.Region = new Region(buttonPath);
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -112,102 +160,56 @@ public partial class frmFloatingButton : Form
         
         if (buttonBitmap != null)
         {
-            // Draw the pre-rendered button bitmap
-            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            // Draw the pre-rendered button bitmap at full quality
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
             e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
             e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
             
-            e.Graphics.DrawImage(buttonBitmap, 0, 0);
+            // Scale down the 2x bitmap to fit the form
+            e.Graphics.DrawImage(buttonBitmap, 0, 0, this.Width, this.Height);
         }
     }
 
     private GraphicsPath CreatePillPath(Rectangle bounds)
     {
+        return CreatePillPathF(new RectangleF(bounds.Left, bounds.Top, bounds.Width, bounds.Height));
+    }
+
+    private GraphicsPath CreatePillPathF(RectangleF bounds)
+    {
         GraphicsPath path = new GraphicsPath();
         
         // For a pill shape, the radius should be half the height
-        int radius = bounds.Height;
+        float radius = bounds.Height / 2f;
         
         // Top-left arc
-        path.AddArc(bounds.Left, bounds.Top, radius, radius, 180, 90);
+        path.AddArc(bounds.Left, bounds.Top, radius * 2, radius * 2, 180, 90);
         
         // Top line
-        path.AddLine(bounds.Left + radius / 2, bounds.Top, bounds.Right - radius / 2, bounds.Top);
+        path.AddLine(bounds.Left + radius, bounds.Top, bounds.Right - radius, bounds.Top);
         
         // Top-right arc
-        path.AddArc(bounds.Right - radius, bounds.Top, radius, radius, 270, 90);
+        path.AddArc(bounds.Right - radius * 2, bounds.Top, radius * 2, radius * 2, 270, 90);
         
         // Right line
-        path.AddLine(bounds.Right, bounds.Top + radius / 2, bounds.Right, bounds.Bottom - radius / 2);
+        path.AddLine(bounds.Right, bounds.Top + radius, bounds.Right, bounds.Bottom - radius);
         
         // Bottom-right arc
-        path.AddArc(bounds.Right - radius, bounds.Bottom - radius, radius, radius, 0, 90);
+        path.AddArc(bounds.Right - radius * 2, bounds.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
         
         // Bottom line
-        path.AddLine(bounds.Right - radius / 2, bounds.Bottom, bounds.Left + radius / 2, bounds.Bottom);
+        path.AddLine(bounds.Right - radius, bounds.Bottom, bounds.Left + radius, bounds.Bottom);
         
         // Bottom-left arc
-        path.AddArc(bounds.Left, bounds.Bottom - radius, radius, radius, 90, 90);
+        path.AddArc(bounds.Left, bounds.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
         
         // Left line
-        path.AddLine(bounds.Left, bounds.Bottom - radius / 2, bounds.Left, bounds.Top + radius / 2);
+        path.AddLine(bounds.Left, bounds.Bottom - radius, bounds.Left, bounds.Top + radius);
         
         path.CloseFigure();
         
         return path;
-    }
-
-    private void DrawPillWithFadingEdge(Graphics g, Rectangle bounds)
-    {
-        // Create multiple layers with decreasing size for fading effect
-        for (int i = 15; i >= 0; i--)
-        {
-            int alpha = (int)(255 * (1.0f - i * 0.065f));
-            
-            if (alpha < 0) alpha = 0;
-            if (alpha > 255) alpha = 255;
-            
-            // Calculate inset for each layer
-            int inset = (int)(i * 0.8f);
-            Rectangle layerBounds = new Rectangle(
-                bounds.Left + inset,
-                bounds.Top + inset,
-                bounds.Width - (inset * 2),
-                bounds.Height - (inset * 2)
-            );
-            
-            if (layerBounds.Width > 0 && layerBounds.Height > 0)
-            {
-                using (GraphicsPath layerPath = CreatePillPath(layerBounds))
-                {
-                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, 211, 211, 211)))
-                    {
-                        g.FillPath(brush, layerPath);
-                    }
-                }
-            }
-        }
-        
-        // Draw the solid center
-        int centerInset = 12;
-        Rectangle centerBounds = new Rectangle(
-            bounds.Left + centerInset,
-            bounds.Top + centerInset,
-            bounds.Width - (centerInset * 2),
-            bounds.Height - (centerInset * 2)
-        );
-        
-        if (centerBounds.Width > 0 && centerBounds.Height > 0)
-        {
-            using (GraphicsPath centerPath = CreatePillPath(centerBounds))
-            {
-                using (SolidBrush centerBrush = new SolidBrush(Color.FromArgb(255, 211, 211, 211)))
-                {
-                    g.FillPath(centerBrush, centerPath);
-                }
-            }
-        }
     }
 
     protected override void OnMouseDown(MouseEventArgs e)
@@ -226,6 +228,8 @@ public partial class frmFloatingButton : Form
     {
         buttonBitmap?.Dispose();
         buttonBitmap = null;
+        buttonPath?.Dispose();
+        buttonPath = null;
         base.OnFormClosing(e);
     }
 
