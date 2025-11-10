@@ -340,6 +340,11 @@ public partial class EachEntry : UserControl
         }
     }
 
+    public void Reset()
+    {
+        StartedOn = DateTime.Now;
+    }
+
     private void btnToggleStartStop_Click(object sender, EventArgs e)
     {
         if (!IsStarted)

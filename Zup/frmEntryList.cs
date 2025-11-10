@@ -516,8 +516,6 @@ public partial class frmEntryList : Form
         {
             ShowFloatingButton(eachEntry);
 
-            Hide();
-
             return;
         }
     }
@@ -556,6 +554,25 @@ public partial class frmEntryList : Form
             var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
 
             ShowUpdateEntry(entry);
+        };
+
+        newFloatingButton.OnResetEvent += (sender, e) =>
+        {
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            if (entry != null)
+            {
+                var existingE = m_DbContext.TaskEntries.Find(entry.EntryID);
+
+                if (existingE != null)
+                {
+                    existingE.StartedOn = DateTime.Now;
+
+                    m_DbContext.SaveChanges();
+                }
+
+                entry.Reset();
+            }            
         };
 
         newFloatingButton.Text = eachEntry.Text;
@@ -726,14 +743,12 @@ public partial class frmEntryList : Form
 
             if (settingHelper.UsePillTimer)
             {
-                Hide();
-
                 ShowFloatingButton(eachEntry);
             }
         }
         else
         {
-            AddEntryToFlowLayoutControl(eachEntry, args);
+            AddEntryToFlowLayoutControl(eachEntry, args);            
         }
 
         SortTasks(flpTaskList.Controls);
@@ -748,6 +763,11 @@ public partial class frmEntryList : Form
         if (OnQueueTaskUpdatedEvent != null)
         {
             OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
+        }
+
+        if (settingHelper.UsePillTimer)
+        {
+            Hide();
         }
 
         if (settingHelper.AutoOpenUpdateWindow)
