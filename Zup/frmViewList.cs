@@ -44,7 +44,7 @@ public partial class frmViewList : Form
         typeof(DataGridView).InvokeMember("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty, null, dgView, new object[] { true });
 
         TagHelper.Register<TimeLogSummary>("StartedOnTicks", (tagKey, dicAction) => dicAction.StartedOn!.Value.Ticks.ToString());
-        TagHelper.Register<TimeLogSummary>("Task", (tagKey, dicAction) => dicAction.Task);
+        TagHelper.Register<TimeLogSummary>("Task", (tagKey, dicAction) => NoteSummary.CleanString(dicAction.Task, 200));
         TagHelper.Register<TimeLogSummary>("Tags", (tagKey, dicAction) => ExtractTags(dicAction.ID));
         TagHelper.Register<TimeLogSummary>("Tag", (tagKey, dicAction) => ExtractTag(tagKey, dicAction.ID));
         TagHelper.Register<TimeLogSummary>("Comments", (tagKey, dicAction) => ExtractComments(dicAction.ID));
@@ -322,7 +322,7 @@ public partial class frmViewList : Form
 
         foreach (var note in notes)
         {
-            var n = NoteSummary.CleanNotes(note.Notes, 100);
+            var n = NoteSummary.CleanString(note.Notes, 100);
 
             if (!string.IsNullOrWhiteSpace(n))
             {
