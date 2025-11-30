@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
@@ -466,6 +466,22 @@ public partial class frmViewList : Form
     }
 
     private Font? tagFont = null;
+
+
+    private void dgView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex != 7)
+        {
+            return;
+        }
+
+        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
+        
+        if (OnSelectedItemEvent != null)
+        {
+            OnSelectedItemEvent(dataRow.ID);
+        }
+    }
 
     private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
     {

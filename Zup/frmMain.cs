@@ -11,9 +11,17 @@ namespace Zup;
 
 public partial class frmMain : Form
 {
+    private readonly IServiceProvider p_ServiceProvider;
+
+
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     extern static bool DestroyIcon(IntPtr handle);
 
+    [DllImport("user32.dll")]
+    public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
+
+    [DllImport("user32.dll")]
+    public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
     static class Constants
     {
@@ -23,6 +31,7 @@ public partial class frmMain : Form
         public const int ShowViewAll = 4;
     }
 
+    #region Properties
     IServiceProvider? serviceProvider;
     private IServiceProvider m_ServiceProvider
     {
@@ -70,6 +79,220 @@ public partial class frmMain : Form
 
             return frmEntryList;
         }
+    }
+
+    frmViewList? frmView = null;
+    private frmViewList m_FormView
+    {
+        get
+        {
+            if (frmView == null || frmView.IsDisposed)
+            {
+                frmView = m_ServiceProvider.GetRequiredService<frmViewList>();
+
+                frmView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
+            }
+
+            return frmView;
+        }
+    }
+
+    frmTagEditor? frmTagEditor = null;
+    private frmTagEditor m_FormTagEditor
+    {
+        get
+        {
+            if (frmTagEditor == null || frmTagEditor.IsDisposed)
+            {
+                frmTagEditor = m_ServiceProvider.GetRequiredService<frmTagEditor>();
+            }
+
+            return frmTagEditor;
+        }
+    }
+
+    private frmSetting? frmSetting = null;
+    private frmSetting m_FormSetting
+    {
+        get
+        {
+            if (frmSetting == null || frmSetting.IsDisposed)
+            {
+                frmSetting = p_ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<frmSetting>();
+
+                frmSetting.OnSettingUpdatedEvent += (name, value) =>
+                {
+                    if (name == "ItemsToShow")
+                    {
+                        m_FormEntryList.ResizeForm();
+                    }
+                    else if (name == "EntryListOpacity" && value is double opacity)
+                    {
+                        m_FormEntryList.Opacity = opacity;
+                    }
+                    else if (name == "UpdateDbPath")
+                    {
+                        m_FormEntryList.Close();
+
+                        dbContext = null;
+                        serviceProvider = null;
+                        frmEntryList = null;
+
+                        m_FormEntryList.Show();
+                    }
+                };
+
+                frmSetting.OnDbTrimEvent += (daysToKeep) =>
+                {
+                    m_DbContext.BackupDb();
+
+                    var keepDate = DateTime.Now.AddDays(-daysToKeep);
+
+                    var toDel = m_DbContext.TaskEntries
+                        .Where(a => a.StartedOn < keepDate)
+                        .ToList();
+
+                    var toDelNotes = m_DbContext.TaskEntryNotes
+                        .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
+                        .ToList();
+
+                    m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
+                    m_DbContext.TaskEntries.RemoveRange(toDel);
+
+                    m_DbContext.SaveChanges();
+
+                    MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
+                };
+
+                frmSetting.OnDbBackupEvent += () =>
+                {
+                    m_DbContext.BackupDb();
+
+                    MessageBox.Show("Backup done!", "Zup");
+                };
+            }
+
+            return frmSetting;
+        }
+    } 
+    #endregion
+
+
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var Params = base.CreateParams;
+            Params.ExStyle |= 0x00000080;
+            return Params;
+        }
+    }
+
+    public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting)
+    {
+        InitializeComponent();
+
+        /*
+          MOD_ALT: 0x0001
+          MOD_CONTROL: 0x0002
+          MOD_SHIFT: 0x0004
+          MOD_WIN: 0x0008
+         */
+
+        RegisterHotKey(this.Handle, Constants.ShowUpdateEntry, 5, (int)Keys.J);
+        RegisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask, 5, (int)Keys.K);
+        RegisterHotKey(this.Handle, Constants.ToggleLastRunningTask, 5, (int)Keys.L);
+        RegisterHotKey(this.Handle, Constants.ShowViewAll, 5, (int)Keys.P);
+
+        p_ServiceProvider = serviceProvider;
+
+        SetIcon();
+    }
+
+    protected override void WndProc(ref Message m)
+    {
+        if (m.Msg == 0x0312)
+        {
+            if (m.WParam.ToInt32() == Constants.ShowUpdateEntry
+                || m.WParam.ToInt32() == Constants.UpdateCurrentRunningTask
+                || m.WParam.ToInt32() == Constants.ToggleLastRunningTask
+                || m.WParam.ToInt32() == Constants.ShowViewAll)
+            {
+                if (IsNewWeek())
+                {
+                    m_DbContext.BackupDb();
+                }
+
+                switch (m.WParam.ToInt32())
+                {
+                    case Constants.ShowUpdateEntry:
+                        if (m_FormEntryList.ListIsReady)
+                        {
+                            m_FormEntryList.ShowNewEntry();
+                        }
+                        break;
+                    case Constants.UpdateCurrentRunningTask:
+                        m_FormEntryList.UpdateCurrentRunningTask();
+                        break;
+                    case Constants.ToggleLastRunningTask:
+                        m_FormEntryList.ToggleLastRunningTask();
+                        break;
+                    case Constants.ShowViewAll:
+                        if (m_FormView.Visible)
+                        {
+                            m_FormView.Activate();
+
+                            return;
+                        }
+
+                        m_FormView.Show();
+                        break;
+                }
+            }
+        }
+
+        base.WndProc(ref m);
+    }
+
+    public void Notify(string message, string title= "Zup")
+    {
+        notifIconZup.ShowBalloonTip(0, title, message, ToolTipIcon.Info);
+    }
+
+    private void FormView_OnSelectedItemEvent(Guid entryID)
+    {
+        var ee = m_FormEntryList.GetEachEntryByID(entryID);
+
+        m_FormEntryList.ShowUpdateEntry(ee, true);
+    }
+
+    protected bool IsNewWeek()
+    {
+        if (!m_DbContext.TaskEntries.Any())
+        {
+            return false;
+        }
+
+        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
+        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
+        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
+
+        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();
+
+        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
+        var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
+
+        return lastRowWeekNum < weekNumNow;
+    }    
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
+        UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ShowViewAll);
+
+        base.OnClosing(e);
     }
 
     private void FrmEntryList_OnTokenDoubleClicked(object? sender, CustomControls.TokenEventArgs e)
@@ -151,231 +374,6 @@ public partial class frmMain : Form
         }
     }
 
-    frmViewList? frmView = null;
-    private frmViewList m_FormView
-    {
-        get
-        {
-            if (frmView == null || frmView.IsDisposed)
-            {
-                frmView = m_ServiceProvider.GetRequiredService<frmViewList>();
-
-                frmView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
-            }
-
-            return frmView;
-        }
-    }
-
-    frmTagEditor? frmTagEditor = null;
-    private frmTagEditor m_FormTagEditor
-    {
-        get
-        {
-            if (frmTagEditor == null || frmTagEditor.IsDisposed)
-            {
-                frmTagEditor = m_ServiceProvider.GetRequiredService<frmTagEditor>();
-            }
-
-            return frmTagEditor;
-        }
-    }
-
-
-
-    private readonly IServiceProvider p_ServiceProvider;
-
-    private frmSetting? frmSetting = null;
-    private frmSetting m_FormSetting
-    {
-        get
-        {
-            if (frmSetting == null || frmSetting.IsDisposed)
-            {
-                frmSetting = p_ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<frmSetting>();
-
-                frmSetting.OnSettingUpdatedEvent += (name, value) =>
-                {
-                    if (name == "ItemsToShow")
-                    {
-                        m_FormEntryList.ResizeForm();
-                    }
-                    else if (name == "EntryListOpacity" && value is double opacity)
-                    {
-                        m_FormEntryList.Opacity = opacity;
-                    }
-                    else if (name == "UpdateDbPath")
-                    {
-                        m_FormEntryList.Close();
-
-                        dbContext = null;
-                        serviceProvider = null;
-                        frmEntryList = null;
-
-                        m_FormEntryList.Show();
-                    }
-                };
-
-                frmSetting.OnDbTrimEvent += (daysToKeep) =>
-                {
-                    m_DbContext.BackupDb();
-
-                    var keepDate = DateTime.Now.AddDays(-daysToKeep);
-
-                    var toDel = m_DbContext.TaskEntries
-                        .Where(a => a.StartedOn < keepDate)
-                        .ToList();
-
-                    var toDelNotes = m_DbContext.TaskEntryNotes
-                        .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
-                        .ToList();
-
-                    m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
-                    m_DbContext.TaskEntries.RemoveRange(toDel);
-
-                    m_DbContext.SaveChanges();
-
-                    MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
-                };
-
-                frmSetting.OnDbBackupEvent += () =>
-                {
-                    m_DbContext.BackupDb();
-
-                    MessageBox.Show("Backup done!", "Zup");
-                };
-            }
-
-            return frmSetting;
-        }
-    }
-
-    #region Initialize
-    [DllImport("user32.dll")]
-    public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
-    [DllImport("user32.dll")]
-    public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-    protected override CreateParams CreateParams
-    {
-        get
-        {
-            var Params = base.CreateParams;
-            Params.ExStyle |= 0x00000080;
-            return Params;
-        }
-    }
-
-
-
-    public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting)
-    {
-        InitializeComponent();
-
-        /*
-          MOD_ALT: 0x0001
-          MOD_CONTROL: 0x0002
-          MOD_SHIFT: 0x0004
-          MOD_WIN: 0x0008
-         */
-
-        RegisterHotKey(this.Handle, Constants.ShowUpdateEntry, 5, (int)Keys.J);
-        RegisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask, 5, (int)Keys.K);
-        RegisterHotKey(this.Handle, Constants.ToggleLastRunningTask, 5, (int)Keys.L);
-        RegisterHotKey(this.Handle, Constants.ShowViewAll, 5, (int)Keys.P);
-
-        p_ServiceProvider = serviceProvider;
-
-        SetIcon();
-    }
-
-    public void Notify(string message, string title= "Zup")
-    {
-        notifIconZup.ShowBalloonTip(0, title, message, ToolTipIcon.Info);
-    }
-
-    private void FormView_OnSelectedItemEvent(Guid entryID)
-    {
-        var ee = m_FormEntryList.GetEachEntryByID(entryID);
-
-        m_FormEntryList.ShowUpdateEntry(ee, true);
-    }
-
-    protected bool IsNewWeek()
-    {
-        if (!m_DbContext.TaskEntries.Any())
-        {
-            return false;
-        }
-
-        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
-        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
-        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
-
-        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();
-
-        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
-        var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
-
-        return lastRowWeekNum < weekNumNow;
-    }
-
-    protected override void WndProc(ref Message m)
-    {
-        if (m.Msg == 0x0312)
-        {
-            if (m.WParam.ToInt32() == Constants.ShowUpdateEntry
-                || m.WParam.ToInt32() == Constants.UpdateCurrentRunningTask
-                || m.WParam.ToInt32() == Constants.ToggleLastRunningTask
-                || m.WParam.ToInt32() == Constants.ShowViewAll)
-            {
-                if (IsNewWeek())
-                {
-                    m_DbContext.BackupDb();
-                }
-
-                switch (m.WParam.ToInt32())
-                {
-                    case Constants.ShowUpdateEntry:
-                        if (m_FormEntryList.ListIsReady)
-                        {
-                            m_FormEntryList.ShowNewEntry();
-                        }
-                        break;
-                    case Constants.UpdateCurrentRunningTask:
-                        m_FormEntryList.UpdateCurrentRunningTask();
-                        break;
-                    case Constants.ToggleLastRunningTask:
-                        m_FormEntryList.ToggleLastRunningTask();
-                        break;
-                    case Constants.ShowViewAll:
-                        if (m_FormView.Visible)
-                        {
-                            m_FormView.Activate();
-
-                            return;
-                        }
-
-                        m_FormView.Show();
-                        break;
-                }
-            }
-        }
-
-        base.WndProc(ref m);
-    }
-
-    protected override void OnClosing(CancelEventArgs e)
-    {
-        UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
-        UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
-        UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
-        UnregisterHotKey(this.Handle, Constants.ShowViewAll);
-
-        base.OnClosing(e);
-    }
-    #endregion
-
     private void frmMain_Load(object sender, EventArgs e)
     {
         Visible = false;
@@ -385,7 +383,7 @@ public partial class frmMain : Form
 
     private void tmrDelayShowList_Tick(object sender, EventArgs e)
     {
-        m_FormEntryList.Show();
+        m_FormView.Show();
         tmrDelayShowList.Stop();
     }
 

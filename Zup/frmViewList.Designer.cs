@@ -40,6 +40,7 @@ partial class frmViewList
         Duration = new DataGridViewTextBoxColumn();
         DurationString = new DataGridViewTextBoxColumn();
         DayOfWeek = new DataGridViewTextBoxColumn();
+        PlayAction = new DataGridViewButtonColumn();
         lblSelectedTotal = new Label();
         label1 = new Label();
         fbdTimesheetFolder = new FolderBrowserDialog();
@@ -72,7 +73,7 @@ partial class frmViewList
         dgView.AllowUserToResizeRows = false;
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString, DayOfWeek });
+        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString, DayOfWeek, PlayAction });
         dgView.Location = new Point(158, 41);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
@@ -80,6 +81,7 @@ partial class frmViewList
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgView.Size = new Size(914, 406);
         dgView.TabIndex = 1;
+        dgView.CellContentClick += dgView_CellContentClick;
         dgView.CellPainting += dgView_CellPainting;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
@@ -145,6 +147,16 @@ partial class frmViewList
         DayOfWeek.HeaderText = "Day of Week";
         DayOfWeek.Name = "DayOfWeek";
         DayOfWeek.ReadOnly = true;
+        // 
+        // PlayAction
+        // 
+        PlayAction.HeaderText = "";
+        PlayAction.Name = "PlayAction";
+        PlayAction.ReadOnly = true;
+        PlayAction.Resizable = DataGridViewTriState.False;
+        PlayAction.Text = "▶";
+        PlayAction.UseColumnTextForButtonValue = true;
+        PlayAction.Width = 40;
         // 
         // lblSelectedTotal
         // 
@@ -384,6 +396,7 @@ partial class frmViewList
     #endregion
 
     private DataGridView dgView;
+    private DataGridViewButtonColumn PlayAction;
     private Label lblSelectedTotal;
     private Label label1;
     private FolderBrowserDialog fbdTimesheetFolder;
