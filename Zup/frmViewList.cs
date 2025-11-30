@@ -56,7 +56,7 @@ public partial class frmViewList : Form
     {
         if (Visible)
         {
-            LoadWeekData();            
+            LoadWeekData();
         }
     }
 
@@ -102,41 +102,47 @@ public partial class frmViewList : Form
         }
 
         var ds = (from te in p_DbContext.TaskEntries.Where(filter)
-                             join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID into tet
-                             from tet2 in tet.DefaultIfEmpty()
-                             join tag in p_DbContext.Tags on tet2.TagID equals tag.ID into tag
-                             from tag2 in tag.DefaultIfEmpty()
-                             select new { TaskEntry = te, Tag = tet2 == null ? null : new { tet2.CreatedOn, tag2.Name } })
-                                .AsEnumerable()
-                                .GroupBy(x => x.TaskEntry)
-                                .OrderByDescending(a => a.Key.StartedOn)
-                                .Select(a =>
-                                {
-                                    string? duration = null;
-                                    TimeSpan? durationData = null;
+                  join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID into tet
+                  from tet2 in tet.DefaultIfEmpty()
+                  join tag in p_DbContext.Tags on tet2.TagID equals tag.ID into tag
+                  from tag2 in tag.DefaultIfEmpty()
+                  select new 
+                  { 
+                      TaskEntry = te, 
+                      Tag = tet2 == null 
+                        ? null 
+                        : new { tet2.CreatedOn, tag2.Name } 
+                  })
+                        .AsEnumerable()
+                        .GroupBy(x => x.TaskEntry)
+                        .OrderByDescending(a => a.Key.StartedOn)
+                        .Select(a =>
+                        {
+                            string? duration = null;
+                            TimeSpan? durationData = null;
 
-                                    if (a.Key.EndedOn != null)
-                                    {
-                                        durationData = a.Key.EndedOn!.Value - a.Key.StartedOn;
+                            if (a.Key.EndedOn != null && a.Key.StartedOn != null)
+                            {
+                                durationData = a.Key.EndedOn!.Value - a.Key.StartedOn;
 
-                                        duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
-                                    }
+                                duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
+                            }
 
-                                    return new TimeLogSummary
-                                    {
-                                        ID = a.Key.ID,
-                                        Task = a.Key.Task,
-                                        StartedOn = a.Key.StartedOn,
-                                        EndedOn = a.Key.EndedOn,
-                                        Duration = durationData,
-                                        DurationString = duration,
-                                        Tags = a.Where(a => a.Tag != null)
-                                            .OrderByDescending(a => a.Tag.CreatedOn)
-                                            .Select(x => x.Tag.Name)
-                                            .ToArray()
-                                    };
-                                })
-                                .ToList();
+                            return new TimeLogSummary
+                            {
+                                ID = a.Key.ID,
+                                Task = a.Key.Task,
+                                StartedOn = a.Key.StartedOn,
+                                EndedOn = a.Key.EndedOn,
+                                Duration = durationData,
+                                DurationString = duration,
+                                Tags = a.Where(a => a.Tag != null)
+                                    .OrderByDescending(a => a.Tag.CreatedOn)
+                                    .Select(x => x.Tag.Name)
+                                    .ToArray()
+                            };
+                        })
+                        .ToList();
 
         foreach (var item in ds)
         {
@@ -490,7 +496,7 @@ public partial class frmViewList : Form
         {
             var tag = tags[i];
             var textSize = e.Graphics!.MeasureString(tag, tagFont);
-            
+
             x -= (int)textSize.Width + 4;
 
             var textRect = new Rectangle(x, e.CellBounds.Top + 3, (int)textSize.Width + 2, (int)textSize.Height + 1);
@@ -545,5 +551,29 @@ public partial class frmViewList : Form
         }
 
         return path;
+    }
+
+    private void btnExportAll_Click(object sender, EventArgs e)
+    {
+        var all = p_DbContext.TaskEntries.ToList();
+
+        var json = System.Text.Json.JsonSerializer.Serialize(all, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
+        if (string.IsNullOrWhiteSpace(txtTimesheetFolder.Text))
+        {
+            throw new Exception("Timesheet directory is empty!");
+        }
+
+        if (!Path.Exists(txtTimesheetFolder.Text))
+        {
+            throw new Exception("Timesheet directory doesn't exist!");
+        }
+
+        var outputPath = Path.Combine(txtTimesheetFolder.Text, "export-all.json");
+
+        File.WriteAllText(outputPath, json);
     }
 }
