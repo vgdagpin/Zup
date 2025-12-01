@@ -1,17 +1,30 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
-
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+
+using Zup.CustomControls;
+using Zup.Entities;
 using Zup.EventArguments;
 
 namespace Zup;
 
 public partial class frmMain : Form
 {
-    private readonly IServiceProvider p_ServiceProvider;
+    private IServiceProvider serviceProvider;
+    private bool listIsReady = false;
+
+    public event EventHandler<NewEntryEventArgs>? OnNewTask;
+    public event EventHandler<ITask>? OnTaskDeleted;
+    public event EventHandler<ITask>? OnTaskUpdated;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public HashSet<ITask> Tasks { get; set; } = new HashSet<ITask>();
+
+    private List<frmFloatingButton> FloatingButtons = new List<frmFloatingButton>();
 
 
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -32,19 +45,6 @@ public partial class frmMain : Form
     }
 
     #region Properties
-    IServiceProvider? serviceProvider;
-    private IServiceProvider m_ServiceProvider
-    {
-        get
-        {
-            if (serviceProvider == null)
-            {
-                serviceProvider = p_ServiceProvider.CreateScope().ServiceProvider;
-            }
-
-            return serviceProvider;
-        }
-    }
 
     ZupDbContext? dbContext = null;
     private ZupDbContext m_DbContext
@@ -53,10 +53,24 @@ public partial class frmMain : Form
         {
             if (dbContext == null)
             {
-                dbContext = m_ServiceProvider.GetRequiredService<ZupDbContext>();
+                dbContext = serviceProvider.GetRequiredService<ZupDbContext>();
             }
 
             return dbContext;
+        }
+    }
+
+    SettingHelper? settingHelper = null;
+    private SettingHelper SettingHelper
+    {
+        get
+        {
+            if (settingHelper == null)
+            {
+                settingHelper = serviceProvider.GetRequiredService<SettingHelper>();
+            }
+
+            return settingHelper;
         }
     }
 
@@ -68,17 +82,21 @@ public partial class frmMain : Form
         {
             if (frmEntryList == null || frmEntryList.IsDisposed)
             {
-                frmEntryList = m_ServiceProvider.GetRequiredService<frmEntryList>();
-
-                frmEntryList.OnListReadyEvent += FrmEntryList_OnListReadyEvent;
-                frmEntryList.OnQueueTaskUpdatedEvent += FrmEntryList_OnQueueTaskUpdatedEvent;
-                frmEntryList.OnTokenDoubleClicked += FrmEntryList_OnTokenDoubleClicked;
-
+                frmEntryList = serviceProvider.GetRequiredService<frmEntryList>();
                 frmEntryList.SetFormMain(this);
+
+                frmEntryList.Move += FrmEntryList_Move;
             }
 
             return frmEntryList;
         }
+    }
+
+    private void FrmEntryList_Move(object? sender, EventArgs e)
+    {
+        tmrSaveSetting.Enabled = false;
+        tmrSaveSetting.Enabled = true;
+        tmrSaveSetting.Tag = sender;
     }
 
     frmViewList? frmView = null;
@@ -88,12 +106,60 @@ public partial class frmMain : Form
         {
             if (frmView == null || frmView.IsDisposed)
             {
-                frmView = m_ServiceProvider.GetRequiredService<frmViewList>();
-
-                frmView.OnSelectedItemEvent += FormView_OnSelectedItemEvent;
+                frmView = serviceProvider.GetRequiredService<frmViewList>();
+                frmView.SetFormMain(this);
             }
 
             return frmView;
+        }
+    }
+
+    frmNewEntry? frmNewEntry = null;
+    private frmNewEntry m_FormNewEntry
+    {
+        get
+        {
+            if (frmNewEntry == null || frmNewEntry.IsDisposed)
+            {
+                frmNewEntry = serviceProvider.GetRequiredService<frmNewEntry>();
+
+                frmNewEntry.OnNewEntryEvent += FormNewEntry_NewEntryEventHandler;
+            }
+
+            return frmNewEntry;
+        }
+    }
+
+    frmUpdateEntry? frmUpdateEntry = null;
+    private frmUpdateEntry m_FormUpdateEntry
+    {
+        get
+        {
+            if (frmUpdateEntry == null || frmUpdateEntry.IsDisposed)
+            {
+                frmUpdateEntry = serviceProvider.GetRequiredService<frmUpdateEntry>();
+                frmUpdateEntry.SetFormMain(this);
+
+                frmUpdateEntry.OnTokenDoubleClicked += FrmEntryList_OnTokenDoubleClicked;
+                frmUpdateEntry.OnSavedEvent += FrmUpdateEntry_OnSavedEvent;
+                frmUpdateEntry.OnReRunEvent += FrmUpdateEntry_OnReRunEvent;
+            }
+            return frmUpdateEntry;
+        }
+    }
+
+    private void FrmUpdateEntry_OnReRunEvent(object? sender, NewEntryEventArgs e)
+    {
+        FormNewEntry_NewEntryEventHandler(sender, e);
+    }
+
+    private void FrmUpdateEntry_OnSavedEvent(object? sender, SaveEventArgs e)
+    {
+        var task = Tasks.SingleOrDefault(a => a.EntryID == e.Task.ID);
+
+        if (task != null)
+        {
+            OnTaskUpdated?.Invoke(this, task);
         }
     }
 
@@ -104,7 +170,7 @@ public partial class frmMain : Form
         {
             if (frmTagEditor == null || frmTagEditor.IsDisposed)
             {
-                frmTagEditor = m_ServiceProvider.GetRequiredService<frmTagEditor>();
+                frmTagEditor = serviceProvider.GetRequiredService<frmTagEditor>();
             }
 
             return frmTagEditor;
@@ -118,7 +184,8 @@ public partial class frmMain : Form
         {
             if (frmSetting == null || frmSetting.IsDisposed)
             {
-                frmSetting = p_ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<frmSetting>();
+                frmSetting = serviceProvider.CreateScope()
+                    .ServiceProvider.GetRequiredService<frmSetting>();
 
                 frmSetting.OnSettingUpdatedEvent += (name, value) =>
                 {
@@ -174,7 +241,7 @@ public partial class frmMain : Form
 
             return frmSetting;
         }
-    } 
+    }
     #endregion
 
 
@@ -192,6 +259,15 @@ public partial class frmMain : Form
     {
         InitializeComponent();
 
+        this.serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+
+        m_DbContext.Database.Migrate();
+        var listResult = LoadList();
+
+        SetIcon(listResult.QueuedTasksCount);
+
+        listIsReady = true;
+
         /*
           MOD_ALT: 0x0001
           MOD_CONTROL: 0x0002
@@ -204,7 +280,7 @@ public partial class frmMain : Form
         RegisterHotKey(this.Handle, Constants.ToggleLastRunningTask, 5, (int)Keys.L);
         RegisterHotKey(this.Handle, Constants.ShowViewAll, 5, (int)Keys.P);
 
-        p_ServiceProvider = serviceProvider;
+
 
         SetIcon();
     }
@@ -226,10 +302,7 @@ public partial class frmMain : Form
                 switch (m.WParam.ToInt32())
                 {
                     case Constants.ShowUpdateEntry:
-                        if (m_FormEntryList.ListIsReady)
-                        {
-                            m_FormEntryList.ShowNewEntry();
-                        }
+                        ShowNewEntry();
                         break;
                     case Constants.UpdateCurrentRunningTask:
                         m_FormEntryList.UpdateCurrentRunningTask();
@@ -254,16 +327,125 @@ public partial class frmMain : Form
         base.WndProc(ref m);
     }
 
-    public void Notify(string message, string title= "Zup")
+    public void ShowNewEntry()
+    {
+        if (!listIsReady)
+        {
+            return;
+        }
+
+        var suggestions = new List<string>();
+
+        var currentList = Tasks
+            .Where(a => a.TaskStatus == TaskStatus.Closed)
+            .Select(a => a.Text)
+            .ToArray();
+
+        if (currentList.Length > 1)
+        {
+            suggestions.Add(currentList[1]);
+        }
+
+        foreach (var item in currentList)
+        {
+            if (suggestions.Contains(item))
+            {
+                continue;
+            }
+
+            suggestions.Add(item);
+        }
+
+        m_FormNewEntry.ShowNewEntryDialog(suggestions.ToArray());
+    }
+
+    private LoadedListControlDetail LoadList()
+    {
+        var result = new LoadedListControlDetail();
+
+        var minDate = DateTime.Now.AddDays(-SettingHelper.NumDaysOfDataToLoad);
+
+        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
+        {
+            var eachEntry = new ZupTask
+            {
+                EntryID = task.ID,
+                Text = task.Task,
+                CreatedOn = task.CreatedOn,
+                StartedOn = task.StartedOn,
+                EndedOn = task.EndedOn,
+                Reminder = task.Reminder,
+                Rank = task.Rank
+            };
+
+            if (eachEntry.TaskStatus == TaskStatus.Ranked)
+            {
+                if (!SettingHelper.ShowRankedTasks)
+                {
+                    continue;
+                }
+
+                Tasks.Add(eachEntry);
+                result.RankedTasksCount++;
+                continue;
+            }
+
+            if (eachEntry.TaskStatus == TaskStatus.Queued)
+            {
+                if (!SettingHelper.ShowQueuedTasks)
+                {
+                    continue;
+                }
+
+                Tasks.Add(eachEntry);
+                result.QueuedTasksCount++;
+                continue;
+            }
+
+            if (eachEntry.TaskStatus == TaskStatus.Closed && !SettingHelper.ShowClosedTasks)
+            {
+                continue;
+            }
+
+            Tasks.Add(eachEntry);
+
+            result.OngoingTasksCount++;
+        }
+
+        return result;
+    }
+
+    public void Notify(string message, string title = "Zup")
     {
         notifIconZup.ShowBalloonTip(0, title, message, ToolTipIcon.Info);
     }
 
-    private void FormView_OnSelectedItemEvent(Guid entryID)
+    public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
     {
-        var ee = m_FormEntryList.GetEachEntryByID(entryID);
+        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
 
-        m_FormEntryList.ShowUpdateEntry(ee, true);
+        if (task != null)
+        {
+            m_FormUpdateEntry.ShowUpdateEntry(task, canReRun);
+        }
+    }
+
+    public void DeleteEntry(Guid taskID)
+    {
+        var entry = m_DbContext.TaskEntries.Find(taskID);
+
+        if (entry != null)
+        {
+            m_DbContext.TaskEntries.Remove(entry);
+            m_DbContext.SaveChanges();
+        }
+
+        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
+
+        if (task != null)
+        {
+            OnTaskDeleted?.Invoke(this, task);
+        }
     }
 
     protected bool IsNewWeek()
@@ -283,16 +465,16 @@ public partial class frmMain : Form
         var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
 
         return lastRowWeekNum < weekNumNow;
-    }    
+    }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnFormClosing(FormClosingEventArgs e)
     {
         UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
         UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
         UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
         UnregisterHotKey(this.Handle, Constants.ShowViewAll);
 
-        base.OnClosing(e);
+        base.OnFormClosing(e);
     }
 
     private void FrmEntryList_OnTokenDoubleClicked(object? sender, CustomControls.TokenEventArgs e)
@@ -311,9 +493,209 @@ public partial class frmMain : Form
         m_FormTagEditor.SelectTag(e.Text);
     }
 
-    private void FrmEntryList_OnQueueTaskUpdatedEvent(object? sender, QueueTaskUpdatedEventArgs args)
+    private void FormNewEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
-        SetIcon(args.QueueCount);
+        m_DbContext.BackupDb();
+
+        var newE = new tbl_TaskEntry
+        {
+            ID = Guid.NewGuid(),
+            Task = args.Entry,
+            CreatedOn = DateTime.Now
+        };
+
+        if (args.StartNow)
+        {
+            newE.StartedOn = DateTime.Now;
+        }
+
+        m_DbContext.TaskEntries.Add(newE);
+
+        var parentEntry = args.ParentEntryID != null
+            ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
+            : null;
+
+        // bring notes, tags and rank from parent, this is when the user started a queued task
+        if (parentEntry != null)
+        {
+            if (args.BringNotes)
+            {
+                foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntry.ID).ToList())
+                {
+                    m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
+                    {
+                        ID = Guid.NewGuid(),
+                        TaskID = newE.ID,
+                        CreatedOn = note.CreatedOn,
+                        Notes = note.Notes,
+                        RTF = note.RTF,
+                        UpdatedOn = note.UpdatedOn
+                    });
+                }
+            }
+
+            if (args.BringTags)
+            {
+                foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntry.ID).ToList())
+                {
+                    m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                    {
+                        CreatedOn = tag.CreatedOn,
+                        TaskID = newE.ID,
+                        TagID = tag.TagID
+                    });
+                }
+            }
+        }
+
+        if (args.GetTags && parentEntry == null)
+        {
+            var minDate = DateTime.Now.AddDays(-SettingHelper.NumDaysOfDataToLoad);
+
+            var tagIDs =
+                (
+                    from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
+                    join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
+                    orderby t.CreatedOn descending
+                    where e.Task == args.Entry
+                    select t.TagID
+                ).Distinct();
+
+            foreach (var tagID in tagIDs)
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    CreatedOn = DateTime.Now,
+                    TaskID = newE.ID,
+                    TagID = tagID
+                });
+            }
+        }
+
+        m_DbContext.SaveChanges();
+
+        var eachEntry = new ZupTask
+        {
+            EntryID = newE.ID,
+            Text = newE.Task,
+            CreatedOn = newE.CreatedOn,
+            StartedOn = newE.StartedOn,
+            EndedOn = newE.EndedOn,
+            Reminder = newE.Reminder,
+            Rank = newE.Rank
+        };
+
+        Tasks.Add(eachEntry);
+
+        args.Task = eachEntry;
+
+        if (args.HideParent && args.ParentEntryID != null)
+        {
+            DeleteEntry(args.ParentEntryID.Value);
+        }
+
+        if (SettingHelper.UsePillTimer)
+        {
+            if (eachEntry.TaskStatus != TaskStatus.Queued)
+            {
+                if (args.StopOtherTask && eachEntry.IsRunning)
+                {
+                    var pillTimer = FloatingButtons.Single(a => ((EachEntry)a.Tag!).EntryID == eachEntry.EntryID);
+
+                    pillTimer.Stop();
+                }
+            }
+
+            ShowFloatingButton(eachEntry);
+        }
+        else
+        {
+            OnNewTask?.Invoke(this, args);
+        }
+
+
+        if (SettingHelper.AutoOpenUpdateWindow)
+        {
+            if (SettingHelper.UsePillTimer)
+            {
+                return;
+            }
+
+            ShowUpdateEntry(eachEntry.EntryID);
+        }
+    }
+
+    private void ShowFloatingButton(ITask eachEntry)
+    {
+        var newFloatingButton = new frmFloatingButton
+        {
+            StartPosition = FormStartPosition.Manual,
+            Tag = eachEntry,
+            Left = Left,
+            Top = Top
+        };
+
+        newFloatingButton.Move += NewFloatingButton_Move;
+
+        FloatingButtons.Add(newFloatingButton);
+
+        newFloatingButton.OnStopEvent += (sender, ts) =>
+        {
+            if (ts.IsClosed && FloatingButtons.Count == 1)
+            {
+                Show();
+            }
+
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            entry?.Stop();
+        };
+
+        newFloatingButton.FormClosed += (sender, e) =>
+        {
+            FloatingButtons.Remove((frmFloatingButton)sender!);
+        };
+
+        newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
+        {
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            if (entry != null)
+            {
+                ShowUpdateEntry(entry.EntryID);
+            }
+        };
+
+        newFloatingButton.OnResetEvent += (sender, e) =>
+        {
+            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+
+            if (entry != null)
+            {
+                var existingE = m_DbContext.TaskEntries.Find(entry.EntryID);
+
+                if (existingE != null)
+                {
+                    existingE.StartedOn = DateTime.Now;
+
+                    m_DbContext.SaveChanges();
+                }
+
+                entry.Reset();
+            }
+        };
+
+        newFloatingButton.Text = eachEntry.Text;
+        newFloatingButton.StartedOn = eachEntry.StartedOn;
+
+        newFloatingButton.Show();
+    }
+
+    private void NewFloatingButton_Move(object? sender, EventArgs e)
+    {
+        tmrSaveSetting.Enabled = false;
+        tmrSaveSetting.Enabled = true;
+        tmrSaveSetting.Tag = sender;
     }
 
     public void SetIcon(int? queueCount = null)
@@ -364,14 +746,6 @@ public partial class frmMain : Form
         }
 
         return false;
-    }
-
-    private void FrmEntryList_OnListReadyEvent(object? sender, ListReadyEventArgs args)
-    {
-        if (!args.HasItem)
-        {
-            notifIconZup.ShowBalloonTip(1000, "", "It's lonely here, press Shift+Alt+J to start adding task!", ToolTipIcon.Info);
-        }
     }
 
     private void frmMain_Load(object sender, EventArgs e)
@@ -425,10 +799,7 @@ public partial class frmMain : Form
 
     private void openNewEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (m_FormEntryList.ListIsReady)
-        {
-            m_FormEntryList.ShowNewEntry();
-        }
+        ShowNewEntry();
     }
 
     private void updateCurrentRunningTaskToolStripMenuItem_Click(object sender, EventArgs e)
@@ -456,5 +827,27 @@ public partial class frmMain : Form
     private void moveToCenterToolStripMenuItem_Click(object sender, EventArgs e)
     {
         m_FormEntryList.MoveToCenterAndBringToFront();
+    }
+
+    private void tmrSaveSetting_Tick(object sender, EventArgs e)
+    {
+        tmrSaveSetting.Enabled = false;
+
+        if (tmrSaveSetting.Tag is frmFloatingButton floatingButton)
+        {
+            SettingHelper.FormLocationX = floatingButton.Left;
+            SettingHelper.FormLocationY = floatingButton.Top;
+
+            SettingHelper.Save();
+        }
+        else if (tmrSaveSetting.Tag is frmEntryList entryList)
+        {
+            SettingHelper.FormLocationX = entryList.Left;
+            SettingHelper.FormLocationY = entryList.Top;
+
+            SettingHelper.Save();
+        }
+
+        tmrSaveSetting.Tag = null;
     }
 }

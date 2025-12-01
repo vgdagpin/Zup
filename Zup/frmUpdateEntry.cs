@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-
+﻿using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using Microsoft.EntityFrameworkCore;
+
 using Zup.CustomControls;
 using Zup.Entities;
 using Zup.EventArguments;
-using TaskStatus = Zup.CustomControls.TaskStatus;
 
 namespace Zup;
 
@@ -19,9 +19,7 @@ public partial class frmUpdateEntry : Form
     private Guid? selectedEntryID;
     private Guid? selectedNoteID;
 
-    public delegate void OnDelete(Guid entryID);
 
-    public event OnDelete? OnDeleteEvent;
     public event EventHandler<SaveEventArgs>? OnSavedEvent;
     public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
     public event EventHandler<NewEntryEventArgs>? OnReRunEvent;
@@ -33,6 +31,7 @@ public partial class frmUpdateEntry : Form
     private bool startTracking = false;
 
     private bool isEntryModified = false;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool IsEntryModified
     {
         get
@@ -65,6 +64,7 @@ public partial class frmUpdateEntry : Form
     }
 
     private bool isNotesModified = false;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool IsNotesModified
     {
         get
@@ -96,8 +96,6 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    private EachEntry m_EachEntryObject = null!;
-
     public frmUpdateEntry(ZupDbContext dbContext)
     {
         InitializeComponent();
@@ -106,6 +104,7 @@ public partial class frmUpdateEntry : Form
         SetControlsEnable(false);
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime? StartedOn
     {
         get
@@ -127,6 +126,7 @@ public partial class frmUpdateEntry : Form
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime? EndedOn
     {
         get
@@ -429,10 +429,8 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public async Task ShowUpdateEntry(EachEntry eachEntry, bool canReRun = false)
+    public void ShowUpdateEntry(ITask eachEntry, bool canReRun = false)
     {
-        m_EachEntryObject = eachEntry;
-
         Text = "Update Entry";
         startTracking = false;
         isEntryModified = false;
@@ -443,7 +441,7 @@ public partial class frmUpdateEntry : Form
 
         Show();
 
-        selectedEntry = await p_DbContext.TaskEntries.FindAsync(eachEntry.EntryID);
+        selectedEntry = p_DbContext.TaskEntries.Find(eachEntry.EntryID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -715,10 +713,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        if (OnDeleteEvent != null)
-        {
-            OnDeleteEvent(selectedEntryID!.Value);
-        }
+        m_FormMain.DeleteEntry(selectedEntryID!.Value);
 
         Close();
     }

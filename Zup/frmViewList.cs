@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
+using Microsoft.EntityFrameworkCore;
+
 using Zup.Entities;
 
 namespace Zup;
@@ -13,11 +15,12 @@ public partial class frmViewList : Form
 {
     private readonly ZupDbContext p_DbContext;
     private readonly SettingHelper settingHelper;
+    private frmMain m_FormMain = null!;
+
 
     public delegate void OnSelectedItem(Guid entryID);
     public delegate void OnExported();
 
-    public event OnSelectedItem? OnSelectedItemEvent;
     public event OnExported? OnExportedEvent;
 
     private IEnumerable<WeekData> WeekDataList = null!;
@@ -27,6 +30,7 @@ public partial class frmViewList : Form
         InitializeComponent();
         p_DbContext = dbContext;
         this.settingHelper = settingHelper;
+        p_DbContext.Database.Migrate();
     }
 
     private void frmView_Load(object sender, EventArgs e)
@@ -58,6 +62,11 @@ public partial class frmViewList : Form
         {
             LoadWeekData();
         }
+    }
+
+    public void SetFormMain(frmMain frmMain)
+    {
+        m_FormMain = frmMain;
     }
 
     private (DateTime Start, DateTime End) LoadWeekData()
@@ -106,12 +115,12 @@ public partial class frmViewList : Form
                   from tet2 in tet.DefaultIfEmpty()
                   join tag in p_DbContext.Tags on tet2.TagID equals tag.ID into tag
                   from tag2 in tag.DefaultIfEmpty()
-                  select new 
-                  { 
-                      TaskEntry = te, 
-                      Tag = tet2 == null 
-                        ? null 
-                        : new { tet2.CreatedOn, tag2.Name } 
+                  select new
+                  {
+                      TaskEntry = te,
+                      Tag = tet2 == null
+                        ? null
+                        : new { tet2.CreatedOn, tag2.Name }
                   })
                         .AsEnumerable()
                         .GroupBy(x => x.TaskEntry)
@@ -154,14 +163,12 @@ public partial class frmViewList : Form
 
     private void dgView_DoubleClick(object sender, EventArgs e)
     {
-        dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
+        dgView.SelectedRows.Cast<DataGridViewRow>()
+            .Select(a => (TimeLogSummary)a.DataBoundItem!)
             .ToList()
             .ForEach(a =>
             {
-                if (OnSelectedItemEvent != null)
-                {
-                    OnSelectedItemEvent(a.ID);
-                }
+                m_FormMain.ShowUpdateEntry(a.ID);
             });
     }
 
@@ -169,7 +176,8 @@ public partial class frmViewList : Form
     {
         var ts = new TimeSpan();
 
-        dgView.SelectedRows.Cast<DataGridViewRow>().Select(a => (TimeLogSummary)a.DataBoundItem)
+        dgView.SelectedRows.Cast<DataGridViewRow>()
+            .Select(a => (TimeLogSummary)a.DataBoundItem!)
             .Where(a => a.Duration != null)
             .ToList()
             .ForEach(a =>
@@ -295,7 +303,7 @@ public partial class frmViewList : Form
         var content = new StringBuilder();
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
-            .Select(a => (TimeLogSummary)a.DataBoundItem)
+            .Select(a => (TimeLogSummary)a.DataBoundItem!)
             .Where(a => a.Duration != null && a.StartedOn != null)
             .ToList()
             .ForEach(a =>
@@ -475,12 +483,9 @@ public partial class frmViewList : Form
             return;
         }
 
-        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
-        
-        if (OnSelectedItemEvent != null)
-        {
-            OnSelectedItemEvent(dataRow.ID);
-        }
+        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+
+        m_FormMain.ShowUpdateEntry(dataRow.ID);
     }
 
     private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
@@ -493,7 +498,7 @@ public partial class frmViewList : Form
         e.PaintBackground(e.CellBounds, true);
         e.PaintContent(e.CellBounds);
 
-        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem;
+        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
         var tags = dataRow.Tags;
 
         if (tags == null || tags.Length == 0)
@@ -503,7 +508,7 @@ public partial class frmViewList : Form
 
         if (tagFont == null)
         {
-            tagFont = new Font(e.CellStyle!.Font.FontFamily, 7);
+            tagFont = new Font(e.CellStyle!.Font!.FontFamily, 7);
         }
 
         var x = e.CellBounds.Right;

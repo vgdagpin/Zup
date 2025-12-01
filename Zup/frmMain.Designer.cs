@@ -39,9 +39,10 @@ partial class frmMain
         toggleLastRunningTaskToolStripMenuItem = new ToolStripMenuItem();
         moveToCenterToolStripMenuItem = new ToolStripMenuItem();
         toolStripSeparator1 = new ToolStripSeparator();
+        aboutToolStripMenuItem = new ToolStripMenuItem();
         exitToolStripMenuItem = new ToolStripMenuItem();
         tmrDelayShowList = new System.Windows.Forms.Timer(components);
-        aboutToolStripMenuItem = new ToolStripMenuItem();
+        tmrSaveSetting = new System.Windows.Forms.Timer(components);
         notifCms.SuspendLayout();
         SuspendLayout();
         // 
@@ -59,28 +60,28 @@ partial class frmMain
         // 
         notifCms.Items.AddRange(new ToolStripItem[] { viewToolStripMenuItem, tagEditorToolStripMenuItem, settingsToolStripMenuItem, openNewEntryToolStripMenuItem, updateCurrentRunningTaskToolStripMenuItem, toggleLastRunningTaskToolStripMenuItem, moveToCenterToolStripMenuItem, toolStripSeparator1, aboutToolStripMenuItem, exitToolStripMenuItem });
         notifCms.Name = "notifCms";
-        notifCms.Size = new Size(298, 230);
+        notifCms.Size = new Size(299, 208);
         // 
         // viewToolStripMenuItem
         // 
         viewToolStripMenuItem.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         viewToolStripMenuItem.Name = "viewToolStripMenuItem";
         viewToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.P;
-        viewToolStripMenuItem.Size = new Size(297, 22);
+        viewToolStripMenuItem.Size = new Size(298, 22);
         viewToolStripMenuItem.Text = "View";
         viewToolStripMenuItem.Click += viewToolStripMenuItem_Click;
         // 
         // tagEditorToolStripMenuItem
         // 
         tagEditorToolStripMenuItem.Name = "tagEditorToolStripMenuItem";
-        tagEditorToolStripMenuItem.Size = new Size(297, 22);
+        tagEditorToolStripMenuItem.Size = new Size(298, 22);
         tagEditorToolStripMenuItem.Text = "Tag Editor";
         tagEditorToolStripMenuItem.Click += tagEditorToolStripMenuItem_Click;
         // 
         // settingsToolStripMenuItem
         // 
         settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-        settingsToolStripMenuItem.Size = new Size(297, 22);
+        settingsToolStripMenuItem.Size = new Size(298, 22);
         settingsToolStripMenuItem.Text = "Settings";
         settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
         // 
@@ -88,7 +89,7 @@ partial class frmMain
         // 
         openNewEntryToolStripMenuItem.Name = "openNewEntryToolStripMenuItem";
         openNewEntryToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.J;
-        openNewEntryToolStripMenuItem.Size = new Size(297, 22);
+        openNewEntryToolStripMenuItem.Size = new Size(298, 22);
         openNewEntryToolStripMenuItem.Text = "Open New Entry";
         openNewEntryToolStripMenuItem.Click += openNewEntryToolStripMenuItem_Click;
         // 
@@ -96,7 +97,7 @@ partial class frmMain
         // 
         updateCurrentRunningTaskToolStripMenuItem.Name = "updateCurrentRunningTaskToolStripMenuItem";
         updateCurrentRunningTaskToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.K;
-        updateCurrentRunningTaskToolStripMenuItem.Size = new Size(297, 22);
+        updateCurrentRunningTaskToolStripMenuItem.Size = new Size(298, 22);
         updateCurrentRunningTaskToolStripMenuItem.Text = "Update Current Running Task";
         updateCurrentRunningTaskToolStripMenuItem.Click += updateCurrentRunningTaskToolStripMenuItem_Click;
         // 
@@ -104,26 +105,32 @@ partial class frmMain
         // 
         toggleLastRunningTaskToolStripMenuItem.Name = "toggleLastRunningTaskToolStripMenuItem";
         toggleLastRunningTaskToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.Shift | Keys.L;
-        toggleLastRunningTaskToolStripMenuItem.Size = new Size(297, 22);
+        toggleLastRunningTaskToolStripMenuItem.Size = new Size(298, 22);
         toggleLastRunningTaskToolStripMenuItem.Text = "Toggle Last Running Task";
         toggleLastRunningTaskToolStripMenuItem.Click += toggleLastRunningTaskToolStripMenuItem_Click;
         // 
         // moveToCenterToolStripMenuItem
         // 
         moveToCenterToolStripMenuItem.Name = "moveToCenterToolStripMenuItem";
-        moveToCenterToolStripMenuItem.Size = new Size(297, 22);
+        moveToCenterToolStripMenuItem.Size = new Size(298, 22);
         moveToCenterToolStripMenuItem.Text = "Move to Center";
         moveToCenterToolStripMenuItem.Click += moveToCenterToolStripMenuItem_Click;
         // 
         // toolStripSeparator1
         // 
         toolStripSeparator1.Name = "toolStripSeparator1";
-        toolStripSeparator1.Size = new Size(294, 6);
+        toolStripSeparator1.Size = new Size(295, 6);
+        // 
+        // aboutToolStripMenuItem
+        // 
+        aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+        aboutToolStripMenuItem.Size = new Size(298, 22);
+        aboutToolStripMenuItem.Text = "About";
         // 
         // exitToolStripMenuItem
         // 
         exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-        exitToolStripMenuItem.Size = new Size(297, 22);
+        exitToolStripMenuItem.Size = new Size(298, 22);
         exitToolStripMenuItem.Text = "Exit";
         exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
         // 
@@ -133,11 +140,10 @@ partial class frmMain
         tmrDelayShowList.Interval = 300;
         tmrDelayShowList.Tick += tmrDelayShowList_Tick;
         // 
-        // aboutToolStripMenuItem
+        // tmrSaveSetting
         // 
-        aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-        aboutToolStripMenuItem.Size = new Size(297, 22);
-        aboutToolStripMenuItem.Text = "About";
+        tmrSaveSetting.Interval = 1000;
+        tmrSaveSetting.Tick += tmrSaveSetting_Tick;
         // 
         // frmMain
         // 
@@ -170,4 +176,5 @@ partial class frmMain
     private ToolStripMenuItem tagEditorToolStripMenuItem;
     private ToolStripMenuItem moveToCenterToolStripMenuItem;
     private ToolStripMenuItem aboutToolStripMenuItem;
+    private System.Windows.Forms.Timer tmrSaveSetting;
 }

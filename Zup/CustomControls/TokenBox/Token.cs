@@ -1,4 +1,5 @@
-﻿using System.Drawing.Drawing2D;
+﻿using System.ComponentModel;
+using System.Drawing.Drawing2D;
 
 using Zup.Properties;
 
@@ -17,24 +18,33 @@ public partial class Token : Control
     /// How rounded token corners will be.
     /// 0 --> Square corners, 10 --> Very round. Default 4.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public int Radius { get; set; } = 4;
 
     public override Color BackColor => base.BackColor;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public int BorderWidth { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool ShowsX { get; set; } = true;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Font FontHovered { get; set; } = null!;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color ForeColorHovered { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color TokenColorHovered { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color TokenColor { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color BorderColor { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color BorderColorHovered { get; set; }
 
     #endregion Properties
@@ -87,9 +97,9 @@ public partial class Token : Control
     protected override void OnPaint(PaintEventArgs pe)
     {
         base.OnPaint(pe);
-       
-        Rectangle rFondo = this.DisplayRectangle; 
-        
+
+        Rectangle rFondo = this.DisplayRectangle;
+
         rFondo.X += 1;
         rFondo.Y += 1;
         rFondo.Width -= 2;
@@ -206,7 +216,7 @@ public partial class Token : Control
     }
 
     public event EventHandler? TokenBodyClicked;
-    
+
     protected void OnTokenBodyClicked(object sender, MouseEventArgs e)
     {
         TokenBodyClicked?.Invoke(sender, e);
@@ -239,7 +249,7 @@ public partial class Token : Control
                     var tokenEventArgs = new TokenEventArgs(Text, "Click");
 
                     NotifyParentEvent(this, tokenEventArgs);
-                }                
+                }
             }
         }
     }

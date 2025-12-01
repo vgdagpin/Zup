@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Data;
 using System.Runtime.InteropServices;
 
+using Microsoft.EntityFrameworkCore;
+
 using Zup.CustomControls;
-using Zup.Entities;
 using Zup.EventArguments;
-using TaskStatus = Zup.CustomControls.TaskStatus;
 
 namespace Zup;
 
@@ -18,8 +15,6 @@ public partial class frmEntryList : Form
     const int maxQueuedTaskRow = 2;
     const int maxRankedTaskRow = 4;
 
-    private frmNewEntry m_FormNewEntry;
-    private frmUpdateEntry m_FormUpdateEntry; // need to make this as singleton to minimize loading
     private readonly SettingHelper settingHelper;
     private frmMain m_FormMain = null!;
 
@@ -31,13 +26,6 @@ public partial class frmEntryList : Form
 
     private EachEntry? m_SelectedEntryToDelete;
 
-    public bool ListIsReady { get; set; }
-
-    public event EventHandler<ListReadyEventArgs>? OnListReadyEvent;
-    public event EventHandler<QueueTaskUpdatedEventArgs>? OnQueueTaskUpdatedEvent;
-    public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
-
-    private List<frmFloatingButton> FloatingButtons = new List<frmFloatingButton>();
 
     #region Draggable Form
     public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -58,21 +46,6 @@ public partial class frmEntryList : Form
         }
     }
 
-    private void frmEntryList_Move(object sender, EventArgs e)
-    {
-        tmrSaveSetting.Enabled = false;
-        tmrSaveSetting.Enabled = true;
-    }
-
-    private void tmrSaveSetting_Tick(object sender, EventArgs e)
-    {
-        settingHelper.FormLocationX = Left;
-        settingHelper.FormLocationY = Top;
-        settingHelper.Save();
-
-        tmrSaveSetting.Enabled = false;
-    }
-
     public void MoveToCenterAndBringToFront()
     {
         Left = (Screen.PrimaryScreen!.WorkingArea.Width / 2) - (Width / 2);
@@ -84,7 +57,71 @@ public partial class frmEntryList : Form
     public void SetFormMain(frmMain frmMain)
     {
         m_FormMain = frmMain;
-        m_FormUpdateEntry.SetFormMain(frmMain);
+
+        m_FormMain.OnNewTask += FormMain_OnNewTask;
+        m_FormMain.OnTaskDeleted += M_FormMain_OnTaskDeleted;
+        m_FormMain.OnTaskUpdated += M_FormMain_OnTaskUpdated;
+    }
+
+    private void M_FormMain_OnTaskUpdated(object? sender, ITask e)
+    {
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID);
+
+        if (eachEntry != null)
+        {
+            eachEntry.Text = e.Text;
+            eachEntry.StartedOn = e.StartedOn;
+            eachEntry.EndedOn = e.EndedOn;
+            eachEntry.Rank = e.Rank;
+        }
+    }
+
+    private void M_FormMain_OnTaskDeleted(object? sender, ITask e)
+    {
+        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID);
+
+        if (entryToRemove != null)
+        {
+            // only hide, remove will auto scroll the list to bottom because the list is in reverse
+            entryToRemove.Hide();
+        }
+
+        ResizeForm();
+    }
+
+    private void FormMain_OnNewTask(object? sender, NewEntryEventArgs e)
+    {
+        var eachEntry = new EachEntry(e.Task.EntryID, e.Task.Text, e.Task.CreatedOn, e.Task.StartedOn, null);
+
+        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
+
+        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
+        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+        eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
+        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
+
+        if (eachEntry.TaskStatus == TaskStatus.Queued)
+        {
+            flpQueuedTaskList.Controls.Add(eachEntry);
+        }
+        else
+        {
+            AddEntryToFlowLayoutControl(eachEntry, e);
+        }
+
+        SortTasks(flpTaskList.Controls);
+
+        RefreshList();
+
+        if (settingHelper.UsePillTimer)
+        {
+            Hide();
+        }
     }
 
     private void UpdateFormPosition()
@@ -113,38 +150,17 @@ public partial class frmEntryList : Form
         }
     }
 
-    public frmEntryList(ZupDbContext dbContext, frmNewEntry frmNewEntry, frmUpdateEntry frmUpdateEntry, SettingHelper settingHelper)
+    public frmEntryList(ZupDbContext dbContext, SettingHelper settingHelper)
     {
         InitializeComponent();
 
         m_DbContext = dbContext;
-        m_FormNewEntry = frmNewEntry;
-        m_FormUpdateEntry = frmUpdateEntry;
         this.settingHelper = settingHelper;
-        m_DbContext.Database.Migrate();
     }
 
     private void frmEntryList_Load(object sender, EventArgs e)
     {
-        m_FormNewEntry.OnNewEntryEvent += EachEntry_NewEntryEventHandler;
-        m_FormUpdateEntry.OnDeleteEvent += FormUpdateEntry_OnDeleteEventHandler;
-        m_FormUpdateEntry.OnSavedEvent += FormUpdateEntry_OnSavedEventHandler;
-        m_FormUpdateEntry.OnTokenDoubleClicked += FormUpdateEntry_OnTokenDoubleClicked;
-        m_FormUpdateEntry.OnReRunEvent += FormUpdateEntry_OnRerunEventHandler;
-
-        var list = LoadListToControl();
-
-        ListIsReady = true;
-
-        if (OnListReadyEvent != null)
-        {
-            OnListReadyEvent(this, new ListReadyEventArgs(list.HasItems));
-        }
-
-        if (OnQueueTaskUpdatedEvent != null)
-        {
-            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(list.QueuedTasksCount));
-        }
+        LoadListToControl();
 
         p_OnLoad = false;
 
@@ -255,43 +271,9 @@ public partial class frmEntryList : Form
         Hide();
     }
 
-    public void ShowNewEntry()
+    private EachEntry Translate(ITask task)
     {
-        var suggestions = new List<string>();
-
-        var currentList = flpTaskList.Controls.Cast<EachEntry>()
-            .Where(a => a.Visible && a.TaskStatus == TaskStatus.Closed)
-            .Select(a => a.Text)
-            .ToArray();
-
-        if (currentList.Length > 1)
-        {
-            suggestions.Add(currentList[1]);
-        }
-
-        foreach (var item in currentList)
-        {
-            if (suggestions.Contains(item))
-            {
-                continue;
-            }
-
-            suggestions.Add(item);
-        }
-
-        m_FormNewEntry.ShowNewEntryDialog(suggestions.ToArray());
-    }
-
-
-
-    private void FormUpdateEntry_OnTokenDoubleClicked(object? sender, TokenEventArgs e)
-    {
-        OnTokenDoubleClicked?.Invoke(sender, e);
-    }
-
-    private EachEntry Translate(tbl_TaskEntry task)
-    {
-        var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
+        var eachEntry = new EachEntry(task.EntryID, task.Text, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
         {
             Rank = task.Rank,
             TabStop = false,
@@ -311,17 +293,13 @@ public partial class frmEntryList : Form
         return eachEntry;
     }
 
-    private LoadedListControlDetail LoadListToControl()
+    private void LoadListToControl()
     {
-        var result = new LoadedListControlDetail();
-
-        var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
-
         var ongoingTasks = new List<EachEntry>();
         var queuedTasks = new List<EachEntry>();
         var rankedTasks = new List<EachEntry>();
 
-        foreach (var task in m_DbContext.TaskEntries.Where(a => a.CreatedOn >= minDate || a.StartedOn == null).ToList())
+        foreach (var task in m_FormMain.Tasks)
         {
             var eachEntry = Translate(task);
 
@@ -333,7 +311,6 @@ public partial class frmEntryList : Form
                 }
 
                 rankedTasks.Add(eachEntry);
-                result.RankedTasksCount++;
                 continue;
             }
 
@@ -345,7 +322,6 @@ public partial class frmEntryList : Form
                 }
 
                 queuedTasks.Add(eachEntry);
-                result.QueuedTasksCount++;
                 continue;
             }
 
@@ -355,8 +331,6 @@ public partial class frmEntryList : Form
             }
 
             ongoingTasks.Add(eachEntry);
-
-            result.OngoingTasksCount++;
         }
 
         SortTasks(ongoingTasks);
@@ -375,9 +349,7 @@ public partial class frmEntryList : Form
         flpRankedTasks.Controls.Clear();
         flpRankedTasks.Controls.AddRange(rankedTasks.OrderBy(a => a.Rank).ToArray());
         flpRankedTasks.ResumeLayout();
-
-        return result;
-    }    
+    }
 
     public void SortTasks(IList entryList)
     {
@@ -490,131 +462,12 @@ public partial class frmEntryList : Form
         Height = totalHeight;
     }
 
-    private void FormUpdateEntry_OnSavedEventHandler(object? sender, SaveEventArgs args)
-    {
-        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID)
-            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID)
-            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == args.Task.ID);
-
-        if (eachEntry != null)
-        {
-            eachEntry.Text = args.Task.Task;
-            eachEntry.StartedOn = args.Task.StartedOn;
-            eachEntry.EndedOn = args.Task.EndedOn;
-            eachEntry.Rank = args.Task.Rank;
-        }
-    }
-
     private void EachEntry_OnStartEvent(object? sender, OnStartEventArgs args)
     {
         var eachEntry = (EachEntry)sender!;
 
         CurrentRunningTaskID = eachEntry.EntryID;
         LastRunningTaskID = eachEntry.EntryID;
-
-        if (settingHelper.UsePillTimer)
-        {
-            ShowFloatingButton(eachEntry);
-
-            return;
-        }
-    }
-
-    private void ShowFloatingButton(EachEntry eachEntry)
-    {
-        var newFloatingButton = new frmFloatingButton
-        {
-            StartPosition = FormStartPosition.Manual,
-            Tag = eachEntry,
-            Left = Left,
-            Top = Top
-        };
-
-        FloatingButtons.Add(newFloatingButton);
-
-        newFloatingButton.OnStopEvent += (sender, ts) =>
-        {
-            if (ts.IsClosed && FloatingButtons.Count == 1)
-            {
-                Show();
-            }
-
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
-
-            entry?.Stop();
-        };
-
-        newFloatingButton.FormClosed += (sender, e) =>
-        {
-            FloatingButtons.Remove((frmFloatingButton)sender!);
-        };
-
-        newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
-        {
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
-
-            ShowUpdateEntry(entry);
-        };
-
-        newFloatingButton.OnResetEvent += (sender, e) =>
-        {
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
-
-            if (entry != null)
-            {
-                var existingE = m_DbContext.TaskEntries.Find(entry.EntryID);
-
-                if (existingE != null)
-                {
-                    existingE.StartedOn = DateTime.Now;
-
-                    m_DbContext.SaveChanges();
-                }
-
-                entry.Reset();
-            }            
-        };
-
-        newFloatingButton.Text = eachEntry.Text;
-        newFloatingButton.StartedOn = eachEntry.StartedOn;
-
-        newFloatingButton.Show();
-    }
-
-    private void FormUpdateEntry_OnDeleteEventHandler(Guid entryID)
-    {
-        DeleteTimeLog(entryID);
-
-        ResizeForm();
-
-        if (OnQueueTaskUpdatedEvent != null)
-        {
-            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
-        }
-    }
-
-    private void DeleteTimeLog(Guid entryID)
-    {
-        var entry = m_DbContext.TaskEntries.Find(entryID);
-
-        if (entry != null)
-        {
-            m_DbContext.TaskEntries.Remove(entry);
-            m_DbContext.SaveChanges();
-        }
-
-        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
-
-        if (entryToRemove != null)
-        {
-            // only hide, remove will auto scroll the list to bottom because the list is in reverse
-            entryToRemove.Hide();
-        }
-    }
-
-    private void FormUpdateEntry_OnRerunEventHandler(object? sender, NewEntryEventArgs args)
-    {
-        EachEntry_NewEntryEventHandler(sender, args);
     }
 
     private void EachEntry_OnReRunEventHandler(object? sender, NewEntryEventArgs args)
@@ -638,161 +491,14 @@ public partial class frmEntryList : Form
 
     private void EachEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
-        m_DbContext.BackupDb();
-
-        var newE = new tbl_TaskEntry
-        {
-            ID = Guid.NewGuid(),
-            Task = args.Entry,
-            CreatedOn = DateTime.Now
-        };
-
-        if (args.StartNow)
-        {
-            newE.StartedOn = DateTime.Now;
-        }
-
-        m_DbContext.TaskEntries.Add(newE);
-
-        var parentEntry = args.ParentEntryID != null
-            ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
-            : null;
-
-        // bring notes, tags and rank from parent, this is when the user started a queued task
-        if (parentEntry != null)
-        {
-            if (args.BringNotes)
-            {
-                foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntry.ID).ToList())
-                {
-                    m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
-                    {
-                        ID = Guid.NewGuid(),
-                        TaskID = newE.ID,
-                        CreatedOn = note.CreatedOn,
-                        Notes = note.Notes,
-                        RTF = note.RTF,
-                        UpdatedOn = note.UpdatedOn
-                    });
-                }
-            }
-
-            if (args.BringTags)
-            {
-                foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntry.ID).ToList())
-                {
-                    m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                    {
-                        CreatedOn = tag.CreatedOn,
-                        TaskID = newE.ID,
-                        TagID = tag.TagID
-                    });
-                }
-            }
-        }
-
-        if (args.GetTags && parentEntry == null)
-        {
-            var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
-
-            var tagIDs = (from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
-                          join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
-                          orderby t.CreatedOn descending
-                          where e.Task == args.Entry
-                          select t.TagID)
-                             .Distinct();
-
-            foreach (var tagID in tagIDs)
-            {
-                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    CreatedOn = DateTime.Now,
-                    TaskID = newE.ID,
-                    TagID = tagID
-                });
-            }
-        }
-
-        m_DbContext.SaveChanges();
-
-        var eachEntry = new EachEntry(newE.ID, newE.Task, newE.CreatedOn, newE.StartedOn, null);
-
-        //if (newE.Rank != null)
-        //{
-        //    eachEntry.Rank = newE.Rank;
-        //}
-
-        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
-
-        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
-        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
-        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
-        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
-        eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
-        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
-        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
-
-        //if (eachEntry.TaskStatus == TaskStatus.Ranked)
-        //{
-        //    flpRankedTasks.Controls.Add(eachEntry);
-        //}
-        //else 
-        if (eachEntry.TaskStatus == TaskStatus.Queued)
-        {
-            flpQueuedTaskList.Controls.Add(eachEntry);
-
-            if (settingHelper.UsePillTimer)
-            {
-                ShowFloatingButton(eachEntry);
-            }
-        }
-        else
-        {
-            AddEntryToFlowLayoutControl(eachEntry, args);            
-        }
-
-        SortTasks(flpTaskList.Controls);
-
-        if (args.HideParent && args.ParentEntryID != null)
-        {
-            DeleteTimeLog(args.ParentEntryID.Value);
-        }
-
-        RefreshList();
-
-        if (OnQueueTaskUpdatedEvent != null)
-        {
-            OnQueueTaskUpdatedEvent(this, new QueueTaskUpdatedEventArgs(GetQueueCount(false)));
-        }
-
-        if (settingHelper.UsePillTimer)
-        {
-            Hide();
-        }
-
-        if (settingHelper.AutoOpenUpdateWindow)
-        {
-            if (settingHelper.UsePillTimer)
-            {
-                return;
-            }
-
-            var ee = GetEachEntryByID(newE.ID);
-
-            ShowUpdateEntry(ee);
-        }
-    }
-
-    private int GetQueueCount(bool includeHidden)
-    {
-        return flpTaskList.Controls.Cast<EachEntry>().Count(a => a.StartedOn == null && (a.Visible || includeHidden));
+        throw new NotImplementedException();
     }
 
     private void EachEntry_OnUpdateEvent(Guid id)
     {
         var eachEntry = GetEachEntryByID(id);
 
-        ShowUpdateEntry(eachEntry, eachEntry?.TaskStatus == TaskStatus.Closed);
+        m_FormMain.ShowUpdateEntry(id, eachEntry?.TaskStatus == TaskStatus.Closed);
     }
 
     public EachEntry? GetEachEntryByID(Guid entryID)
@@ -803,23 +509,10 @@ public partial class frmEntryList : Form
 
         if (eachEntry == null)
         {
-            var entryFromDb = m_DbContext.TaskEntries.Find(entryID);
-
-            if (entryFromDb != null)
-            {
-                eachEntry = Translate(entryFromDb);
-            }
+            throw new ArgumentNullException("Entry not found");
         }
 
         return eachEntry;
-    }
-
-    public async void ShowUpdateEntry(EachEntry? eachEntry, bool canReRun = false)
-    {
-        if (eachEntry != null)
-        {
-            await m_FormUpdateEntry.ShowUpdateEntry(eachEntry, canReRun);
-        }
     }
 
     private void AddEntryToFlowLayoutControl(EachEntry newEntry, NewEntryEventArgs args)
@@ -836,17 +529,7 @@ public partial class frmEntryList : Form
                 {
                     if (item.IsStarted)
                     {
-                        // if we are using pill timer, stopping the pill timer will also stop the EachEntry
-                        if (settingHelper.UsePillTimer)
-                        {
-                            var pillTimer = FloatingButtons.Single(a => ((EachEntry)a.Tag!).EntryID == item.EntryID);
-
-                            pillTimer.Stop();
-                        }
-                        else
-                        {
-                            item.Stop();
-                        }
+                        item.Stop();
                     }
 
                     if (item.StartedOn == null)
@@ -886,9 +569,7 @@ public partial class frmEntryList : Form
             return;
         }
 
-        var ee = GetEachEntryByID(CurrentRunningTaskID.Value);
-
-        ShowUpdateEntry(ee);        
+        m_FormMain.ShowUpdateEntry(CurrentRunningTaskID.Value);
     }
 
     public void ToggleLastRunningTask()

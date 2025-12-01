@@ -57,7 +57,7 @@ public partial class frmFloatingButton : Form
     [Category("Appearance")]
     [Description("Gets the current duration of the task.")]
     [Browsable(true)]
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public TimeSpan Duration
     {
         get

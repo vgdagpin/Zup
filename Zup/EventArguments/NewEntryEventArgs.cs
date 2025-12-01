@@ -2,6 +2,8 @@
 
 public class NewEntryEventArgs : EventArgs
 {
+    public ITask Task { get; set; } = null!;
+
     public NewEntryEventArgs(string entry)
     {
         Entry = entry;

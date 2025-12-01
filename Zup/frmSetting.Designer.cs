@@ -28,7 +28,7 @@ partial class frmSetting
     /// </summary>
     private void InitializeComponent()
     {
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSetting));
         groupBox1 = new GroupBox();
         nMaxDaysDataToLoad = new NumericUpDown();
         label4 = new Label();
@@ -49,14 +49,15 @@ partial class frmSetting
         ofdDbFile = new OpenFileDialog();
         btnTrimDb = new Button();
         groupBox4 = new GroupBox();
+        lblDayEnd = new Label();
+        lblDayStart = new Label();
+        label7 = new Label();
+        label6 = new Label();
         label5 = new Label();
         cbDayEndNextDay = new CheckBox();
         mtDayEnd = new MaskedTextBox();
         mtDayStart = new MaskedTextBox();
-        label6 = new Label();
-        label7 = new Label();
-        lblDayStart = new Label();
-        lblDayEnd = new Label();
+        cbUsePill = new CheckBox();
         groupBox1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)nMaxDaysDataToLoad).BeginInit();
         ((System.ComponentModel.ISupportInitialize)tbOpacity).BeginInit();
@@ -76,7 +77,7 @@ partial class frmSetting
         groupBox1.Controls.Add(tbOpacity);
         groupBox1.Controls.Add(numTxtItemsToShow);
         groupBox1.Controls.Add(label1);
-        groupBox1.Location = new Point(13, 143);
+        groupBox1.Location = new Point(12, 216);
         groupBox1.Name = "groupBox1";
         groupBox1.Size = new Size(390, 167);
         groupBox1.TabIndex = 2;
@@ -85,7 +86,7 @@ partial class frmSetting
         // 
         // nMaxDaysDataToLoad
         // 
-        nMaxDaysDataToLoad.Location = new Point(138, 42);
+        nMaxDaysDataToLoad.Location = new Point(143, 138);
         nMaxDaysDataToLoad.Maximum = new decimal(new int[] { 365, 0, 0, 0 });
         nMaxDaysDataToLoad.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         nMaxDaysDataToLoad.Name = "nMaxDaysDataToLoad";
@@ -98,16 +99,16 @@ partial class frmSetting
         // label4
         // 
         label4.AutoSize = true;
-        label4.Location = new Point(6, 44);
+        label4.Location = new Point(11, 140);
         label4.Name = "label4";
-        label4.Size = new Size(126, 15);
+        label4.Size = new Size(125, 15);
         label4.TabIndex = 7;
         label4.Text = "Max days data to load:";
         // 
         // lblOpacityVal
         // 
         lblOpacityVal.AutoSize = true;
-        lblOpacityVal.Location = new Point(349, 101);
+        lblOpacityVal.Location = new Point(351, 26);
         lblOpacityVal.Name = "lblOpacityVal";
         lblOpacityVal.Size = new Size(22, 15);
         lblOpacityVal.TabIndex = 6;
@@ -116,7 +117,7 @@ partial class frmSetting
         // label2
         // 
         label2.AutoSize = true;
-        label2.Location = new Point(6, 101);
+        label2.Location = new Point(13, 26);
         label2.Name = "label2";
         label2.Size = new Size(51, 15);
         label2.TabIndex = 5;
@@ -125,7 +126,7 @@ partial class frmSetting
         // tbOpacity
         // 
         tbOpacity.LargeChange = 10;
-        tbOpacity.Location = new Point(96, 99);
+        tbOpacity.Location = new Point(101, 24);
         tbOpacity.Maximum = 100;
         tbOpacity.Name = "tbOpacity";
         tbOpacity.Size = new Size(247, 45);
@@ -136,7 +137,7 @@ partial class frmSetting
         // 
         // numTxtItemsToShow
         // 
-        numTxtItemsToShow.Location = new Point(96, 69);
+        numTxtItemsToShow.Location = new Point(101, 112);
         numTxtItemsToShow.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
         numTxtItemsToShow.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
         numTxtItemsToShow.Name = "numTxtItemsToShow";
@@ -149,7 +150,7 @@ partial class frmSetting
         // label1
         // 
         label1.AutoSize = true;
-        label1.Location = new Point(6, 71);
+        label1.Location = new Point(11, 114);
         label1.Name = "label1";
         label1.Size = new Size(84, 15);
         label1.TabIndex = 2;
@@ -158,7 +159,7 @@ partial class frmSetting
         // groupBox2
         // 
         groupBox2.Controls.Add(cbAutoOpenUpdateWindow);
-        groupBox2.Location = new Point(12, 449);
+        groupBox2.Location = new Point(12, 533);
         groupBox2.Name = "groupBox2";
         groupBox2.Size = new Size(390, 62);
         groupBox2.TabIndex = 3;
@@ -276,12 +277,50 @@ partial class frmSetting
         groupBox4.Controls.Add(cbDayEndNextDay);
         groupBox4.Controls.Add(mtDayEnd);
         groupBox4.Controls.Add(mtDayStart);
-        groupBox4.Location = new Point(12, 320);
+        groupBox4.Location = new Point(12, 404);
         groupBox4.Name = "groupBox4";
         groupBox4.Size = new Size(391, 116);
         groupBox4.TabIndex = 4;
         groupBox4.TabStop = false;
         groupBox4.Text = "Day Start/End (HH:mm)";
+        // 
+        // lblDayEnd
+        // 
+        lblDayEnd.AutoSize = true;
+        lblDayEnd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblDayEnd.Location = new Point(73, 87);
+        lblDayEnd.Name = "lblDayEnd";
+        lblDayEnd.Size = new Size(125, 15);
+        lblDayEnd.TabIndex = 7;
+        lblDayEnd.Text = "01/01/2024 11:59pm";
+        // 
+        // lblDayStart
+        // 
+        lblDayStart.AutoSize = true;
+        lblDayStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblDayStart.Location = new Point(73, 69);
+        lblDayStart.Name = "lblDayStart";
+        lblDayStart.Size = new Size(124, 15);
+        lblDayStart.TabIndex = 6;
+        lblDayStart.Text = "01/01/2024 12:00am";
+        // 
+        // label7
+        // 
+        label7.AutoSize = true;
+        label7.Location = new Point(10, 87);
+        label7.Name = "label7";
+        label7.Size = new Size(53, 15);
+        label7.TabIndex = 5;
+        label7.Text = "Day End:";
+        // 
+        // label6
+        // 
+        label6.AutoSize = true;
+        label6.Location = new Point(10, 69);
+        label6.Name = "label6";
+        label6.Size = new Size(57, 15);
+        label6.TabIndex = 4;
+        label6.Text = "Day Start:";
         // 
         // label5
         // 
@@ -325,49 +364,22 @@ partial class frmSetting
         mtDayStart.ValidatingType = typeof(DateTime);
         mtDayStart.TextChanged += mtDayStart_TextChanged;
         // 
-        // label6
+        // cbUsePill
         // 
-        label6.AutoSize = true;
-        label6.Location = new Point(10, 69);
-        label6.Name = "label6";
-        label6.Size = new Size(57, 15);
-        label6.TabIndex = 4;
-        label6.Text = "Day Start:";
-        // 
-        // label7
-        // 
-        label7.AutoSize = true;
-        label7.Location = new Point(10, 87);
-        label7.Name = "label7";
-        label7.Size = new Size(53, 15);
-        label7.TabIndex = 5;
-        label7.Text = "Day End:";
-        // 
-        // lblDayStart
-        // 
-        lblDayStart.AutoSize = true;
-        lblDayStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblDayStart.Location = new Point(73, 69);
-        lblDayStart.Name = "lblDayStart";
-        lblDayStart.Size = new Size(124, 15);
-        lblDayStart.TabIndex = 6;
-        lblDayStart.Text = "01/01/2024 12:00am";
-        // 
-        // lblDayEnd
-        // 
-        lblDayEnd.AutoSize = true;
-        lblDayEnd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblDayEnd.Location = new Point(73, 87);
-        lblDayEnd.Name = "lblDayEnd";
-        lblDayEnd.Size = new Size(125, 15);
-        lblDayEnd.TabIndex = 7;
-        lblDayEnd.Text = "01/01/2024 11:59pm";
+        cbUsePill.AutoSize = true;
+        cbUsePill.Location = new Point(12, 182);
+        cbUsePill.Name = "cbUsePill";
+        cbUsePill.Size = new Size(64, 19);
+        cbUsePill.TabIndex = 9;
+        cbUsePill.Text = "Use Pill";
+        cbUsePill.UseVisualStyleBackColor = true;
         // 
         // frmSetting
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(415, 521);
+        ClientSize = new Size(878, 609);
+        Controls.Add(cbUsePill);
         Controls.Add(groupBox4);
         Controls.Add(btnTrimDb);
         Controls.Add(groupBox3);
@@ -396,6 +408,7 @@ partial class frmSetting
         groupBox4.ResumeLayout(false);
         groupBox4.PerformLayout();
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
@@ -427,4 +440,5 @@ partial class frmSetting
     private Label label6;
     private Label lblDayStart;
     private Label lblDayEnd;
+    private CheckBox cbUsePill;
 }

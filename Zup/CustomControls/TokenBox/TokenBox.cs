@@ -63,12 +63,14 @@ public partial class TokenBox : FlowLayoutPanel
     /// List of the suggested values to be shown if ShowAutoComplete is set to True.
     /// </summary>
     [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public List<string> AutoCompleteList { get; set; } = new List<string>();
 
 
     /// <summary>
     /// If set to true, user can write in TokenBox and Tab or Enter to add a new Token.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool CanAddTokenByText { get; set; } = true;
 
     /// <summary>
@@ -87,6 +89,7 @@ public partial class TokenBox : FlowLayoutPanel
     /// Returns a List of Tokens in the TokenBox.
     /// </summary>
     [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public IEnumerable<string> Tokens
     {
         get
@@ -109,23 +112,28 @@ public partial class TokenBox : FlowLayoutPanel
     /// <summary>
     /// If set to True, a list of suggested texts will be shown to the user when writing the name of a new TokenBox. Needs to have CanAddTokenByText property set to True.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool ShowAutoComplete { get; set; } = true;
 
-   
 
 
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool CanWriteInTokenBox { get; set; } = true;
 
     /// <summary>
     /// If set to False, the user will not be able to delete Tokens using Backspace when cursor is in TokenBox. Needs CanAddTokenByText set to True.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool CanDeleteTokensWithBackspace { get; set; } = true;
 
     /// <summary>
     /// If set to True, a red cross will be shown in the rightmost part of the Token. Clicking on this cross will delete Token.
     /// </summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool ShowDeleteCross { get; set; } = true;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenBackgroundColor
     {
         get
@@ -140,6 +148,7 @@ public partial class TokenBox : FlowLayoutPanel
     }
 
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenBorderColor
     {
         get
@@ -153,6 +162,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Font DefaultTokenFont
     {
         get
@@ -166,6 +176,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenForeColor
     {
         get
@@ -179,6 +190,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenBackgroundColorHovered
     {
         get
@@ -193,6 +205,7 @@ public partial class TokenBox : FlowLayoutPanel
     }
 
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenBorderColorHovered
     {
         get
@@ -206,6 +219,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Font DefaultTokenFontHovered
     {
         get
@@ -219,6 +233,7 @@ public partial class TokenBox : FlowLayoutPanel
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Color DefaultTokenForeColorHovered
     {
         get
@@ -247,7 +262,7 @@ public partial class TokenBox : FlowLayoutPanel
         this.ResumeLayout(false);
 
 
-        
+
         this.MouseClick += mouseClick;
         this.ControlAdded += controlAdded;
         this.BackColor = Color.FromKnownColor(KnownColor.Window);
@@ -257,7 +272,7 @@ public partial class TokenBox : FlowLayoutPanel
         this.Padding = new Padding(0, 0, 10, 0);
         this.WrapContents = true;
         this.BorderStyle = BorderStyle.FixedSingle;
-        
+
         this.MouseEnter += OnMouseEnter;
     }
 
@@ -328,9 +343,9 @@ public partial class TokenBox : FlowLayoutPanel
     {
         for (int i = Controls.Count - 1; i >= 0; i--)
         {
-            if (Controls[i] != AutoCompleteTextBox) 
-            { 
-                Controls.RemoveAt(i); 
+            if (Controls[i] != AutoCompleteTextBox)
+            {
+                Controls.RemoveAt(i);
             }
         }
     }
@@ -352,12 +367,12 @@ public partial class TokenBox : FlowLayoutPanel
         AutoCompleteTextBox.Focus();
     }
 
-    private void tb_KeyDown(object ?sender, KeyEventArgs e)
+    private void tb_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.Back 
-            && AutoCompleteTextBox.SelectionStart == 0 
-            && AutoCompleteTextBox.SelectionLength == 0 
-            && CanDeleteTokensWithBackspace 
+        if (e.KeyCode == Keys.Back
+            && AutoCompleteTextBox.SelectionStart == 0
+            && AutoCompleteTextBox.SelectionLength == 0
+            && CanDeleteTokensWithBackspace
             && Controls.Count - 1 > 0)
         {
             Controls.RemoveAt(Controls.Count - 2);

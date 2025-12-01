@@ -1,18 +1,12 @@
-﻿using Zup.EventArguments;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+
+using Zup.EventArguments;
 
 namespace Zup.CustomControls;
 
-public enum TaskStatus
-{
-    Ongoing,
-    Queued,
-    Ranked,
-    Closed,
-    Unclosed,
-    Running
-}
 
-public partial class EachEntry : UserControl
+public partial class EachEntry : UserControl, ITask
 {
     public const string StartChar = "►";
     public const string StopChar = "■";
@@ -98,6 +92,7 @@ public partial class EachEntry : UserControl
     }
 
     byte? rank;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public byte? Rank
     {
         get => rank;
@@ -117,6 +112,7 @@ public partial class EachEntry : UserControl
     }
 
     bool isExpanded = false;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool IsExpanded
     {
         get
@@ -141,14 +137,18 @@ public partial class EachEntry : UserControl
             }
         }
     }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 
     public bool IsFirstItem { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public Guid EntryID { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime CreatedOn { get; set; }
 
     DateTime? startedOn;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime? StartedOn
     {
         get
@@ -166,6 +166,7 @@ public partial class EachEntry : UserControl
     DateTime? endedOn;
     private DateTime? taskReminder;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime? EndedOn
     {
         get
@@ -180,15 +181,20 @@ public partial class EachEntry : UserControl
         }
     }
 
-    public DateTime? TaskReminder 
-    { 
-        get => taskReminder; 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+    public DateTime? Reminder
+    {
+        get => taskReminder;
         set
         {
             taskReminder = value;
             btnReminder.Visible = value.GetValueOrDefault(DateTime.MinValue) > DateTime.MinValue;
         }
     }
+
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool IsRunning { get; set; }
 
     public EachEntry(string text)
     {
@@ -209,7 +215,7 @@ public partial class EachEntry : UserControl
         StartedOn = startedOn;
         EndedOn = endedOn;
         Rank = null;
-        TaskReminder = taskReminder;
+        Reminder = taskReminder;
 
         WriteTime();
 
@@ -445,5 +451,28 @@ public partial class EachEntry : UserControl
     private void btnReminder_Click(object sender, EventArgs e)
     {
 
+    }
+
+    public bool Equals(ITask? x, ITask? y)
+    {
+        if (x == null && y == null)
+        {
+            return true;
+        }
+        if (x == null || y == null)
+        {
+            return false;
+        }
+        return x.EntryID == y.EntryID;
+    }
+
+    public int GetHashCode([DisallowNull] ITask obj)
+    {
+        if (obj == null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        return obj.EntryID.GetHashCode();
     }
 }

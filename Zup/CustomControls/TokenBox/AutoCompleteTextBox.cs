@@ -1,4 +1,6 @@
-﻿namespace Zup.CustomControls;
+﻿using System.ComponentModel;
+
+namespace Zup.CustomControls;
 
 /// <summary>
 /// This TokenProject borrows code from:
@@ -19,8 +21,10 @@ public class AutoCompleteTextBox : TextBox
 
     #region Properties
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool ShowAutoComplete { get; set; } = true;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public List<string> Values { get; set; } = new List<string>();
 
     public string[] SelectedValues
@@ -132,7 +136,7 @@ public class AutoCompleteTextBox : TextBox
     protected override void OnLeave(EventArgs e)
     {
         base.OnLeave(e);
-        
+
         AcceptInput();
     }
     #endregion Events
@@ -147,7 +151,7 @@ public class AutoCompleteTextBox : TextBox
 
         ParentTokenBox.AddToken(textToken);
 
-        Text = string.Empty;        
+        Text = string.Empty;
     }
 
     public void ShowExternalSuggestionList(string[] suggestionList)
@@ -249,7 +253,7 @@ public class AutoCompleteTextBox : TextBox
                     lbSuggestions.SelectedIndex = 0;
 
                     Focus();
-                }                
+                }
 
                 return;
             }
@@ -262,7 +266,7 @@ public class AutoCompleteTextBox : TextBox
                 _formerValue = Text;
                 ResetListBox();
                 Focus();
-            }            
+            }
         }
         else
         {
@@ -309,7 +313,7 @@ public class AutoCompleteTextBox : TextBox
                         // GetItemRectangle does not work for me
                         // we add a little extra space by using '_'
                         int itemWidth = (int)graphics.MeasureString(((string)lbSuggestions.Items[i]) + "_", lbSuggestions.Font).Width;
-                        
+
                         lbSuggestions.Width = (lbSuggestions.Width < itemWidth) ? itemWidth : lbSuggestions.Width;
                     }
                 }
