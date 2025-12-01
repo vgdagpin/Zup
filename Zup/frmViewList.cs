@@ -155,7 +155,7 @@ public partial class frmViewList : Form
 
         foreach (var item in ds)
         {
-            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn, settingHelper.DayStart, settingHelper.DayEnd, settingHelper.DayEndNextDay);
+            item.DayOfWeek = Utility.GetDayOfWeek(item.StartedOn, settingHelper.DayStart, settingHelper.DayEnd);
         }
 
         dgView.DataSource = ds;

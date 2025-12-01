@@ -550,14 +550,7 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnStopEventHandler(Guid id, DateTime endOn)
     {
-        var existingE = m_DbContext.TaskEntries.Find(id);
-
-        if (existingE != null)
-        {
-            existingE.EndedOn = endOn;
-
-            m_DbContext.SaveChanges();
-        }
+        m_FormMain.StopTask(id, endOn);
 
         CurrentRunningTaskID = null;
     }

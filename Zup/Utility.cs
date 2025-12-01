@@ -91,7 +91,7 @@ public static class Utility
             .ToArray();
     }
 
-    public static DayOfWeek? GetDayOfWeek(DateTime? startedOn, TimeSpan dayStart, TimeSpan dayEnd, bool dayEndNextDay)
+    public static DayOfWeek? GetDayOfWeek(DateTime? startedOn, TimeSpan dayStart, TimeSpan dayEnd)
     {
         if (startedOn == null)
         {
@@ -100,9 +100,9 @@ public static class Utility
 
         var dt = new DateTime(startedOn.Value.Year, startedOn.Value.Month, startedOn.Value.Day);
 
-        var ds1 = GetDayShift(dt.AddHours(-24), dayStart, dayEnd, dayEndNextDay);
-        var ds2 = GetDayShift(dt, dayStart, dayEnd, dayEndNextDay);
-        var ds3 = GetDayShift(dt.AddHours(24), dayStart, dayEnd, dayEndNextDay);
+        var ds1 = GetDayShift(dt.AddHours(-24), dayStart, dayEnd);
+        var ds2 = GetDayShift(dt, dayStart, dayEnd);
+        var ds3 = GetDayShift(dt.AddHours(24), dayStart, dayEnd);
 
         if (ds1.start <= startedOn.Value && startedOn.Value <= ds1.end)
         {
@@ -120,7 +120,7 @@ public static class Utility
         return null;
     }
 
-    public static (DateTime start, DateTime end, DateTime passedDT) GetDayShift(DateTime date, TimeSpan dayStart, TimeSpan dayEnd, bool dayEndNextDay)
+    public static (DateTime start, DateTime end, DateTime passedDT) GetDayShift(DateTime date, TimeSpan dayStart, TimeSpan dayEnd)
     {
         var s = date;
         s = s.AddHours(dayStart.Hours - 7);
@@ -131,10 +131,7 @@ public static class Utility
         e = e.AddMinutes(dayEnd.Minutes);
         e = e.AddSeconds(-1);
 
-        if (dayEndNextDay)
-        {
-            e = e.AddHours(24);
-        }
+        e = e.AddHours(24);
 
         return (s, e, date);
     }

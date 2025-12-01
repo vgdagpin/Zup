@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 
-using Zup.CustomControls;
 using Zup.Entities;
 using Zup.EventArguments;
 
@@ -430,6 +429,18 @@ public partial class frmMain : Form
         }
     }
 
+    public void StopTask(Guid taskID, DateTime endOn)
+    {
+        var existingE = m_DbContext.TaskEntries.Find(taskID);
+
+        if (existingE != null)
+        {
+            existingE.EndedOn = endOn;
+
+            m_DbContext.SaveChanges();
+        }
+    }
+
     public void DeleteEntry(Guid taskID)
     {
         var entry = m_DbContext.TaskEntries.Find(taskID);
@@ -596,17 +607,23 @@ public partial class frmMain : Form
 
         if (SettingHelper.UsePillTimer)
         {
-            if (eachEntry.TaskStatus != TaskStatus.Queued)
-            {
-                if (args.StopOtherTask && eachEntry.IsRunning)
-                {
-                    var pillTimer = FloatingButtons.Single(a => ((EachEntry)a.Tag!).EntryID == eachEntry.EntryID);
+            ShowFloatingButton(eachEntry);
 
-                    pillTimer.Stop();
+            if (eachEntry.TaskStatus != TaskStatus.Queued
+                && args.StopOtherTask
+                && eachEntry.IsRunning)
+            {
+                foreach (var runningPills in FloatingButtons.Where(a => ((ITask)a.Tag!).EntryID != eachEntry.EntryID))
+                {
+                    runningPills.Stop();
                 }
             }
 
-            ShowFloatingButton(eachEntry);
+            FloatingButtons.Where(a => a.IsDisposed).ToList()
+                .ForEach(d =>
+                {
+                    FloatingButtons.Remove(d);
+                });
         }
         else
         {
@@ -631,8 +648,8 @@ public partial class frmMain : Form
         {
             StartPosition = FormStartPosition.Manual,
             Tag = eachEntry,
-            Left = Left,
-            Top = Top
+            Left = SettingHelper.FormLocationX,
+            Top = SettingHelper.FormLocationY
         };
 
         newFloatingButton.Move += NewFloatingButton_Move;
@@ -641,24 +658,19 @@ public partial class frmMain : Form
 
         newFloatingButton.OnStopEvent += (sender, ts) =>
         {
-            if (ts.IsClosed && FloatingButtons.Count == 1)
+            var entry = ((frmFloatingButton)sender!).Tag as ITask;
+
+            if (entry != null && entry.StartedOn != null)
             {
-                Show();
+                var endOn = entry.StartedOn.Value.Add(ts.Duration);
+
+                StopTask(entry.EntryID, endOn);
             }
-
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
-
-            entry?.Stop();
-        };
-
-        newFloatingButton.FormClosed += (sender, e) =>
-        {
-            FloatingButtons.Remove((frmFloatingButton)sender!);
         };
 
         newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
         {
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+            var entry = ((frmFloatingButton)sender!).Tag as ITask;
 
             if (entry != null)
             {
@@ -668,7 +680,7 @@ public partial class frmMain : Form
 
         newFloatingButton.OnResetEvent += (sender, e) =>
         {
-            var entry = ((frmFloatingButton)sender!).Tag as EachEntry;
+            var entry = ((frmFloatingButton)sender!).Tag as ITask;
 
             if (entry != null)
             {
@@ -680,13 +692,13 @@ public partial class frmMain : Form
 
                     m_DbContext.SaveChanges();
                 }
-
-                entry.Reset();
             }
         };
 
         newFloatingButton.Text = eachEntry.Text;
         newFloatingButton.StartedOn = eachEntry.StartedOn;
+
+        eachEntry.IsRunning = eachEntry.StartedOn != null;
 
         newFloatingButton.Show();
     }

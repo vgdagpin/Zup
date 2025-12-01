@@ -169,7 +169,7 @@ public partial class frmSetting : Form
 
     private void RecalcDayStartAndEnd()
     {
-        var dayShift = Utility.GetDayShift(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), settingHelper.DayStart, settingHelper.DayEnd, settingHelper.DayEndNextDay);
+        var dayShift = Utility.GetDayShift(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), settingHelper.DayStart, settingHelper.DayEnd);
 
         // 01/01/2024 12:00am
         lblDayStart.Text = $"{dayShift.start:MM/dd/yyyy hh:mmtt}";
