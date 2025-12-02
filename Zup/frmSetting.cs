@@ -4,18 +4,23 @@ public partial class frmSetting : Form
 {
     private readonly SettingHelper settingHelper;
 
+    private frmMain m_FormMain = null!;
+
     public delegate void OnSettingUpdated(string name, object value);
-    public delegate void OnDbTrim(int daysToKeep);
     public delegate void OnDbBackup();
 
     public event OnSettingUpdated? OnSettingUpdatedEvent;
-    public event OnDbTrim? OnDbTrimEvent;
     public event OnDbBackup? OnDbBackupEvent;
 
     public frmSetting(SettingHelper settingHelper)
     {
         InitializeComponent();
         this.settingHelper = settingHelper;
+    }
+
+    public void SetFormMain(frmMain frmMain)
+    {
+        m_FormMain = frmMain;
     }
 
     private void frmSetting_Load(object sender, EventArgs e)
@@ -123,10 +128,7 @@ public partial class frmSetting : Form
 
     private void btnTrimDb_Click(object sender, EventArgs e)
     {
-        if (OnDbTrimEvent != null)
-        {
-            OnDbTrimEvent(Convert.ToInt32(numKeepDaysOfData.Value));
-        }
+        m_FormMain.TrimDb(Convert.ToInt32(numKeepDaysOfData.Value));
     }
 
     private void frmSetting_KeyDown(object sender, KeyEventArgs e)

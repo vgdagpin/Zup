@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 using Zup.Entities;
+using Zup.EventArguments;
 
 namespace Zup;
 
@@ -16,7 +17,7 @@ public partial class frmViewList : Form
     private readonly ZupDbContext p_DbContext;
     private readonly SettingHelper settingHelper;
     private frmMain m_FormMain = null!;
-
+    private Font? tagFont = null;
 
     public delegate void OnSelectedItem(Guid entryID);
     public delegate void OnExported();
@@ -161,6 +162,13 @@ public partial class frmViewList : Form
         dgView.DataSource = ds;
     }
 
+    public void RefreshList()
+    {
+        var currentWeekData = LoadWeekData();
+        LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
+    }
+
+    #region dgView Events
     private void dgView_DoubleClick(object sender, EventArgs e)
     {
         dgView.SelectedRows.Cast<DataGridViewRow>()
@@ -168,7 +176,7 @@ public partial class frmViewList : Form
             .ToList()
             .ForEach(a =>
             {
-                m_FormMain.ShowUpdateEntry(a.ID);
+                m_FormMain.ShowUpdateEntry(a.ID, a.StartedOn != null && a.EndedOn != null);
             });
     }
 
@@ -186,7 +194,74 @@ public partial class frmViewList : Form
             });
 
         lblSelectedTotal.Text = $"{ts.Days:00}:{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
+    } 
+    
+    private void dgView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        {
+            return;
+        }
+
+        var columnName = dgView.Columns[e.ColumnIndex].Name;
+
+        if (columnName == "PlayAction")
+        {
+            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+
+            var args = new NewEntryEventArgs(dataRow.Task)
+            {
+                StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
+                StartNow = true,
+                ParentEntryID = dataRow.ID,
+                HideParent = true,
+                BringNotes = true,
+                BringTags = true
+            };
+
+            m_FormMain.RunTask(args);
+        }        
     }
+
+    private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 || dgView.Columns[e.ColumnIndex].Name != "Task")
+        {
+            return;
+        }
+
+        e.PaintBackground(e.CellBounds, true);
+        e.PaintContent(e.CellBounds);
+
+        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+        var tags = dataRow.Tags;
+
+        if (tags == null || tags.Length == 0)
+        {
+            return;
+        }
+
+        if (tagFont == null)
+        {
+            tagFont = new Font(e.CellStyle!.Font!.FontFamily, 7);
+        }
+
+        var x = e.CellBounds.Right;
+
+        for (int i = 0; i < tags.Length; i++)
+        {
+            var tag = tags[i];
+            var textSize = e.Graphics!.MeasureString(tag, tagFont);
+
+            x -= (int)textSize.Width + 4;
+
+            var textRect = new Rectangle(x, e.CellBounds.Top + 3, (int)textSize.Width + 2, (int)textSize.Height + 1);
+            DrawTag(tag, e.Graphics, textRect, tagFont);
+        }
+
+        e.Handled = true;
+    }
+    #endregion
 
     private void btnBrowseTimesheetFolder_Click(object sender, EventArgs e)
     {
@@ -441,9 +516,7 @@ public partial class frmViewList : Form
 
     private void btnRefresh_Click(object sender, EventArgs e)
     {
-        var currentWeekData = LoadWeekData();
-
-        LoadListData(currentWeekData.Start, currentWeekData.End, txtSearch.Text);
+        RefreshList();
     }
 
     private void lbWeek_SelectedIndexChanged(object sender, EventArgs e)
@@ -471,60 +544,6 @@ public partial class frmViewList : Form
         allowedTags.Add("Tag[Name=Bill%].Description");
 
         MessageBox.Show(string.Join("\n", allowedTags.Select(a => $"~{a}~")), "Available Templates");
-    }
-
-    private Font? tagFont = null;
-
-
-    private void dgView_CellContentClick(object sender, DataGridViewCellEventArgs e)
-    {
-        if (e.RowIndex < 0 || e.ColumnIndex != 7)
-        {
-            return;
-        }
-
-        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
-
-        m_FormMain.ShowUpdateEntry(dataRow.ID);
-    }
-
-    private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
-    {
-        if (e.RowIndex < 0 || e.ColumnIndex != 1)
-        {
-            return;
-        }
-
-        e.PaintBackground(e.CellBounds, true);
-        e.PaintContent(e.CellBounds);
-
-        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
-        var tags = dataRow.Tags;
-
-        if (tags == null || tags.Length == 0)
-        {
-            return;
-        }
-
-        if (tagFont == null)
-        {
-            tagFont = new Font(e.CellStyle!.Font!.FontFamily, 7);
-        }
-
-        var x = e.CellBounds.Right;
-
-        for (int i = 0; i < tags.Length; i++)
-        {
-            var tag = tags[i];
-            var textSize = e.Graphics!.MeasureString(tag, tagFont);
-
-            x -= (int)textSize.Width + 4;
-
-            var textRect = new Rectangle(x, e.CellBounds.Top + 3, (int)textSize.Width + 2, (int)textSize.Height + 1);
-            DrawTag(tag, e.Graphics, textRect, tagFont);
-        }
-
-        e.Handled = true;
     }
 
     private void DrawTag(string text, Graphics graphics, Rectangle textRect, Font font)

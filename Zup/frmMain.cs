@@ -149,7 +149,7 @@ public partial class frmMain : Form
 
     private void FrmUpdateEntry_OnReRunEvent(object? sender, NewEntryEventArgs e)
     {
-        FormNewEntry_NewEntryEventHandler(sender, e);
+        RunTask(e);
     }
 
     private void FrmUpdateEntry_OnSavedEvent(object? sender, SaveEventArgs e)
@@ -183,8 +183,9 @@ public partial class frmMain : Form
         {
             if (frmSetting == null || frmSetting.IsDisposed)
             {
-                frmSetting = serviceProvider.CreateScope()
-                    .ServiceProvider.GetRequiredService<frmSetting>();
+                frmSetting = serviceProvider.GetRequiredService<frmSetting>();
+
+                frmSetting.SetFormMain(this);
 
                 frmSetting.OnSettingUpdatedEvent += (name, value) =>
                 {
@@ -207,29 +208,7 @@ public partial class frmMain : Form
                         m_FormEntryList.Show();
                     }
                 };
-
-                frmSetting.OnDbTrimEvent += (daysToKeep) =>
-                {
-                    m_DbContext.BackupDb();
-
-                    var keepDate = DateTime.Now.AddDays(-daysToKeep);
-
-                    var toDel = m_DbContext.TaskEntries
-                        .Where(a => a.StartedOn < keepDate)
-                        .ToList();
-
-                    var toDelNotes = m_DbContext.TaskEntryNotes
-                        .Where(a => toDel.Select(b => b.ID).Contains(a.TaskID))
-                        .ToList();
-
-                    m_DbContext.TaskEntryNotes.RemoveRange(toDelNotes);
-                    m_DbContext.TaskEntries.RemoveRange(toDel);
-
-                    m_DbContext.SaveChanges();
-
-                    MessageBox.Show($"Trimmed {toDel.Count} record/s.", "Zup");
-                };
-
+               
                 frmSetting.OnDbBackupEvent += () =>
                 {
                     m_DbContext.BackupDb();
@@ -324,6 +303,32 @@ public partial class frmMain : Form
         }
 
         base.WndProc(ref m);
+    }
+
+    public void TrimDb(int daysToKeep)
+    {
+        m_DbContext.BackupDb();
+
+        var keepDate = DateTime.Now.AddDays(-daysToKeep);
+
+        (
+             from n in m_DbContext.TaskEntryNotes
+             join e in m_DbContext.TaskEntries
+                 on n.TaskID equals e.ID
+             where e.StartedOn < keepDate
+             select n
+         ).ExecuteDelete();
+
+        var totalDeleted = 
+        (
+            from e in m_DbContext.TaskEntries
+            where e.StartedOn < keepDate
+            select e
+        ).ExecuteDelete();
+
+        m_DbContext.Database.ExecuteSql($"VACUUM;");
+
+        MessageBox.Show($"Trimmed {totalDeleted} record/s.", "Zup");
     }
 
     public void ShowNewEntry()
@@ -441,70 +446,7 @@ public partial class frmMain : Form
         }
     }
 
-    public void DeleteEntry(Guid taskID)
-    {
-        var entry = m_DbContext.TaskEntries.Find(taskID);
-
-        if (entry != null)
-        {
-            m_DbContext.TaskEntries.Remove(entry);
-            m_DbContext.SaveChanges();
-        }
-
-        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
-
-        if (task != null)
-        {
-            OnTaskDeleted?.Invoke(this, task);
-        }
-    }
-
-    protected bool IsNewWeek()
-    {
-        if (!m_DbContext.TaskEntries.Any())
-        {
-            return false;
-        }
-
-        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
-        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
-        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
-
-        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();
-
-        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
-        var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
-
-        return lastRowWeekNum < weekNumNow;
-    }
-
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
-        UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
-        UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
-        UnregisterHotKey(this.Handle, Constants.ShowViewAll);
-
-        base.OnFormClosing(e);
-    }
-
-    private void FrmEntryList_OnTokenDoubleClicked(object? sender, CustomControls.TokenEventArgs e)
-    {
-        if (m_FormTagEditor.Visible)
-        {
-            m_FormTagEditor.Activate();
-
-            m_FormTagEditor.SelectTag(e.Text);
-
-            return;
-        }
-
-        m_FormTagEditor.Show();
-
-        m_FormTagEditor.SelectTag(e.Text);
-    }
-
-    private void FormNewEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
+    public void RunTask(NewEntryEventArgs args)
     {
         m_DbContext.BackupDb();
 
@@ -640,6 +582,75 @@ public partial class frmMain : Form
 
             ShowUpdateEntry(eachEntry.EntryID);
         }
+
+    }
+
+    public void DeleteEntry(Guid taskID)
+    {
+        var entry = m_DbContext.TaskEntries.Find(taskID);
+
+        if (entry != null)
+        {
+            m_DbContext.TaskEntries.Remove(entry);
+            m_DbContext.SaveChanges();
+        }
+
+        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
+
+        if (task != null)
+        {
+            OnTaskDeleted?.Invoke(this, task);
+        }
+    }
+
+    protected bool IsNewWeek()
+    {
+        if (!m_DbContext.TaskEntries.Any())
+        {
+            return false;
+        }
+
+        var latestCreatedOn = m_DbContext.TaskEntries.OrderByDescending(x => x.CreatedOn).FirstOrDefault()?.CreatedOn;
+        var latestStartedOn = m_DbContext.TaskEntries.Where(a => a.StartedOn != null).OrderByDescending(x => x.StartedOn).FirstOrDefault()?.StartedOn;
+        var latestEndedOn = m_DbContext.TaskEntries.Where(a => a.EndedOn != null).OrderByDescending(x => x.EndedOn).FirstOrDefault()?.EndedOn;
+
+        var lastRow = new[] { latestCreatedOn.GetValueOrDefault(), latestStartedOn.GetValueOrDefault(), latestEndedOn.GetValueOrDefault() }.Max();
+
+        var lastRowWeekNum = Utility.GetWeekNumber(lastRow);
+        var weekNumNow = Utility.GetWeekNumber(DateTime.Now);
+
+        return lastRowWeekNum < weekNumNow;
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        UnregisterHotKey(this.Handle, Constants.ShowUpdateEntry);
+        UnregisterHotKey(this.Handle, Constants.UpdateCurrentRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ToggleLastRunningTask);
+        UnregisterHotKey(this.Handle, Constants.ShowViewAll);
+
+        base.OnFormClosing(e);
+    }
+
+    private void FrmEntryList_OnTokenDoubleClicked(object? sender, CustomControls.TokenEventArgs e)
+    {
+        if (m_FormTagEditor.Visible)
+        {
+            m_FormTagEditor.Activate();
+
+            m_FormTagEditor.SelectTag(e.Text);
+
+            return;
+        }
+
+        m_FormTagEditor.Show();
+
+        m_FormTagEditor.SelectTag(e.Text);
+    }
+
+    private void FormNewEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
+    {
+        RunTask(args);
     }
 
     private void ShowFloatingButton(ITask eachEntry)
@@ -656,6 +667,11 @@ public partial class frmMain : Form
 
         FloatingButtons.Add(newFloatingButton);
 
+        newFloatingButton.OnStartEvent += (sender, e) =>
+        {
+            m_FormView.RefreshList();
+        };
+
         newFloatingButton.OnStopEvent += (sender, ts) =>
         {
             var entry = ((frmFloatingButton)sender!).Tag as ITask;
@@ -666,6 +682,8 @@ public partial class frmMain : Form
 
                 StopTask(entry.EntryID, endOn);
             }
+
+            m_FormView.RefreshList();
         };
 
         newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
