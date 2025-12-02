@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
@@ -194,7 +194,38 @@ public partial class frmViewList : Form
             });
 
         lblSelectedTotal.Text = $"{ts.Days:00}:{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
-    } 
+    }
+
+    private void dgView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        {
+            return;
+        }
+
+        var column = dgView.Columns[e.ColumnIndex];
+
+        if (column.Name == "PlayAction" && column is DataGridViewButtonColumn buttonColumn)
+        {
+            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+
+            // Ensure the column uses cell values instead of column text
+            if (buttonColumn.UseColumnTextForButtonValue)
+            {
+                buttonColumn.UseColumnTextForButtonValue = false;
+            }
+
+            // If EndedOn is null and StartedOn is not null, show stop icon
+            if (dataRow.EndedOn == null && dataRow.StartedOn != null)
+            {
+                e.Value = Constants.Controls.Stop;
+            }
+            else
+            {
+                e.Value = Constants.Controls.Play;
+            }
+        }
+    }
     
     private void dgView_CellContentClick(object sender, DataGridViewCellEventArgs e)
     {
@@ -203,9 +234,11 @@ public partial class frmViewList : Form
             return;
         }
 
-        var columnName = dgView.Columns[e.ColumnIndex].Name;
+        var column = dgView.Columns[e.ColumnIndex];
 
-        if (columnName == "PlayAction")
+        if (column.Name == "PlayAction" 
+            && column is DataGridViewButtonColumn buttonColumn 
+            && buttonColumn.Text == Constants.Controls.Play)
         {
             var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
 
@@ -214,7 +247,7 @@ public partial class frmViewList : Form
                 StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                 StartNow = true,
                 ParentEntryID = dataRow.ID,
-                HideParent = true,
+                HideParent = false,
                 BringNotes = true,
                 BringTags = true
             };

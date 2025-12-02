@@ -82,6 +82,7 @@ partial class frmViewList
         dgView.Size = new Size(914, 406);
         dgView.TabIndex = 1;
         dgView.CellContentClick += dgView_CellContentClick;
+        dgView.CellFormatting += dgView_CellFormatting;
         dgView.CellPainting += dgView_CellPainting;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;

@@ -8,8 +8,6 @@ namespace Zup.CustomControls;
 
 public partial class EachEntry : UserControl, ITask
 {
-    public const string StartChar = "►";
-    public const string StopChar = "■";
     public const string ReminderChar = "Ѧ";
 
     Color RunningColor = Color.LightPink;
@@ -264,7 +262,7 @@ public partial class EachEntry : UserControl, ITask
     {
         tmr.Stop();
         EndedOn = DateTime.Now;
-        btnToggleStartStop.Text = StartChar;
+        btnToggleStartStop.Text = Constants.Controls.PlayMini;
         btnToggleStartStop.ForeColor = DefaultForeColor;
         IsStarted = false;
 
@@ -327,7 +325,7 @@ public partial class EachEntry : UserControl, ITask
 
         tmr.Start();
 
-        btnToggleStartStop.Text = StopChar;
+        btnToggleStartStop.Text = Constants.Controls.StopMini;
         btnToggleStartStop.ForeColor = Color.Red;
         IsStarted = true;
 
