@@ -35,8 +35,8 @@ public partial class frmViewList : Form
         p_Tasks = tasks;
         p_DbContext.Database.Migrate();
 
-        p_Tasks.OnTaskAdded += P_Tasks_OnTaskAdded;
-        p_Tasks.OnTaskRemoved += P_Tasks_OnTaskRemoved;
+        p_Tasks.OnTaskStarted += P_Tasks_OnTaskAdded;
+        p_Tasks.OnTaskStopped += P_Tasks_OnTaskRemoved;
     }
 
     private void P_Tasks_OnTaskRemoved(object? sender, ITask e)

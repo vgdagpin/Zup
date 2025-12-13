@@ -161,7 +161,7 @@ public partial class frmFloatingButton : Form
         taskTooltip.ReshowDelay = 100;
         p_Tasks = tasks;
 
-        p_Tasks.OnTaskRemoved += (s, e) =>
+        p_Tasks.OnTaskStopped += (s, e) =>
         {
             if ((Tag as ITask)?.ID == e.ID)
             {

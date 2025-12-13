@@ -19,8 +19,8 @@ public class TaskCollection : IEnumerable<ITask>
 
     private HashSet<ITask> tasks { get; set; } = new HashSet<ITask>();
 
-    public event EventHandler<NewEntryEventArgs>? OnTaskAdded;
-    public event EventHandler<ITask>? OnTaskRemoved;
+    public event EventHandler<NewEntryEventArgs>? OnTaskStarted;
+    public event EventHandler<ITask>? OnTaskStopped;
 
     public TaskCollection(ZupDbContext dbContext, SettingHelper settingHelper)
     {
@@ -160,7 +160,7 @@ public class TaskCollection : IEnumerable<ITask>
 
         tasks.Add(task);
 
-        OnTaskAdded?.Invoke(this, args);
+        OnTaskStarted?.Invoke(this, args);
     }
 
     public void Stop(Guid taskId, DateTime? endOn = null)
@@ -172,8 +172,6 @@ public class TaskCollection : IEnumerable<ITask>
             task.EndedOn = endOn ?? DateTime.Now;
             runningIDs.Remove(taskId);
 
-            tasks.Remove(task);
-
             var taskEntity = m_DbContext.TaskEntries.Find(taskId);
 
             if (taskEntity != null)
@@ -182,7 +180,7 @@ public class TaskCollection : IEnumerable<ITask>
                 m_DbContext.SaveChanges();
             }
 
-            OnTaskRemoved?.Invoke(this, task);
+            OnTaskStopped?.Invoke(this, task);
         }
     }
 

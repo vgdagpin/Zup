@@ -234,8 +234,8 @@ public partial class frmMain : Form
     {
         Tasks = tasks;
 
-        Tasks.OnTaskAdded += Tasks_OnTaskAdded;
-        Tasks.OnTaskRemoved += Tasks_OnTaskRemoved;
+        Tasks.OnTaskStarted += Tasks_OnTaskAdded;
+        Tasks.OnTaskStopped += Tasks_OnTaskRemoved;
 
 
         InitializeComponent();
