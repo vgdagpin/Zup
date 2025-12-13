@@ -441,7 +441,7 @@ public partial class frmUpdateEntry : Form
 
         Show();
 
-        selectedEntry = p_DbContext.TaskEntries.Find(eachEntry.EntryID);
+        selectedEntry = p_DbContext.TaskEntries.Find(eachEntry.ID);
 
         selectedEntryID = null;
         selectedNoteID = null;
@@ -454,7 +454,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        selectedEntryID = eachEntry.EntryID;
+        selectedEntryID = eachEntry.ID;
 
         txtTask.Text = selectedEntry.Task;
 

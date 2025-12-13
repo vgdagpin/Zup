@@ -4,8 +4,8 @@ namespace Zup;
 
 public class ZupTask : ITask
 {
-    public Guid EntryID { get; set; }
-    public string Text { get; set; } = null!;
+    public Guid ID { get; set; }
+    public string Task { get; set; } = null!;
     public DateTime CreatedOn { get; set; }
     public DateTime? StartedOn { get; set; }
     public DateTime? EndedOn { get; set; }
@@ -13,39 +13,6 @@ public class ZupTask : ITask
     public byte? Rank { get; set; }
     public bool IsRunning { get; set; }
 
-
-    public TaskStatus TaskStatus
-    {
-        get
-        {
-            if (IsRunning)
-            {
-                return TaskStatus.Running;
-            }
-
-            if (Rank != null)
-            {
-                return TaskStatus.Ranked;
-            }
-
-            if (StartedOn == null)
-            {
-                return TaskStatus.Queued;
-            }
-
-            if (StartedOn != null && EndedOn == null)
-            {
-                return TaskStatus.Unclosed;
-            }
-
-            if (StartedOn != null && EndedOn != null)
-            {
-                return TaskStatus.Closed;
-            }
-
-            return TaskStatus.Ongoing;
-        }
-    }
 
 
     public bool Equals(ITask? x, ITask? y)
@@ -58,7 +25,7 @@ public class ZupTask : ITask
         {
             return false;
         }
-        return x.EntryID == y.EntryID;
+        return x.ID == y.ID;
     }
 
     public int GetHashCode([DisallowNull] ITask obj)
@@ -68,6 +35,6 @@ public class ZupTask : ITask
             throw new ArgumentNullException(nameof(obj));
         }
 
-        return obj.EntryID.GetHashCode();
+        return obj.ID.GetHashCode();
     }
 }

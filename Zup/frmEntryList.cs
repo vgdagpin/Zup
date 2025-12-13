@@ -65,13 +65,13 @@ public partial class frmEntryList : Form
 
     private void M_FormMain_OnTaskUpdated(object? sender, ITask e)
     {
-        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID)
-            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID)
-            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID);
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
 
         if (eachEntry != null)
         {
-            eachEntry.Text = e.Text;
+            eachEntry.Task = e.Task;
             eachEntry.StartedOn = e.StartedOn;
             eachEntry.EndedOn = e.EndedOn;
             eachEntry.Rank = e.Rank;
@@ -80,7 +80,7 @@ public partial class frmEntryList : Form
 
     private void M_FormMain_OnTaskDeleted(object? sender, ITask e)
     {
-        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == e.EntryID);
+        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
 
         if (entryToRemove != null)
         {
@@ -93,7 +93,7 @@ public partial class frmEntryList : Form
 
     private void FormMain_OnNewTask(object? sender, NewEntryEventArgs e)
     {
-        var eachEntry = new EachEntry(e.Task.EntryID, e.Task.Text, e.Task.CreatedOn, e.Task.StartedOn, null);
+        var eachEntry = new EachEntry(e.Task.ID, e.Task.Task, e.Task.CreatedOn, e.Task.StartedOn, null);
 
         eachEntry.GotFocus += (sender, e) => ActiveControl = null;
 
@@ -273,7 +273,7 @@ public partial class frmEntryList : Form
 
     private EachEntry Translate(ITask task)
     {
-        var eachEntry = new EachEntry(task.EntryID, task.Text, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
+        var eachEntry = new EachEntry(task.ID, task.Task, task.CreatedOn, task.StartedOn, task.EndedOn, task.Reminder)
         {
             Rank = task.Rank,
             TabStop = false,
@@ -466,8 +466,8 @@ public partial class frmEntryList : Form
     {
         var eachEntry = (EachEntry)sender!;
 
-        CurrentRunningTaskID = eachEntry.EntryID;
-        LastRunningTaskID = eachEntry.EntryID;
+        CurrentRunningTaskID = eachEntry.ID;
+        LastRunningTaskID = eachEntry.ID;
     }
 
     private void EachEntry_OnReRunEventHandler(object? sender, NewEntryEventArgs args)
@@ -481,7 +481,7 @@ public partial class frmEntryList : Form
 
         if (eachEntryStatus == TaskStatus.Queued)
         {
-            var queuedEntry = flpQueuedTaskList.Controls.Cast<EachEntry>().Single(a => a.EntryID == ((EachEntry)sender!).EntryID);
+            var queuedEntry = flpQueuedTaskList.Controls.Cast<EachEntry>().Single(a => a.ID == ((EachEntry)sender!).ID);
 
             flpQueuedTaskList.Controls.Remove(queuedEntry);
         }
@@ -503,9 +503,9 @@ public partial class frmEntryList : Form
 
     public EachEntry? GetEachEntryByID(Guid entryID)
     {
-        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
-            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID)
-            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.EntryID == entryID);
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == entryID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == entryID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == entryID);
 
         if (eachEntry == null)
         {
@@ -574,7 +574,7 @@ public partial class frmEntryList : Form
 
         foreach (EachEntry item in flpTaskList.Controls)
         {
-            if (item.EntryID != LastRunningTaskID)
+            if (item.ID != LastRunningTaskID)
             {
                 continue;
             }
@@ -647,7 +647,7 @@ public partial class frmEntryList : Form
             return;
         }
 
-        var task = await m_DbContext.TaskEntries.SingleOrDefaultAsync(a => a.ID == m_SelectedEntryToDelete.EntryID);
+        var task = await m_DbContext.TaskEntries.SingleOrDefaultAsync(a => a.ID == m_SelectedEntryToDelete.ID);
 
         if (task != null)
         {

@@ -42,7 +42,8 @@ public partial class frmFloatingButton : Form
 
     #region Properties
     // Override Text property to refresh UI when changed
-    public override string Text
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+    public string Task
     {
         get => base.Text;
         set
@@ -310,7 +311,7 @@ public partial class frmFloatingButton : Form
         int minutes = duration.Minutes;
         int seconds = duration.Seconds;
         string timeText = $"{hours:D2}:{minutes:D2}:{seconds:D2}";
-        string taskText = Text;
+        string taskText = Task;
 
         // Truncate task text to max length and append "..." if needed
         if (taskText.Length > MAX_TASK_TEXT_LENGTH)
@@ -508,7 +509,7 @@ public partial class frmFloatingButton : Form
         {
             if (taskTooltip != null && string.IsNullOrEmpty(taskTooltip.GetToolTip(this)))
             {
-                taskTooltip.SetToolTip(this, Text);
+                taskTooltip.SetToolTip(this, Task);
             }
         }
         else

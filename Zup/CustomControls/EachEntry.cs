@@ -32,40 +32,9 @@ public partial class EachEntry : UserControl, ITask
     public event MouseEventHandler? TaskMouseDown;
     public event MouseEventHandler? TaskRightClick;
 
-    public TaskStatus TaskStatus
-    {
-        get
-        {
-            if (tmr.Enabled)
-            {
-                return TaskStatus.Running;
-            }
 
-            if (Rank != null)
-            {
-                return TaskStatus.Ranked;
-            }
-
-            if (StartedOn == null)
-            {
-                return TaskStatus.Queued;
-            }
-
-            if (StartedOn != null && EndedOn == null)
-            {
-                return TaskStatus.Unclosed;
-            }
-
-            if (StartedOn != null && EndedOn != null)
-            {
-                return TaskStatus.Closed;
-            }
-
-            return TaskStatus.Ongoing;
-        }
-    }
-
-    public override string Text
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+    public string Task
     {
         get => lblText.Text;
         set
@@ -140,7 +109,7 @@ public partial class EachEntry : UserControl, ITask
     public bool IsFirstItem { get; set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-    public Guid EntryID { get; set; }
+    public Guid ID { get; set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime CreatedOn { get; set; }
@@ -192,13 +161,23 @@ public partial class EachEntry : UserControl, ITask
 
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool IsRunning { get; set; }
+    public bool IsRunning
+    {
+        get
+        {
+            return tmr.Enabled;
+        }
+        set
+        {
+            tmr.Enabled = true;
+        }
+    }
 
     public EachEntry(string text)
     {
         InitializeComponent();
 
-        Text = text;
+        Task = text;
 
         WriteTime();
     }
@@ -207,8 +186,8 @@ public partial class EachEntry : UserControl, ITask
     {
         InitializeComponent();
 
-        EntryID = entryID;
-        Text = text;
+        ID = entryID;
+        Task = text;
         CreatedOn = createdOn;
         StartedOn = startedOn;
         EndedOn = endedOn;
@@ -231,7 +210,7 @@ public partial class EachEntry : UserControl, ITask
     {
         if (!Visible)
         {
-            tmr.Enabled = false;
+            IsRunning = false;
         }
     }
 
@@ -270,7 +249,7 @@ public partial class EachEntry : UserControl, ITask
 
         if (OnStopEvent != null)
         {
-            OnStopEvent(EntryID, EndedOn.Value);
+            OnStopEvent(ID, EndedOn.Value);
         }
 
         BackColor = DefaultBackColor;
@@ -278,7 +257,7 @@ public partial class EachEntry : UserControl, ITask
 
     public void Start()
     {
-        var curStatus = TaskStatus;
+        var curStatus = this.TaskStatus;
 
         if (EndedOn != null)
         {
@@ -289,11 +268,11 @@ public partial class EachEntry : UserControl, ITask
                 Rank = null;
 
                 // if shift is pressed, create a new entry running in parallel
-                var args = new NewEntryEventArgs(Text)
+                var args = new NewEntryEventArgs(Task)
                 {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
-                    ParentEntryID = EntryID,
+                    ParentEntryID = ID,
                     BringTags = true
                 };
 
@@ -307,12 +286,12 @@ public partial class EachEntry : UserControl, ITask
         {
             if (OnStartQueueEvent != null)
             {
-                var args = new NewEntryEventArgs(Text)
+                var args = new NewEntryEventArgs(Task)
                 {
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
-                    ParentEntryID = EntryID,
-                    HideParent = TaskStatus == TaskStatus.Queued, // only hide if it is started from queued tasks
+                    ParentEntryID = ID,
+                    HideParent = this.TaskStatus == TaskStatus.Queued, // only hide if it is started from queued tasks
                     BringNotes = true,
                     BringTags = true
                 };
@@ -379,7 +358,7 @@ public partial class EachEntry : UserControl, ITask
             }
             else // double click
             {
-                OnUpdateEvent?.Invoke(EntryID);
+                OnUpdateEvent?.Invoke(ID);
             }
         }
         else if (e.Button == MouseButtons.Right)
@@ -398,7 +377,7 @@ public partial class EachEntry : UserControl, ITask
             }
             else // double click
             {
-                OnUpdateEvent?.Invoke(EntryID);
+                OnUpdateEvent?.Invoke(ID);
             }
         }
         else if (e.Button == MouseButtons.Right)
@@ -417,7 +396,7 @@ public partial class EachEntry : UserControl, ITask
             }
             else // double click
             {
-                OnUpdateEvent?.Invoke(EntryID);
+                OnUpdateEvent?.Invoke(ID);
             }
         }
         else if (e.Button == MouseButtons.Right)
@@ -436,7 +415,7 @@ public partial class EachEntry : UserControl, ITask
             }
             else // double click
             {
-                OnUpdateEvent?.Invoke(EntryID);
+                OnUpdateEvent?.Invoke(ID);
             }
         }
         else if (e.Button == MouseButtons.Right)
@@ -461,7 +440,7 @@ public partial class EachEntry : UserControl, ITask
         {
             return false;
         }
-        return x.EntryID == y.EntryID;
+        return x.ID == y.ID;
     }
 
     public int GetHashCode([DisallowNull] ITask obj)
@@ -471,6 +450,6 @@ public partial class EachEntry : UserControl, ITask
             throw new ArgumentNullException(nameof(obj));
         }
 
-        return obj.EntryID.GetHashCode();
+        return obj.ID.GetHashCode();
     }
 }

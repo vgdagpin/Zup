@@ -154,7 +154,7 @@ public partial class frmMain : Form
 
     private void FrmUpdateEntry_OnSavedEvent(object? sender, SaveEventArgs e)
     {
-        var task = Tasks.SingleOrDefault(a => a.EntryID == e.Task.ID);
+        var task = Tasks.SingleOrDefault(a => a.ID == e.Task.ID);
 
         if (task != null)
         {
@@ -208,7 +208,7 @@ public partial class frmMain : Form
                         m_FormEntryList.Show();
                     }
                 };
-               
+
                 frmSetting.OnDbBackupEvent += () =>
                 {
                     m_DbContext.BackupDb();
@@ -319,7 +319,7 @@ public partial class frmMain : Form
              select n
          ).ExecuteDelete();
 
-        var totalDeleted = 
+        var totalDeleted =
         (
             from e in m_DbContext.TaskEntries
             where e.StartedOn < keepDate
@@ -342,7 +342,7 @@ public partial class frmMain : Form
 
         var currentList = Tasks
             .Where(a => a.TaskStatus == TaskStatus.Closed)
-            .Select(a => a.Text)
+            .Select(a => a.Task)
             .ToArray();
 
         if (currentList.Length > 1)
@@ -373,8 +373,8 @@ public partial class frmMain : Form
         {
             var eachEntry = new ZupTask
             {
-                EntryID = task.ID,
-                Text = task.Task,
+                ID = task.ID,
+                Task = task.Task,
                 CreatedOn = task.CreatedOn,
                 StartedOn = task.StartedOn,
                 EndedOn = task.EndedOn,
@@ -426,7 +426,7 @@ public partial class frmMain : Form
 
     public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
     {
-        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
+        var task = Tasks.SingleOrDefault(a => a.ID == taskID);
 
         if (task != null)
         {
@@ -529,8 +529,8 @@ public partial class frmMain : Form
 
         var eachEntry = new ZupTask
         {
-            EntryID = newE.ID,
-            Text = newE.Task,
+            ID = newE.ID,
+            Task = newE.Task,
             CreatedOn = newE.CreatedOn,
             StartedOn = newE.StartedOn,
             EndedOn = newE.EndedOn,
@@ -555,7 +555,7 @@ public partial class frmMain : Form
                 && args.StopOtherTask
                 && eachEntry.IsRunning)
             {
-                foreach (var runningPills in FloatingButtons.Where(a => ((ITask)a.Tag!).EntryID != eachEntry.EntryID))
+                foreach (var runningPills in FloatingButtons.Where(a => ((ITask)a.Tag!).ID != eachEntry.ID))
                 {
                     runningPills.Stop();
                 }
@@ -580,7 +580,7 @@ public partial class frmMain : Form
                 return;
             }
 
-            ShowUpdateEntry(eachEntry.EntryID);
+            ShowUpdateEntry(eachEntry.ID);
         }
 
     }
@@ -595,7 +595,7 @@ public partial class frmMain : Form
             m_DbContext.SaveChanges();
         }
 
-        var task = Tasks.SingleOrDefault(a => a.EntryID == taskID);
+        var task = Tasks.SingleOrDefault(a => a.ID == taskID);
 
         if (task != null)
         {
@@ -680,7 +680,7 @@ public partial class frmMain : Form
             {
                 var endOn = entry.StartedOn.Value.Add(ts.Duration);
 
-                StopTask(entry.EntryID, endOn);
+                StopTask(entry.ID, endOn);
             }
 
             m_FormView.RefreshList();
@@ -692,7 +692,7 @@ public partial class frmMain : Form
 
             if (entry != null)
             {
-                ShowUpdateEntry(entry.EntryID);
+                ShowUpdateEntry(entry.ID);
             }
         };
 
@@ -702,7 +702,7 @@ public partial class frmMain : Form
 
             if (entry != null)
             {
-                var existingE = m_DbContext.TaskEntries.Find(entry.EntryID);
+                var existingE = m_DbContext.TaskEntries.Find(entry.ID);
 
                 if (existingE != null)
                 {
@@ -713,7 +713,7 @@ public partial class frmMain : Form
             }
         };
 
-        newFloatingButton.Text = eachEntry.Text;
+        newFloatingButton.Task = eachEntry.Task;
         newFloatingButton.StartedOn = eachEntry.StartedOn;
 
         eachEntry.IsRunning = eachEntry.StartedOn != null;

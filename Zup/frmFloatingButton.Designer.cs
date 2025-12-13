@@ -28,7 +28,7 @@ partial class frmFloatingButton
         ShowIcon = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;
-        Text = "Store task text bounds for tooltip detection (scaled down to 1x, accounting for padding)";
+        Task = "Store task text bounds for tooltip detection (scaled down to 1x, accounting for padding)";
         TopMost = true;
         ResumeLayout(false);
     }

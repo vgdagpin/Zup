@@ -12,9 +12,9 @@ public enum TaskStatus
 
 public interface ITask : IEqualityComparer<ITask>
 {
-    Guid EntryID { get; set; }
+    Guid ID { get; set; }
 
-    string Text { get; set; }
+    string Task { get; set; }
 
     DateTime CreatedOn { get; set; }
     DateTime? StartedOn { get; set; }
@@ -25,5 +25,36 @@ public interface ITask : IEqualityComparer<ITask>
 
     byte? Rank { get; set; }
 
-    TaskStatus TaskStatus { get; }
+    public TaskStatus TaskStatus
+    {
+        get
+        {
+            if (IsRunning)
+            {
+                return TaskStatus.Running;
+            }
+
+            if (Rank != null)
+            {
+                return TaskStatus.Ranked;
+            }
+
+            if (StartedOn == null)
+            {
+                return TaskStatus.Queued;
+            }
+
+            if (StartedOn != null && EndedOn == null)
+            {
+                return TaskStatus.Unclosed;
+            }
+
+            if (StartedOn != null && EndedOn != null)
+            {
+                return TaskStatus.Closed;
+            }
+
+            return TaskStatus.Ongoing;
+        }
+    }
 }
