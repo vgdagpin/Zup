@@ -452,11 +452,6 @@ public partial class frmMain : Form
         m_FormUpdateEntry.ShowUpdateEntry(taskID);
     }
 
-    public void RunTask(NewEntryEventArgs args)
-    {
-        throw new NotImplementedException();
-    }
-
     protected bool IsNewWeek()
     {
         if (!m_DbContext.TaskEntries.Any())
@@ -504,7 +499,7 @@ public partial class frmMain : Form
 
     private void FormNewEntry_NewEntryEventHandler(object? sender, NewEntryEventArgs args)
     {
-        RunTask(args);
+        Tasks.Start(sender, args.Entry, args.StartNow, args.StopOtherTask, args.HideParent, args.BringNotes, args.BringTags, args.GetTags, args.ParentEntryID);
     }
 
     private void ShowFloatingButton(ITask eachEntry)

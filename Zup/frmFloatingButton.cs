@@ -87,6 +87,9 @@ public partial class frmFloatingButton : Form
                 {
                     isRunning = true;
                     updateTimer.Start();
+
+                    var task = Tag as ITask;
+                    p_Tasks.Resume(this, task!.ID);
                 }
             }
             else
@@ -168,6 +171,11 @@ public partial class frmFloatingButton : Form
 
     private void P_Tasks_OnTaskStopped(object? sender, ITask e)
     {
+        if (sender is frmFloatingButton)
+        {
+            return;
+        }
+
         if ((Tag as ITask)?.ID != e.ID)
         {
             return;
@@ -183,6 +191,11 @@ public partial class frmFloatingButton : Form
 
     private void P_Tasks_OnTaskDeleted(object? sender, ITask e)
     {
+        if (sender is frmFloatingButton)
+        {
+            return;
+        }
+
         if ((Tag as ITask)?.ID != e.ID)
         {
             return;
@@ -203,6 +216,11 @@ public partial class frmFloatingButton : Form
 
     private void P_Tasks_OnTaskUpdated(object? sender, ITask e)
     {
+        if (sender is frmFloatingButton)
+        {
+            return;
+        }
+
         if ((Tag as ITask)?.ID != e.ID)
         {
             return;
@@ -679,6 +697,10 @@ public partial class frmFloatingButton : Form
         if (!startedOn.HasValue)
         {
             startedOn = DateTime.Now;
+
+            var task = Tag as ITask;
+
+            p_Tasks.Resume(this, task!.ID);
         }
         isRunning = true;
         updateTimer?.Start();

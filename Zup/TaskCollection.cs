@@ -45,12 +45,24 @@ public class TaskCollection : IEnumerable<ITask>
         tasks.Add(task);
     }
 
-    public void Resume(object sender, Guid id, bool stopOtherTasks)
+    public void Resume(object? sender, Guid id)
     {
+        var taskEntity = m_DbContext.TaskEntries.Find(id);
+        var task = Find(id);
 
+        if (taskEntity != null && task != null)
+        {
+            task.StartedOn = DateTime.Now;
+            task.IsRunning = true;
+            taskEntity.StartedOn = DateTime.Now;
+
+            m_DbContext.SaveChanges();
+
+            OnTaskUpdated?.Invoke(sender, task);
+        }
     }
 
-    public void Start(object sender, string text, bool startNow, bool stopOtherTasks, bool hideParent, bool bringNotes, bool bringTags, Guid? parentEntryID = null)
+    public void Start(object? sender, string text, bool startNow, bool stopOtherTasks, bool hideParent, bool bringNotes, bool bringTags, bool getTags, Guid? parentEntryID = null)
     {
         var newE = new tbl_TaskEntry
         {
@@ -110,29 +122,29 @@ public class TaskCollection : IEnumerable<ITask>
             }
         }
 
-        //if (args.GetTags && parentEntry == null)
-        //{
-        //    var minDate = DateTime.Now.AddDays(-p_SettingHelper.NumDaysOfDataToLoad);
+        if (getTags && parentEntry == null)
+        {
+            var minDate = DateTime.Now.AddDays(-p_SettingHelper.NumDaysOfDataToLoad);
 
-        //    var tagIDs =
-        //        (
-        //            from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
-        //            join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
-        //            orderby t.CreatedOn descending
-        //            where e.Task == args.Entry
-        //            select t.TagID
-        //        ).Distinct();
+            var tagIDs =
+                (
+                    from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
+                    join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
+                    orderby t.CreatedOn descending
+                    where e.Task == text
+                    select t.TagID
+                ).Distinct();
 
-        //    foreach (var tagID in tagIDs)
-        //    {
-        //        m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-        //        {
-        //            CreatedOn = DateTime.Now,
-        //            TaskID = newE.ID,
-        //            TagID = tagID
-        //        });
-        //    }
-        //}
+            foreach (var tagID in tagIDs)
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    CreatedOn = DateTime.Now,
+                    TaskID = newE.ID,
+                    TagID = tagID
+                });
+            }
+        }
 
         m_DbContext.SaveChanges();
 
@@ -166,7 +178,7 @@ public class TaskCollection : IEnumerable<ITask>
         OnTaskStarted?.Invoke(sender, args);
     }
 
-    public void Stop(object sender, Guid taskId, DateTime? endOn = null)
+    public void Stop(object? sender, Guid taskId, DateTime? endOn = null)
     {
         var task = Find(taskId);
 
@@ -189,7 +201,7 @@ public class TaskCollection : IEnumerable<ITask>
         }
     }
 
-    public void Delete(object sender, Guid taskId)
+    public void Delete(object? sender, Guid taskId)
     {
         m_DbContext.TaskEntries.Where(a => a.ID == taskId).ExecuteDelete();
 
@@ -203,7 +215,7 @@ public class TaskCollection : IEnumerable<ITask>
         }
     }
 
-    public void Update(object sender, Guid taskId, ZupTask task)
+    public void Update(object? sender, Guid taskId, ZupTask task)
     {
         var taskEntity = m_DbContext.TaskEntries.Find(taskId);
 
@@ -224,7 +236,7 @@ public class TaskCollection : IEnumerable<ITask>
         }
     }
 
-    public void Reset(object sender, Guid taskId)
+    public void Reset(object? sender, Guid taskId)
     {
         var taskEntity = m_DbContext.TaskEntries.Find(taskId);
         var task = Find(taskId);

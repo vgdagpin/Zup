@@ -829,7 +829,7 @@ public partial class frmUpdateEntry : Form
 
         if (eachEntry.GetTaskStatus() == TaskStatus.Closed)
         {
-            p_Tasks.Start(this, txtTask.Text, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, selectedEntryID);
+            p_Tasks.Start(this, txtTask.Text, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, false, selectedEntryID);
         }
         else if (eachEntry.GetTaskStatus() == TaskStatus.Running)
         {
@@ -837,7 +837,7 @@ public partial class frmUpdateEntry : Form
         }
         else
         {
-            p_Tasks.Resume(this, selectedEntryID!.Value, !ModifierKeys.HasFlag(Keys.Shift));
+            p_Tasks.Resume(this, selectedEntryID!.Value);
         }
 
         Close();

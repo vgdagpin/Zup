@@ -295,7 +295,7 @@ public partial class frmViewList : Form
             }
             else
             {
-                p_Tasks.Start(this, dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, dataRow.ID);
+                p_Tasks.Start(this, dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, false, dataRow.ID);
             }
         }
     }
