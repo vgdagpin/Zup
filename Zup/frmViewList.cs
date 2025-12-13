@@ -185,12 +185,13 @@ public partial class frmViewList : Form
         var ts = new TimeSpan();
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
-            .Select(a => (TimeLogSummary)a.DataBoundItem!)
+            .Select(a => a.DataBoundItem)
+            .Cast<TimeLogSummary>()
             .Where(a => a.Duration != null)
             .ToList()
             .ForEach(a =>
             {
-                ts += a!.Duration!.Value;
+                ts += a.Duration!.Value;
             });
 
         lblSelectedTotal.Text = $"{ts.Days:00}:{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
@@ -226,7 +227,7 @@ public partial class frmViewList : Form
             }
         }
     }
-    
+
     private void dgView_CellContentClick(object sender, DataGridViewCellEventArgs e)
     {
         if (e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -236,8 +237,8 @@ public partial class frmViewList : Form
 
         var column = dgView.Columns[e.ColumnIndex];
 
-        if (column.Name == "PlayAction" 
-            && column is DataGridViewButtonColumn buttonColumn 
+        if (column.Name == "PlayAction"
+            && column is DataGridViewButtonColumn buttonColumn
             && buttonColumn.Text == Constants.Controls.Play)
         {
             var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
@@ -253,7 +254,7 @@ public partial class frmViewList : Form
             };
 
             m_FormMain.RunTask(args);
-        }        
+        }
     }
 
     private void dgView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)

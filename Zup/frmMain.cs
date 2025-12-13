@@ -341,7 +341,7 @@ public partial class frmMain : Form
         var suggestions = new List<string>();
 
         var currentList = Tasks
-            .Where(a => a.TaskStatus == TaskStatus.Closed)
+            .Where(a => a.GetTaskStatus() == TaskStatus.Closed)
             .Select(a => a.Task)
             .ToArray();
 
@@ -382,7 +382,7 @@ public partial class frmMain : Form
                 Rank = task.Rank
             };
 
-            if (eachEntry.TaskStatus == TaskStatus.Ranked)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Ranked)
             {
                 if (!SettingHelper.ShowRankedTasks)
                 {
@@ -394,7 +394,7 @@ public partial class frmMain : Form
                 continue;
             }
 
-            if (eachEntry.TaskStatus == TaskStatus.Queued)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Queued)
             {
                 if (!SettingHelper.ShowQueuedTasks)
                 {
@@ -406,7 +406,7 @@ public partial class frmMain : Form
                 continue;
             }
 
-            if (eachEntry.TaskStatus == TaskStatus.Closed && !SettingHelper.ShowClosedTasks)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Closed && !SettingHelper.ShowClosedTasks)
             {
                 continue;
             }
@@ -551,7 +551,7 @@ public partial class frmMain : Form
         {
             ShowFloatingButton(eachEntry);
 
-            if (eachEntry.TaskStatus != TaskStatus.Queued
+            if (eachEntry.GetTaskStatus() != TaskStatus.Queued
                 && args.StopOtherTask
                 && eachEntry.IsRunning)
             {

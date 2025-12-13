@@ -257,7 +257,7 @@ public partial class EachEntry : UserControl, ITask
 
     public void Start()
     {
-        var curStatus = this.TaskStatus;
+        var curStatus = this.GetTaskStatus();
 
         if (EndedOn != null)
         {
@@ -291,7 +291,7 @@ public partial class EachEntry : UserControl, ITask
                     StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
                     StartNow = true,
                     ParentEntryID = ID,
-                    HideParent = this.TaskStatus == TaskStatus.Queued, // only hide if it is started from queued tasks
+                    HideParent = this.GetTaskStatus() == TaskStatus.Queued, // only hide if it is started from queued tasks
                     BringNotes = true,
                     BringTags = true
                 };

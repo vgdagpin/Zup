@@ -105,7 +105,7 @@ public partial class frmEntryList : Form
         eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
         eachEntry.TaskRightClick += EachEntry_TaskRightClick;
 
-        if (eachEntry.TaskStatus == TaskStatus.Queued)
+        if (eachEntry.GetTaskStatus() == TaskStatus.Queued)
         {
             flpQueuedTaskList.Controls.Add(eachEntry);
         }
@@ -303,7 +303,7 @@ public partial class frmEntryList : Form
         {
             var eachEntry = Translate(task);
 
-            if (eachEntry.TaskStatus == TaskStatus.Ranked)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Ranked)
             {
                 if (!settingHelper.ShowRankedTasks)
                 {
@@ -314,7 +314,7 @@ public partial class frmEntryList : Form
                 continue;
             }
 
-            if (eachEntry.TaskStatus == TaskStatus.Queued)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Queued)
             {
                 if (!settingHelper.ShowQueuedTasks)
                 {
@@ -325,7 +325,7 @@ public partial class frmEntryList : Form
                 continue;
             }
 
-            if (eachEntry.TaskStatus == TaskStatus.Closed && !settingHelper.ShowClosedTasks)
+            if (eachEntry.GetTaskStatus() == TaskStatus.Closed && !settingHelper.ShowClosedTasks)
             {
                 continue;
             }
@@ -359,7 +359,7 @@ public partial class frmEntryList : Form
         var minDate = DateTime.Now.AddDays(-settingHelper.NumDaysOfDataToLoad);
 
         // running
-        foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Running).OrderBy(a => a.CreatedOn))
+        foreach (var item in all.Where(a => a.GetTaskStatus() == TaskStatus.Running).OrderBy(a => a.CreatedOn))
         {
             if (!list.Contains(item))
             {
@@ -371,7 +371,7 @@ public partial class frmEntryList : Form
         }
 
         // started but not yet closed
-        foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Unclosed))
+        foreach (var item in all.Where(a => a.GetTaskStatus() == TaskStatus.Unclosed))
         {
             if (!list.Contains(item))
             {
@@ -383,7 +383,7 @@ public partial class frmEntryList : Form
         }
 
         // with ranking
-        foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Ranked).OrderBy(a => a.Rank))
+        foreach (var item in all.Where(a => a.GetTaskStatus() == TaskStatus.Ranked).OrderBy(a => a.Rank))
         {
             if (!list.Contains(item))
             {
@@ -395,7 +395,7 @@ public partial class frmEntryList : Form
         }
 
         // not yet started
-        foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Queued).OrderByDescending(a => a.CreatedOn))
+        foreach (var item in all.Where(a => a.GetTaskStatus() == TaskStatus.Queued).OrderByDescending(a => a.CreatedOn))
         {
             if (!list.Contains(item))
             {
@@ -407,7 +407,7 @@ public partial class frmEntryList : Form
         }
 
         // closed items
-        foreach (var item in all.Where(a => a.TaskStatus == TaskStatus.Closed).OrderByDescending(a => a.StartedOn))
+        foreach (var item in all.Where(a => a.GetTaskStatus() == TaskStatus.Closed).OrderByDescending(a => a.StartedOn))
         {
             if (!list.Contains(item))
             {
@@ -477,7 +477,7 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnStartQueueEventHandler(object? sender, NewEntryEventArgs args)
     {
-        var eachEntryStatus = ((EachEntry)sender!).TaskStatus;
+        var eachEntryStatus = ((EachEntry)sender!).GetTaskStatus();
 
         if (eachEntryStatus == TaskStatus.Queued)
         {
@@ -498,7 +498,7 @@ public partial class frmEntryList : Form
     {
         var eachEntry = GetEachEntryByID(id);
 
-        m_FormMain.ShowUpdateEntry(id, eachEntry?.TaskStatus == TaskStatus.Closed);
+        m_FormMain.ShowUpdateEntry(id, eachEntry?.GetTaskStatus() == TaskStatus.Closed);
     }
 
     public EachEntry? GetEachEntryByID(Guid entryID)

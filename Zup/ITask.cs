@@ -1,15 +1,5 @@
 ﻿namespace Zup;
 
-public enum TaskStatus
-{
-    Ongoing,
-    Queued,
-    Ranked,
-    Closed,
-    Unclosed,
-    Running
-}
-
 public interface ITask : IEqualityComparer<ITask>
 {
     Guid ID { get; set; }
@@ -24,37 +14,37 @@ public interface ITask : IEqualityComparer<ITask>
     bool IsRunning { get; set; }
 
     byte? Rank { get; set; }
+}
 
-    public TaskStatus TaskStatus
+public static class ITaskExtensions
+{
+    public static TaskStatus GetTaskStatus(this ITask task)
     {
-        get
+        if (task.IsRunning)
         {
-            if (IsRunning)
-            {
-                return TaskStatus.Running;
-            }
-
-            if (Rank != null)
-            {
-                return TaskStatus.Ranked;
-            }
-
-            if (StartedOn == null)
-            {
-                return TaskStatus.Queued;
-            }
-
-            if (StartedOn != null && EndedOn == null)
-            {
-                return TaskStatus.Unclosed;
-            }
-
-            if (StartedOn != null && EndedOn != null)
-            {
-                return TaskStatus.Closed;
-            }
-
-            return TaskStatus.Ongoing;
+            return TaskStatus.Running;
         }
+
+        if (task.Rank != null)
+        {
+            return TaskStatus.Ranked;
+        }
+
+        if (task.StartedOn == null)
+        {
+            return TaskStatus.Queued;
+        }
+
+        if (task.StartedOn != null && task.EndedOn == null)
+        {
+            return TaskStatus.Unclosed;
+        }
+
+        if (task.StartedOn != null && task.EndedOn != null)
+        {
+            return TaskStatus.Closed;
+        }
+
+        return TaskStatus.Ongoing;
     }
 }

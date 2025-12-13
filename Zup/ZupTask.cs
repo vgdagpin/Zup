@@ -13,8 +13,6 @@ public class ZupTask : ITask
     public byte? Rank { get; set; }
     public bool IsRunning { get; set; }
 
-
-
     public bool Equals(ITask? x, ITask? y)
     {
         if (x == null && y == null)

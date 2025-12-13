@@ -437,7 +437,7 @@ public partial class frmUpdateEntry : Form
         isNotesModified = false;
 
         btnRerun.Visible = canReRun;
-        btnRemind.Visible = eachEntry.TaskStatus == TaskStatus.Queued || eachEntry.TaskStatus == TaskStatus.Ranked;
+        btnRemind.Visible = eachEntry.GetTaskStatus() == TaskStatus.Queued || eachEntry.GetTaskStatus() == TaskStatus.Ranked;
 
         Show();
 
