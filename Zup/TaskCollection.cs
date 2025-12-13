@@ -21,6 +21,8 @@ public class TaskCollection : IEnumerable<ITask>
 
     public event EventHandler<NewEntryEventArgs>? OnTaskStarted;
     public event EventHandler<ITask>? OnTaskStopped;
+    public event EventHandler<ITask>? OnTaskDeleted;
+    public event EventHandler<ITask>? OnTaskUpdated;
 
     public TaskCollection(ZupDbContext dbContext, SettingHelper settingHelper)
     {
@@ -182,6 +184,129 @@ public class TaskCollection : IEnumerable<ITask>
 
             OnTaskStopped?.Invoke(this, task);
         }
+    }
+
+    public void Delete(Guid taskId)
+    {
+        m_DbContext.TaskEntries.Where(a => a.ID == taskId).ExecuteDelete();
+
+        var task = Find(taskId);
+
+        if (task != null)
+        {
+            tasks.Remove(task);
+            OnTaskDeleted?.Invoke(this, task);
+            runningIDs.Remove(taskId);
+        }
+    }
+
+    public void Update(Guid taskId, ZupTask task)
+    {
+        var taskEntity = m_DbContext.TaskEntries.Find(taskId);
+
+        if (taskEntity != null)
+        {
+            taskEntity.Task = task.Task;
+            taskEntity.StartedOn = task.StartedOn;
+            taskEntity.EndedOn = task.EndedOn;
+            taskEntity.Rank = task.Rank;
+
+            SaveTags(taskId, task.Tags);
+
+            m_DbContext.SaveChanges();
+
+            task.ID = taskId;
+
+            OnTaskUpdated?.Invoke(this, task);
+        }
+    }
+
+    private void SaveTags(Guid taskID, string[] tags)
+    {
+        if (tags == null)
+        {
+            return;
+        }
+
+        var allTagsNameIDDictionary = m_DbContext.Tags.Where(a => tags.Contains(a.Name))
+            .ToList()
+            .ToDictionary(a => a.Name, a => a.ID);
+
+        var query = from tet in m_DbContext.TaskEntryTags
+                    join t in m_DbContext.Tags
+                        on tet.TagID equals t.ID
+                    where tet.TaskID == taskID
+                    orderby tet.CreatedOn
+                    select new
+                    {
+                        t.ID,
+                        t.Name
+                    };
+
+        var existing = query.ToArray();
+
+
+        #region Tags to remove
+        var tagIDsToRemove = new List<Guid>();
+
+        foreach (var item in existing)
+        {
+            if (!tags.Contains(item.Name))
+            {
+                tagIDsToRemove.Add(item.ID);
+            }
+        }
+
+        if (tagIDsToRemove.Any())
+        {
+            var tagEToRem = m_DbContext.TaskEntryTags.Where(a => a.TaskID == taskID && tagIDsToRemove.Contains(a.TagID))
+            .ToList();
+
+            m_DbContext.TaskEntryTags.RemoveRange(tagEToRem);
+        }
+        #endregion
+
+        #region Tags to add
+        var tagNamesToAdd = new List<string>();
+
+        foreach (var newTag in tags)
+        {
+            if (!existing.Any(a => a.Name == newTag))
+            {
+                tagNamesToAdd.Add(newTag);
+            }
+        }
+
+        foreach (var tag in tagNamesToAdd.Distinct())
+        {
+            if (allTagsNameIDDictionary.ContainsKey(tag))
+            {
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = allTagsNameIDDictionary[tag],
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+            else
+            {
+                var newTag = new tbl_Tag
+                {
+                    ID = Guid.NewGuid(),
+                    Name = tag
+                };
+
+                m_DbContext.Tags.Add(newTag);
+
+                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
+                {
+                    TagID = newTag.ID,
+                    TaskID = taskID,
+                    CreatedOn = DateTime.Now
+                });
+            }
+        }
+        #endregion
     }
 
     public IEnumerator<ITask> GetEnumerator() => tasks.GetEnumerator();

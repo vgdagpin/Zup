@@ -36,7 +36,6 @@ public partial class frmFloatingButton : Form
 
     // Events
     public event EventHandler? OnResetEvent;
-    public event EventHandler? OnDeleteEvent;
     public event EventHandler? OnShowUpdateEntry;
 
     #region Properties
@@ -161,13 +160,69 @@ public partial class frmFloatingButton : Form
         taskTooltip.ReshowDelay = 100;
         p_Tasks = tasks;
 
-        p_Tasks.OnTaskStopped += (s, e) =>
+        p_Tasks.OnTaskStopped += P_Tasks_OnTaskStopped;
+
+        p_Tasks.OnTaskDeleted += P_Tasks_OnTaskDeleted;
+
+        p_Tasks.OnTaskUpdated += P_Tasks_OnTaskUpdated;
+    }
+
+    private void P_Tasks_OnTaskStopped(object? sender, ITask e)
+    {
+        if ((Tag as ITask)?.ID != e.ID)
         {
-            if ((Tag as ITask)?.ID == e.ID)
-            {
-                Stop();
-            }
-        };
+            return;
+        }
+
+        if (!isRunning)
+        {
+            return;
+        }
+
+        Stop();
+    }
+
+    private void P_Tasks_OnTaskDeleted(object? sender, ITask e)
+    {
+        if ((Tag as ITask)?.ID != e.ID)
+        {
+            return;
+        }
+
+        if (!isRunning)
+        {
+            return;
+        }
+
+        // Stop button clicked - stop timer and raise event
+        isRunning = false;
+        updateTimer?.Stop();
+
+        // Close the form
+        Close();
+    }
+
+    private void P_Tasks_OnTaskUpdated(object? sender, ITask e)
+    {
+        if ((Tag as ITask)?.ID != e.ID)
+        {
+            return;
+        }
+
+        if (!isRunning)
+        {
+            return;
+        }
+
+        if (StartedOn != e.StartedOn)
+        {
+            StartedOn = e.StartedOn;
+        }
+
+        if (Task != e.Task)
+        {
+            Task = e.Task;
+        }
     }
 
     private void FrmFloatingButton_Load(object? sender, EventArgs e)
@@ -627,8 +682,6 @@ public partial class frmFloatingButton : Form
         }
         isRunning = true;
         updateTimer?.Start();
-
-
     }
 
     private void OnControlButtonStop()
@@ -637,14 +690,24 @@ public partial class frmFloatingButton : Form
         isRunning = false;
         updateTimer?.Stop();
 
+        var task = Tag as ITask;
+
+        var endOn = task!.StartedOn!.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
+
+        p_Tasks.Stop(task!.ID, endOn);
+
         // Close the form
         Close();
     }
 
     private void OnControlButtonDelete()
     {
-        // Raise OnDeleteEvent
-        OnDeleteEvent?.Invoke(this, EventArgs.Empty);
+        isRunning = false;
+        updateTimer?.Stop();
+
+        var task = Tag as ITask;
+
+        p_Tasks.Delete(task!.ID);
 
         // Close the form
         Close();

@@ -58,71 +58,6 @@ public partial class frmEntryList : Form
     public void SetFormMain(frmMain frmMain)
     {
         m_FormMain = frmMain;
-
-        m_FormMain.OnNewTask += FormMain_OnNewTask;
-        m_FormMain.OnTaskDeleted += M_FormMain_OnTaskDeleted;
-        m_FormMain.OnTaskUpdated += M_FormMain_OnTaskUpdated;
-    }
-
-    private void M_FormMain_OnTaskUpdated(object? sender, ITask e)
-    {
-        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
-            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
-            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
-
-        if (eachEntry != null)
-        {
-            eachEntry.Task = e.Task;
-            eachEntry.StartedOn = e.StartedOn;
-            eachEntry.EndedOn = e.EndedOn;
-            eachEntry.Rank = e.Rank;
-        }
-    }
-
-    private void M_FormMain_OnTaskDeleted(object? sender, ITask e)
-    {
-        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
-
-        if (entryToRemove != null)
-        {
-            // only hide, remove will auto scroll the list to bottom because the list is in reverse
-            entryToRemove.Hide();
-        }
-
-        ResizeForm();
-    }
-
-    private void FormMain_OnNewTask(object? sender, NewEntryEventArgs e)
-    {
-        var eachEntry = new EachEntry(e.Task.ID, e.Task.Task, e.Task.CreatedOn, e.Task.StartedOn, null);
-
-        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
-
-        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
-        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
-        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
-        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
-        eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
-        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
-        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
-
-        if (eachEntry.GetTaskStatus() == TaskStatus.Queued)
-        {
-            flpQueuedTaskList.Controls.Add(eachEntry);
-        }
-        else
-        {
-            AddEntryToFlowLayoutControl(eachEntry, e);
-        }
-
-        SortTasks(flpTaskList.Controls);
-
-        RefreshList();
-
-        if (settingHelper.UsePillTimer)
-        {
-            Hide();
-        }
     }
 
     private void UpdateFormPosition()
@@ -158,6 +93,71 @@ public partial class frmEntryList : Form
         m_DbContext = dbContext;
         this.settingHelper = settingHelper;
         p_Tasks = tasks;
+
+        p_Tasks.OnTaskStarted += P_Tasks_OnTaskStarted;
+        p_Tasks.OnTaskDeleted += P_Tasks_OnTaskDeleted;
+        p_Tasks.OnTaskUpdated += P_Tasks_OnTaskUpdated;
+    }
+
+    private void P_Tasks_OnTaskStarted(object? sender, NewEntryEventArgs e)
+    {
+        var eachEntry = new EachEntry(e.Task.ID, e.Task.Task, e.Task.CreatedOn, e.Task.StartedOn, null);
+
+        eachEntry.GotFocus += (sender, e) => ActiveControl = null;
+
+        eachEntry.OnReRunEvent += EachEntry_OnReRunEventHandler;
+        eachEntry.OnStopEvent += EachEntry_OnStopEventHandler;
+        eachEntry.OnStartEvent += EachEntry_OnStartEvent;
+        eachEntry.OnUpdateEvent += EachEntry_OnUpdateEvent;
+        eachEntry.OnStartQueueEvent += EachEntry_OnStartQueueEventHandler;
+        eachEntry.TaskMouseDown += new MouseEventHandler(frmEntryList_MouseDown);
+        eachEntry.TaskRightClick += EachEntry_TaskRightClick;
+
+        if (eachEntry.GetTaskStatus() == TaskStatus.Queued)
+        {
+            flpQueuedTaskList.Controls.Add(eachEntry);
+        }
+        else
+        {
+            AddEntryToFlowLayoutControl(eachEntry, e);
+        }
+
+        SortTasks(flpTaskList.Controls);
+
+        RefreshList();
+
+        if (settingHelper.UsePillTimer)
+        {
+            Hide();
+        }
+    }
+
+    private void P_Tasks_OnTaskDeleted(object? sender, ITask e)
+    {
+        var entryToRemove = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
+
+        if (entryToRemove != null)
+        {
+            // only hide, remove will auto scroll the list to bottom because the list is in reverse
+            entryToRemove.Hide();
+        }
+
+        ResizeForm();
+    }
+
+    private void P_Tasks_OnTaskUpdated(object? sender, ITask e)
+    {
+        var eachEntry = flpTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
+            ?? flpQueuedTaskList.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID)
+            ?? flpRankedTasks.Controls.Cast<EachEntry>().SingleOrDefault(a => a.ID == e.ID);
+
+        if (eachEntry != null)
+        {
+            eachEntry.Task = e.Task;
+            eachEntry.StartedOn = e.StartedOn;
+            eachEntry.EndedOn = e.EndedOn;
+            eachEntry.Rank = e.Rank;
+        }
     }
 
     private void frmEntryList_Load(object sender, EventArgs e)

@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 using Zup.CustomControls;
 using Zup.Entities;
-using Zup.EventArguments;
 
 namespace Zup;
 
@@ -16,13 +15,12 @@ public partial class frmUpdateEntry : Form
     private frmMain m_FormMain = null!;
 
     private readonly ZupDbContext p_DbContext;
+    private readonly TaskCollection p_Tasks;
     private Guid? selectedEntryID;
     private Guid? selectedNoteID;
 
 
-    public event EventHandler<SaveEventArgs>? OnSavedEvent;
     public event EventHandler<TokenEventArgs>? OnTokenDoubleClicked;
-    public event EventHandler<NewEntryEventArgs>? OnReRunEvent;
 
     const string DateTimeCustomFormat = "MM/dd/yyyy hh:mm:ss tt";
 
@@ -96,11 +94,11 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public frmUpdateEntry(ZupDbContext dbContext)
+    public frmUpdateEntry(ZupDbContext dbContext, TaskCollection tasks)
     {
         InitializeComponent();
         p_DbContext = dbContext;
-
+        p_Tasks = tasks;
         SetControlsEnable(false);
     }
 
@@ -151,123 +149,27 @@ public partial class frmUpdateEntry : Form
     #region Save
     private void SaveEntry()
     {
-        var task = p_DbContext.TaskEntries.Find(selectedEntryID);
-
-        if (task != null)
+        var update = new ZupTask
         {
-            task.Task = txtTask.Text;
-            task.StartedOn = StartedOn;
-            task.EndedOn = EndedOn;
+            Task = txtTask.Text,
+            StartedOn = StartedOn,
+            EndedOn = EndedOn
+        };
 
-            if (numRank.Value <= 0)
-            {
-                task.Rank = null;
-            }
-            else
-            {
-                task.Rank = (byte)numRank.Value;
-            }
-
-            SaveTags(task.ID, tokenBoxTags.Tokens.ToArray());
-
-            p_DbContext.SaveChanges();
-
-            IsEntryModified = false;
-
-            if (OnSavedEvent != null)
-            {
-                OnSavedEvent(this, new SaveEventArgs(task));
-            }
+        if (numRank.Value <= 0)
+        {
+            update.Rank = null;
         }
-    }
-
-    private void SaveTags(Guid taskID, string[] tags)
-    {
-        if (tags == null)
+        else
         {
-            return;
+            update.Rank = (byte)numRank.Value;
         }
 
-        var allTagsNameIDDictionary = p_DbContext.Tags.Where(a => tags.Contains(a.Name))
-            .ToList()
-            .ToDictionary(a => a.Name, a => a.ID);
+        update.Tags = tokenBoxTags.Tokens.ToArray();
 
-        var query = from tet in p_DbContext.TaskEntryTags
-                    join t in p_DbContext.Tags
-                        on tet.TagID equals t.ID
-                    where tet.TaskID == taskID
-                    orderby tet.CreatedOn
-                    select new
-                    {
-                        t.ID,
-                        t.Name
-                    };
+        p_Tasks.Update(selectedEntryID!.Value, update);
 
-        var existing = query.ToArray();
-
-
-        #region Tags to remove
-        var tagIDsToRemove = new List<Guid>();
-
-        foreach (var item in existing)
-        {
-            if (!tags.Contains(item.Name))
-            {
-                tagIDsToRemove.Add(item.ID);
-            }
-        }
-
-        if (tagIDsToRemove.Any())
-        {
-            var tagEToRem = p_DbContext.TaskEntryTags.Where(a => a.TaskID == taskID && tagIDsToRemove.Contains(a.TagID))
-            .ToList();
-
-            p_DbContext.TaskEntryTags.RemoveRange(tagEToRem);
-        }
-        #endregion
-
-        #region Tags to add
-        var tagNamesToAdd = new List<string>();
-
-        foreach (var newTag in tags)
-        {
-            if (!existing.Any(a => a.Name == newTag))
-            {
-                tagNamesToAdd.Add(newTag);
-            }
-        }
-
-
-        foreach (var tag in tagNamesToAdd.Distinct())
-        {
-            if (allTagsNameIDDictionary.ContainsKey(tag))
-            {
-                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    TagID = allTagsNameIDDictionary[tag],
-                    TaskID = taskID,
-                    CreatedOn = DateTime.Now
-                });
-            }
-            else
-            {
-                var newTag = new tbl_Tag
-                {
-                    ID = Guid.NewGuid(),
-                    Name = tag
-                };
-
-                p_DbContext.Tags.Add(newTag);
-
-                p_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    TagID = newTag.ID,
-                    TaskID = taskID,
-                    CreatedOn = DateTime.Now
-                });
-            }
-        }
-        #endregion
+        IsEntryModified = false;
     }
 
     private void SaveNotes()
@@ -429,8 +331,10 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public void ShowUpdateEntry(ITask eachEntry, bool canReRun = false)
+    public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
     {
+        var eachEntry = p_Tasks.Find(taskID) ?? throw new ArgumentNullException(taskID.ToString());
+
         Text = "Update Entry";
         startTracking = false;
         isEntryModified = false;
@@ -713,7 +617,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        m_FormMain.DeleteEntry(selectedEntryID!.Value);
+        p_Tasks.Delete(selectedEntryID!.Value);
 
         Close();
     }
@@ -875,16 +779,8 @@ public partial class frmUpdateEntry : Form
 
     private void btnRerun_Click(object sender, EventArgs e)
     {
-        if (OnReRunEvent != null)
-        {
-            OnReRunEvent(this, new NewEntryEventArgs(txtTask.Text)
-            {
-                StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
-                StartNow = true,
-                ParentEntryID = selectedEntryID,
-                BringTags = true
-            });
-        }
+        p_Tasks.Start(txtTask.Text, true, !ModifierKeys.HasFlag(Keys.Shift), false, true, true, selectedEntryID);
+        Close();
     }
 
     private void btnRemind_Click(object sender, EventArgs e)

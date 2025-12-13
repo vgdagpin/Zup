@@ -37,6 +37,18 @@ public partial class frmViewList : Form
 
         p_Tasks.OnTaskStarted += P_Tasks_OnTaskAdded;
         p_Tasks.OnTaskStopped += P_Tasks_OnTaskRemoved;
+        p_Tasks.OnTaskDeleted += P_Tasks_OnTaskDeleted;
+        p_Tasks.OnTaskUpdated += P_Tasks_OnTaskUpdated;
+    }
+
+    private void P_Tasks_OnTaskUpdated(object? sender, ITask e)
+    {
+        RefreshList();
+    }
+
+    private void P_Tasks_OnTaskDeleted(object? sender, ITask e)
+    {
+        RefreshList();
     }
 
     private void P_Tasks_OnTaskRemoved(object? sender, ITask e)

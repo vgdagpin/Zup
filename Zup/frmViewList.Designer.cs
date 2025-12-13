@@ -301,6 +301,7 @@ partial class frmViewList
         ID.HeaderText = "ID";
         ID.Name = "ID";
         ID.ReadOnly = true;
+        ID.Visible = false;
         // 
         // Task
         // 

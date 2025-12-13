@@ -16,10 +16,6 @@ public partial class frmMain : Form
 
     private readonly TaskCollection Tasks;
 
-    public event EventHandler<NewEntryEventArgs>? OnNewTask;
-    public event EventHandler<ITask>? OnTaskDeleted;
-    public event EventHandler<ITask>? OnTaskUpdated;
-
     private List<frmFloatingButton> FloatingButtons = new List<frmFloatingButton>();
 
 
@@ -137,25 +133,8 @@ public partial class frmMain : Form
                 frmUpdateEntry.SetFormMain(this);
 
                 frmUpdateEntry.OnTokenDoubleClicked += FrmEntryList_OnTokenDoubleClicked;
-                frmUpdateEntry.OnSavedEvent += FrmUpdateEntry_OnSavedEvent;
-                frmUpdateEntry.OnReRunEvent += FrmUpdateEntry_OnReRunEvent;
             }
             return frmUpdateEntry;
-        }
-    }
-
-    private void FrmUpdateEntry_OnReRunEvent(object? sender, NewEntryEventArgs e)
-    {
-        RunTask(e);
-    }
-
-    private void FrmUpdateEntry_OnSavedEvent(object? sender, SaveEventArgs e)
-    {
-        var task = Tasks.Find(e.Task.ID);
-
-        if (task != null)
-        {
-            OnTaskUpdated?.Invoke(this, task);
         }
     }
 
@@ -274,11 +253,6 @@ public partial class frmMain : Form
 
     private void Tasks_OnTaskAdded(object? sender, NewEntryEventArgs args)
     {
-        if (args.HideParent && args.ParentEntryID != null)
-        {
-            DeleteEntry(args.ParentEntryID.Value);
-        }
-
         if (SettingHelper.UsePillTimer)
         {
             ShowFloatingButton(args.Task);
@@ -300,11 +274,6 @@ public partial class frmMain : Form
                     FloatingButtons.Remove(d);
                 });
         }
-        else
-        {
-            OnNewTask?.Invoke(this, args);
-        }
-
 
         if (SettingHelper.AutoOpenUpdateWindow)
         {
@@ -480,35 +449,12 @@ public partial class frmMain : Form
 
     public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
     {
-        var task = Tasks.Find(taskID);
-
-        if (task != null)
-        {
-            m_FormUpdateEntry.ShowUpdateEntry(task, canReRun);
-        }
+        m_FormUpdateEntry.ShowUpdateEntry(taskID, canReRun);
     }
 
     public void RunTask(NewEntryEventArgs args)
     {
         throw new NotImplementedException();
-    }
-
-    public void DeleteEntry(Guid taskID)
-    {
-        var entry = m_DbContext.TaskEntries.Find(taskID);
-
-        if (entry != null)
-        {
-            m_DbContext.TaskEntries.Remove(entry);
-            m_DbContext.SaveChanges();
-        }
-
-        var task = Tasks.Find(taskID);
-
-        if (task != null)
-        {
-            OnTaskDeleted?.Invoke(this, task);
-        }
     }
 
     protected bool IsNewWeek()
