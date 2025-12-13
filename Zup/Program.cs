@@ -39,7 +39,9 @@ internal static class Program
                             opt.MigrationsHistoryTable("tbl_MigrationHistory");
                         }
                     );
-                });
+                },
+                contextLifetime: ServiceLifetime.Singleton,
+                optionsLifetime: ServiceLifetime.Singleton);
             });
     }
 

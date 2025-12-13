@@ -32,10 +32,9 @@ public partial class frmFloatingButton : Form
     private static readonly Color COLOR_WHITE_BOTTOM = Color.FromArgb(255, 235, 235, 235);
     private static readonly Color COLOR_BORDER = Color.FromArgb(220, 160, 160, 160);
     private static readonly Color COLOR_TEXT = Color.FromArgb(255, 50, 50, 50);
+    private readonly TaskCollection p_Tasks;
 
     // Events
-    public event EventHandler? OnStartEvent;
-    public event EventHandler<StopEventArgs>? OnStopEvent;
     public event EventHandler? OnResetEvent;
     public event EventHandler? OnDeleteEvent;
     public event EventHandler? OnShowUpdateEntry;
@@ -90,8 +89,6 @@ public partial class frmFloatingButton : Form
                 {
                     isRunning = true;
                     updateTimer.Start();
-
-                    OnStartEvent?.Invoke(this, EventArgs.Empty);
                 }
             }
             else
@@ -102,11 +99,11 @@ public partial class frmFloatingButton : Form
                     isRunning = false;
                     updateTimer.Stop();
 
-                    OnStopEvent?.Invoke(this, new StopEventArgs
-                    {
-                        Duration = TimeSpan.FromSeconds(elapsedSeconds),
-                        IsClosed = false
-                    });
+                    var task = Tag as ITask;
+
+                    var endOn = task!.StartedOn!.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
+
+                    p_Tasks.Stop(task!.ID, endOn);
                 }
             }
             buttonBitmap?.Dispose();
@@ -131,7 +128,7 @@ public partial class frmFloatingButton : Form
     }
     #endregion
 
-    public frmFloatingButton()
+    public frmFloatingButton(TaskCollection tasks)
     {
         InitializeComponent();
 
@@ -162,6 +159,15 @@ public partial class frmFloatingButton : Form
         taskTooltip.AutoPopDelay = 5000;
         taskTooltip.InitialDelay = 500;
         taskTooltip.ReshowDelay = 100;
+        p_Tasks = tasks;
+
+        p_Tasks.OnTaskRemoved += (s, e) =>
+        {
+            if ((Tag as ITask)?.ID == e.ID)
+            {
+                Stop();
+            }
+        };
     }
 
     private void FrmFloatingButton_Load(object? sender, EventArgs e)
@@ -622,7 +628,7 @@ public partial class frmFloatingButton : Form
         isRunning = true;
         updateTimer?.Start();
 
-        OnStartEvent?.Invoke(this, EventArgs.Empty);
+
     }
 
     private void OnControlButtonStop()
@@ -630,13 +636,6 @@ public partial class frmFloatingButton : Form
         // Stop button clicked - stop timer and raise event
         isRunning = false;
         updateTimer?.Stop();
-
-        // Raise OnStopEvent with current duration
-        OnStopEvent?.Invoke(this, new StopEventArgs
-        {
-            Duration = Duration,
-            IsClosed = true
-        });
 
         // Close the form
         Close();

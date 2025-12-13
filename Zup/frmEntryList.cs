@@ -552,7 +552,7 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnStopEventHandler(Guid id, DateTime endOn)
     {
-        m_FormMain.StopTask(id, endOn);
+        p_Tasks.Stop(id, endOn);
 
         CurrentRunningTaskID = null;
     }

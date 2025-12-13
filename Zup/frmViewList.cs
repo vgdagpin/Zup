@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
@@ -9,7 +8,6 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 using Zup.Entities;
-using Zup.EventArguments;
 
 namespace Zup;
 
@@ -17,6 +15,7 @@ public partial class frmViewList : Form
 {
     private readonly ZupDbContext p_DbContext;
     private readonly SettingHelper settingHelper;
+    private readonly TaskCollection p_Tasks;
     private frmMain m_FormMain = null!;
     private Font? tagFont = null;
 
@@ -25,17 +24,29 @@ public partial class frmViewList : Form
 
     public event OnExported? OnExportedEvent;
 
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public HashSet<Guid> RunningIDs { get; set; } = new HashSet<Guid>();
 
     private IEnumerable<WeekData> WeekDataList = null!;
 
-    public frmViewList(ZupDbContext dbContext, SettingHelper settingHelper)
+    public frmViewList(ZupDbContext dbContext, SettingHelper settingHelper, TaskCollection tasks)
     {
         InitializeComponent();
         p_DbContext = dbContext;
         this.settingHelper = settingHelper;
+        p_Tasks = tasks;
         p_DbContext.Database.Migrate();
+
+        p_Tasks.OnTaskAdded += P_Tasks_OnTaskAdded;
+        p_Tasks.OnTaskRemoved += P_Tasks_OnTaskRemoved;
+    }
+
+    private void P_Tasks_OnTaskRemoved(object? sender, ITask e)
+    {
+        RefreshList();
+    }
+
+    private void P_Tasks_OnTaskAdded(object? sender, EventArguments.NewEntryEventArgs e)
+    {
+        RefreshList();
     }
 
     private void frmView_Load(object sender, EventArgs e)
@@ -115,6 +126,7 @@ public partial class frmViewList : Form
             filter = a => a.Task.ToLower().Contains(search.ToLower());
         }
 
+        var runningIDs = p_Tasks.RunningIDs;
         var ds = (from te in p_DbContext.TaskEntries.Where(filter)
                   join tet in p_DbContext.TaskEntryTags on te.ID equals tet.TaskID into tet
                   from tet2 in tet.DefaultIfEmpty()
@@ -150,7 +162,7 @@ public partial class frmViewList : Form
                                 EndedOn = a.Key.EndedOn,
                                 Duration = durationData,
                                 DurationString = duration,
-                                IsRunning = RunningIDs.Contains(a.Key.ID),
+                                IsRunning = runningIDs.Contains(a.Key.ID),
                                 Tags = a.Where(a => a.Tag != null)
                                     .OrderByDescending(a => a.Tag.CreatedOn)
                                     .Select(x => x.Tag.Name)
@@ -252,24 +264,12 @@ public partial class frmViewList : Form
 
             if (dataRow.GetTaskStatus() == TaskStatus.Running)
             {
-                m_FormMain.StopTask(dataRow.ID, DateTime.Now);
+                p_Tasks.Stop(dataRow.ID);
             }
             else
             {
-                var args = new NewEntryEventArgs(dataRow.Task)
-                {
-                    StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
-                    StartNow = true,
-                    ParentEntryID = dataRow.ID,
-                    HideParent = false,
-                    BringNotes = true,
-                    BringTags = true
-                };
-
-                m_FormMain.RunTask(args);
+                p_Tasks.Start(dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, true, true, dataRow.ID);
             }
-
-
         }
     }
 

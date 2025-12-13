@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 
-using Zup.Entities;
 using Zup.EventArguments;
 
 namespace Zup;
@@ -273,9 +272,49 @@ public partial class frmMain : Form
 
     }
 
-    private void Tasks_OnTaskAdded(object? sender, NewEntryEventArgs e)
+    private void Tasks_OnTaskAdded(object? sender, NewEntryEventArgs args)
     {
+        if (args.HideParent && args.ParentEntryID != null)
+        {
+            DeleteEntry(args.ParentEntryID.Value);
+        }
 
+        if (SettingHelper.UsePillTimer)
+        {
+            ShowFloatingButton(args.Task);
+
+            if (args.Task.GetTaskStatus() != TaskStatus.Queued
+                && args.StopOtherTask
+                && args.Task.IsRunning)
+            {
+                foreach (var runningPills in FloatingButtons.Where(a => ((ITask)a.Tag!).ID != args.Task.ID))
+                {
+                    runningPills.Stop();
+                }
+            }
+
+            // removed disposed floating buttons
+            FloatingButtons.Where(a => a.IsDisposed).ToList()
+                .ForEach(d =>
+                {
+                    FloatingButtons.Remove(d);
+                });
+        }
+        else
+        {
+            OnNewTask?.Invoke(this, args);
+        }
+
+
+        if (SettingHelper.AutoOpenUpdateWindow)
+        {
+            if (SettingHelper.UsePillTimer)
+            {
+                return;
+            }
+
+            ShowUpdateEntry(args.Task.ID);
+        }
     }
 
     protected override void WndProc(ref Message m)
@@ -449,158 +488,9 @@ public partial class frmMain : Form
         }
     }
 
-    public void StopTask(Guid taskID, DateTime endOn)
-    {
-        var existingE = m_DbContext.TaskEntries.Find(taskID);
-
-        if (existingE != null)
-        {
-            existingE.EndedOn = endOn;
-
-            m_DbContext.SaveChanges();
-        }
-
-        m_FormView.RunningIDs.Remove(taskID);
-        m_FormView.RefreshList();
-    }
-
     public void RunTask(NewEntryEventArgs args)
     {
-        m_DbContext.BackupDb();
-
-        var newE = new tbl_TaskEntry
-        {
-            ID = Guid.NewGuid(),
-            Task = args.Entry,
-            CreatedOn = DateTime.Now
-        };
-
-        if (args.StartNow)
-        {
-            newE.StartedOn = DateTime.Now;
-        }
-
-        m_DbContext.TaskEntries.Add(newE);
-
-        var parentEntry = args.ParentEntryID != null
-            ? m_DbContext.TaskEntries.Find(args.ParentEntryID)
-            : null;
-
-        // bring notes, tags and rank from parent, this is when the user started a queued task
-        if (parentEntry != null)
-        {
-            if (args.BringNotes)
-            {
-                foreach (var note in m_DbContext.TaskEntryNotes.Where(a => a.TaskID == parentEntry.ID).ToList())
-                {
-                    m_DbContext.TaskEntryNotes.Add(new tbl_TaskEntryNote
-                    {
-                        ID = Guid.NewGuid(),
-                        TaskID = newE.ID,
-                        CreatedOn = note.CreatedOn,
-                        Notes = note.Notes,
-                        RTF = note.RTF,
-                        UpdatedOn = note.UpdatedOn
-                    });
-                }
-            }
-
-            if (args.BringTags)
-            {
-                foreach (var tag in m_DbContext.TaskEntryTags.Where(a => a.TaskID == parentEntry.ID).ToList())
-                {
-                    m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                    {
-                        CreatedOn = tag.CreatedOn,
-                        TaskID = newE.ID,
-                        TagID = tag.TagID
-                    });
-                }
-            }
-        }
-
-        if (args.GetTags && parentEntry == null)
-        {
-            var minDate = DateTime.Now.AddDays(-SettingHelper.NumDaysOfDataToLoad);
-
-            var tagIDs =
-                (
-                    from e in m_DbContext.TaskEntries.Where(a => (a.StartedOn >= minDate && a.EndedOn != null) || a.StartedOn == null || (a.StartedOn != null && a.EndedOn == null))
-                    join t in m_DbContext.TaskEntryTags on e.ID equals t.TaskID
-                    orderby t.CreatedOn descending
-                    where e.Task == args.Entry
-                    select t.TagID
-                ).Distinct();
-
-            foreach (var tagID in tagIDs)
-            {
-                m_DbContext.TaskEntryTags.Add(new tbl_TaskEntryTag
-                {
-                    CreatedOn = DateTime.Now,
-                    TaskID = newE.ID,
-                    TagID = tagID
-                });
-            }
-        }
-
-        m_DbContext.SaveChanges();
-
-        var eachEntry = new ZupTask
-        {
-            ID = newE.ID,
-            Task = newE.Task,
-            CreatedOn = newE.CreatedOn,
-            StartedOn = newE.StartedOn,
-            EndedOn = newE.EndedOn,
-            Reminder = newE.Reminder,
-            Rank = newE.Rank
-        };
-
-        Tasks.Add(eachEntry);
-
-        args.Task = eachEntry;
-
-        if (args.HideParent && args.ParentEntryID != null)
-        {
-            DeleteEntry(args.ParentEntryID.Value);
-        }
-
-        if (SettingHelper.UsePillTimer)
-        {
-            ShowFloatingButton(eachEntry);
-
-            if (eachEntry.GetTaskStatus() != TaskStatus.Queued
-                && args.StopOtherTask
-                && eachEntry.IsRunning)
-            {
-                foreach (var runningPills in FloatingButtons.Where(a => ((ITask)a.Tag!).ID != eachEntry.ID))
-                {
-                    runningPills.Stop();
-                }
-            }
-
-            FloatingButtons.Where(a => a.IsDisposed).ToList()
-                .ForEach(d =>
-                {
-                    FloatingButtons.Remove(d);
-                });
-        }
-        else
-        {
-            OnNewTask?.Invoke(this, args);
-        }
-
-
-        if (SettingHelper.AutoOpenUpdateWindow)
-        {
-            if (SettingHelper.UsePillTimer)
-            {
-                return;
-            }
-
-            ShowUpdateEntry(eachEntry.ID);
-        }
-
+        throw new NotImplementedException();
     }
 
     public void DeleteEntry(Guid taskID)
@@ -673,7 +563,7 @@ public partial class frmMain : Form
 
     private void ShowFloatingButton(ITask eachEntry)
     {
-        var newFloatingButton = new frmFloatingButton
+        var newFloatingButton = new frmFloatingButton(Tasks)
         {
             StartPosition = FormStartPosition.Manual,
             Tag = eachEntry,
@@ -684,37 +574,6 @@ public partial class frmMain : Form
         newFloatingButton.Move += NewFloatingButton_Move;
 
         FloatingButtons.Add(newFloatingButton);
-
-        newFloatingButton.OnStartEvent += (sender, e) =>
-        {
-            var entry = ((frmFloatingButton)sender!).Tag as ITask;
-
-            if (entry != null)
-            {
-                m_FormView.RunningIDs.Add(entry.ID);
-            }
-
-            m_FormView.RefreshList();
-        };
-
-        newFloatingButton.OnStopEvent += (sender, ts) =>
-        {
-            var entry = ((frmFloatingButton)sender!).Tag as ITask;
-
-            if (entry != null)
-            {
-                m_FormView.RunningIDs.Remove(entry.ID);
-
-                if (entry.StartedOn != null)
-                {
-                    var endOn = entry.StartedOn.Value.Add(ts.Duration);
-
-                    StopTask(entry.ID, endOn);
-                }
-            }
-
-            m_FormView.RefreshList();
-        };
 
         newFloatingButton.OnShowUpdateEntry += (sender, e) =>
         {
