@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Zup;
+﻿namespace Zup;
 
 public static class Constants
 {

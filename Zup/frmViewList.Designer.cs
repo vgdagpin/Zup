@@ -29,18 +29,10 @@ partial class frmViewList
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmViewList));
+        var dataGridViewCellStyle1 = new DataGridViewCellStyle();
+        var dataGridViewCellStyle2 = new DataGridViewCellStyle();
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmViewList));
         dgView = new DataGridView();
-        ID = new DataGridViewTextBoxColumn();
-        Task = new DataGridViewTextBoxColumn();
-        StartedOn = new DataGridViewTextBoxColumn();
-        EndedOn = new DataGridViewTextBoxColumn();
-        Duration = new DataGridViewTextBoxColumn();
-        DurationString = new DataGridViewTextBoxColumn();
-        DayOfWeek = new DataGridViewTextBoxColumn();
-        PlayAction = new DataGridViewButtonColumn();
         lblSelectedTotal = new Label();
         label1 = new Label();
         fbdTimesheetFolder = new FolderBrowserDialog();
@@ -61,6 +53,18 @@ partial class frmViewList
         btnRefresh = new Button();
         lbWeek = new ListBox();
         btnExportAll = new Button();
+        ID = new DataGridViewTextBoxColumn();
+        Task = new DataGridViewTextBoxColumn();
+        StartedOn = new DataGridViewTextBoxColumn();
+        EndedOn = new DataGridViewTextBoxColumn();
+        Duration = new DataGridViewTextBoxColumn();
+        DurationString = new DataGridViewTextBoxColumn();
+        DayOfWeek = new DataGridViewTextBoxColumn();
+        PlayAction = new DataGridViewButtonColumn();
+        CreatedOn = new DataGridViewTextBoxColumn();
+        Reminder = new DataGridViewTextBoxColumn();
+        Rank = new DataGridViewTextBoxColumn();
+        IsRunning = new DataGridViewTextBoxColumn();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         statusStrip1.SuspendLayout();
         groupBox1.SuspendLayout();
@@ -73,7 +77,7 @@ partial class frmViewList
         dgView.AllowUserToResizeRows = false;
         dgView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString, DayOfWeek, PlayAction });
+        dgView.Columns.AddRange(new DataGridViewColumn[] { ID, Task, StartedOn, EndedOn, Duration, DurationString, DayOfWeek, PlayAction, CreatedOn, Reminder, Rank, IsRunning });
         dgView.Location = new Point(158, 41);
         dgView.Name = "dgView";
         dgView.ReadOnly = true;
@@ -86,78 +90,6 @@ partial class frmViewList
         dgView.CellPainting += dgView_CellPainting;
         dgView.SelectionChanged += dgView_SelectionChanged;
         dgView.DoubleClick += dgView_DoubleClick;
-        // 
-        // ID
-        // 
-        ID.DataPropertyName = "ID";
-        ID.HeaderText = "ID";
-        ID.Name = "ID";
-        ID.ReadOnly = true;
-        ID.Visible = false;
-        // 
-        // Task
-        // 
-        Task.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        Task.DataPropertyName = "Task";
-        Task.HeaderText = "Task";
-        Task.Name = "Task";
-        Task.ReadOnly = true;
-        // 
-        // StartedOn
-        // 
-        StartedOn.DataPropertyName = "StartedOn";
-        dataGridViewCellStyle1.Format = "MM/dd hh:mm tt";
-        StartedOn.DefaultCellStyle = dataGridViewCellStyle1;
-        StartedOn.HeaderText = "Start";
-        StartedOn.Name = "StartedOn";
-        StartedOn.ReadOnly = true;
-        StartedOn.Resizable = DataGridViewTriState.False;
-        // 
-        // EndedOn
-        // 
-        EndedOn.DataPropertyName = "EndedOn";
-        dataGridViewCellStyle2.Format = "MM/dd hh:mm tt";
-        EndedOn.DefaultCellStyle = dataGridViewCellStyle2;
-        EndedOn.HeaderText = "End";
-        EndedOn.Name = "EndedOn";
-        EndedOn.ReadOnly = true;
-        EndedOn.Resizable = DataGridViewTriState.False;
-        // 
-        // Duration
-        // 
-        Duration.DataPropertyName = "Duration";
-        Duration.HeaderText = "Duration";
-        Duration.Name = "Duration";
-        Duration.ReadOnly = true;
-        Duration.Resizable = DataGridViewTriState.False;
-        Duration.Visible = false;
-        Duration.Width = 80;
-        // 
-        // DurationString
-        // 
-        DurationString.DataPropertyName = "DurationString";
-        DurationString.HeaderText = "Duration";
-        DurationString.Name = "DurationString";
-        DurationString.ReadOnly = true;
-        DurationString.Resizable = DataGridViewTriState.False;
-        DurationString.Width = 80;
-        // 
-        // DayOfWeek
-        // 
-        DayOfWeek.DataPropertyName = "DayOfWeek";
-        DayOfWeek.HeaderText = "Day of Week";
-        DayOfWeek.Name = "DayOfWeek";
-        DayOfWeek.ReadOnly = true;
-        // 
-        // PlayAction
-        // 
-        PlayAction.HeaderText = "";
-        PlayAction.Name = "PlayAction";
-        PlayAction.ReadOnly = true;
-        PlayAction.Resizable = DataGridViewTriState.False;
-        PlayAction.Text = "▶";
-        PlayAction.UseColumnTextForButtonValue = true;
-        PlayAction.Width = 40;
         // 
         // lblSelectedTotal
         // 
@@ -174,7 +106,7 @@ partial class frmViewList
         label1.AutoSize = true;
         label1.Location = new Point(7, 57);
         label1.Name = "label1";
-        label1.Size = new Size(105, 15);
+        label1.Size = new Size(106, 15);
         label1.TabIndex = 2;
         label1.Text = "Timesheets Folder:";
         // 
@@ -294,7 +226,7 @@ partial class frmViewList
         label4.AutoSize = true;
         label4.Location = new Point(6, 25);
         label4.Name = "label4";
-        label4.Size = new Size(111, 15);
+        label4.Size = new Size(110, 15);
         label4.TabIndex = 14;
         label4.Text = "Export Row Format:";
         // 
@@ -344,7 +276,6 @@ partial class frmViewList
         // 
         lbWeek.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
         lbWeek.FormattingEnabled = true;
-        lbWeek.ItemHeight = 15;
         lbWeek.Location = new Point(8, 41);
         lbWeek.Name = "lbWeek";
         lbWeek.SelectionMode = SelectionMode.MultiExtended;
@@ -363,6 +294,109 @@ partial class frmViewList
         btnExportAll.Text = "Export All";
         btnExportAll.UseVisualStyleBackColor = true;
         btnExportAll.Click += btnExportAll_Click;
+        // 
+        // ID
+        // 
+        ID.DataPropertyName = "ID";
+        ID.HeaderText = "ID";
+        ID.Name = "ID";
+        ID.ReadOnly = true;
+        // 
+        // Task
+        // 
+        Task.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        Task.DataPropertyName = "Task";
+        Task.HeaderText = "Task";
+        Task.Name = "Task";
+        Task.ReadOnly = true;
+        // 
+        // StartedOn
+        // 
+        StartedOn.DataPropertyName = "StartedOn";
+        dataGridViewCellStyle1.Format = "MM/dd hh:mm tt";
+        StartedOn.DefaultCellStyle = dataGridViewCellStyle1;
+        StartedOn.HeaderText = "Start";
+        StartedOn.Name = "StartedOn";
+        StartedOn.ReadOnly = true;
+        StartedOn.Resizable = DataGridViewTriState.False;
+        // 
+        // EndedOn
+        // 
+        EndedOn.DataPropertyName = "EndedOn";
+        dataGridViewCellStyle2.Format = "MM/dd hh:mm tt";
+        EndedOn.DefaultCellStyle = dataGridViewCellStyle2;
+        EndedOn.HeaderText = "End";
+        EndedOn.Name = "EndedOn";
+        EndedOn.ReadOnly = true;
+        EndedOn.Resizable = DataGridViewTriState.False;
+        // 
+        // Duration
+        // 
+        Duration.DataPropertyName = "Duration";
+        Duration.HeaderText = "Duration";
+        Duration.Name = "Duration";
+        Duration.ReadOnly = true;
+        Duration.Resizable = DataGridViewTriState.False;
+        Duration.Visible = false;
+        Duration.Width = 80;
+        // 
+        // DurationString
+        // 
+        DurationString.DataPropertyName = "DurationString";
+        DurationString.HeaderText = "Duration";
+        DurationString.Name = "DurationString";
+        DurationString.ReadOnly = true;
+        DurationString.Resizable = DataGridViewTriState.False;
+        DurationString.Width = 80;
+        // 
+        // DayOfWeek
+        // 
+        DayOfWeek.DataPropertyName = "DayOfWeek";
+        DayOfWeek.HeaderText = "Day of Week";
+        DayOfWeek.Name = "DayOfWeek";
+        DayOfWeek.ReadOnly = true;
+        // 
+        // PlayAction
+        // 
+        PlayAction.HeaderText = "";
+        PlayAction.Name = "PlayAction";
+        PlayAction.ReadOnly = true;
+        PlayAction.Resizable = DataGridViewTriState.False;
+        PlayAction.Text = "▶";
+        PlayAction.UseColumnTextForButtonValue = true;
+        PlayAction.Width = 40;
+        // 
+        // CreatedOn
+        // 
+        CreatedOn.DataPropertyName = "CreatedOn";
+        CreatedOn.HeaderText = "CreatedOn";
+        CreatedOn.Name = "CreatedOn";
+        CreatedOn.ReadOnly = true;
+        CreatedOn.Visible = false;
+        // 
+        // Reminder
+        // 
+        Reminder.DataPropertyName = "Reminder";
+        Reminder.HeaderText = "Reminder";
+        Reminder.Name = "Reminder";
+        Reminder.ReadOnly = true;
+        Reminder.Visible = false;
+        // 
+        // Rank
+        // 
+        Rank.DataPropertyName = "Rank";
+        Rank.HeaderText = "Rank";
+        Rank.Name = "Rank";
+        Rank.ReadOnly = true;
+        Rank.Visible = false;
+        // 
+        // IsRunning
+        // 
+        IsRunning.DataPropertyName = "IsRunning";
+        IsRunning.HeaderText = "IsRunning";
+        IsRunning.Name = "IsRunning";
+        IsRunning.ReadOnly = true;
+        IsRunning.Visible = false;
         // 
         // frmViewList
         // 
@@ -397,7 +431,6 @@ partial class frmViewList
     #endregion
 
     private DataGridView dgView;
-    private DataGridViewButtonColumn PlayAction;
     private Label lblSelectedTotal;
     private Label label1;
     private FolderBrowserDialog fbdTimesheetFolder;
@@ -417,6 +450,7 @@ partial class frmViewList
     private Button btnRowFormatHelp;
     private Button btnRefresh;
     private ListBox lbWeek;
+    private Button btnExportAll;
     private DataGridViewTextBoxColumn ID;
     private DataGridViewTextBoxColumn Task;
     private DataGridViewTextBoxColumn StartedOn;
@@ -424,5 +458,9 @@ partial class frmViewList
     private DataGridViewTextBoxColumn Duration;
     private DataGridViewTextBoxColumn DurationString;
     private DataGridViewTextBoxColumn DayOfWeek;
-    private Button btnExportAll;
+    private DataGridViewButtonColumn PlayAction;
+    private DataGridViewTextBoxColumn CreatedOn;
+    private DataGridViewTextBoxColumn Reminder;
+    private DataGridViewTextBoxColumn Rank;
+    private DataGridViewTextBoxColumn IsRunning;
 }

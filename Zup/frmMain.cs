@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -16,12 +15,11 @@ public partial class frmMain : Form
     private IServiceProvider serviceProvider;
     private bool listIsReady = false;
 
+    private readonly TaskCollection Tasks;
+
     public event EventHandler<NewEntryEventArgs>? OnNewTask;
     public event EventHandler<ITask>? OnTaskDeleted;
     public event EventHandler<ITask>? OnTaskUpdated;
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public HashSet<ITask> Tasks { get; set; } = new HashSet<ITask>();
 
     private List<frmFloatingButton> FloatingButtons = new List<frmFloatingButton>();
 
@@ -154,7 +152,7 @@ public partial class frmMain : Form
 
     private void FrmUpdateEntry_OnSavedEvent(object? sender, SaveEventArgs e)
     {
-        var task = Tasks.SingleOrDefault(a => a.ID == e.Task.ID);
+        var task = Tasks.Find(e.Task.ID);
 
         if (task != null)
         {
@@ -233,8 +231,14 @@ public partial class frmMain : Form
         }
     }
 
-    public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting)
+    public frmMain(IServiceProvider serviceProvider, frmSetting frmSetting, TaskCollection tasks)
     {
+        Tasks = tasks;
+
+        Tasks.OnTaskAdded += Tasks_OnTaskAdded;
+        Tasks.OnTaskRemoved += Tasks_OnTaskRemoved;
+
+
         InitializeComponent();
 
         this.serviceProvider = serviceProvider.CreateScope().ServiceProvider;
@@ -261,6 +265,17 @@ public partial class frmMain : Form
 
 
         SetIcon();
+
+    }
+
+    private void Tasks_OnTaskRemoved(object? sender, ITask e)
+    {
+
+    }
+
+    private void Tasks_OnTaskAdded(object? sender, NewEntryEventArgs e)
+    {
+
     }
 
     protected override void WndProc(ref Message m)
@@ -341,7 +356,7 @@ public partial class frmMain : Form
         var suggestions = new List<string>();
 
         var currentList = Tasks
-            .Where(a => a.GetTaskStatus() == TaskStatus.Closed)
+            .ClosedTasks()
             .Select(a => a.Task)
             .ToArray();
 
@@ -426,7 +441,7 @@ public partial class frmMain : Form
 
     public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
     {
-        var task = Tasks.SingleOrDefault(a => a.ID == taskID);
+        var task = Tasks.Find(taskID);
 
         if (task != null)
         {
@@ -444,6 +459,9 @@ public partial class frmMain : Form
 
             m_DbContext.SaveChanges();
         }
+
+        m_FormView.RunningIDs.Remove(taskID);
+        m_FormView.RefreshList();
     }
 
     public void RunTask(NewEntryEventArgs args)
@@ -595,7 +613,7 @@ public partial class frmMain : Form
             m_DbContext.SaveChanges();
         }
 
-        var task = Tasks.SingleOrDefault(a => a.ID == taskID);
+        var task = Tasks.Find(taskID);
 
         if (task != null)
         {
@@ -669,6 +687,13 @@ public partial class frmMain : Form
 
         newFloatingButton.OnStartEvent += (sender, e) =>
         {
+            var entry = ((frmFloatingButton)sender!).Tag as ITask;
+
+            if (entry != null)
+            {
+                m_FormView.RunningIDs.Add(entry.ID);
+            }
+
             m_FormView.RefreshList();
         };
 
@@ -676,11 +701,16 @@ public partial class frmMain : Form
         {
             var entry = ((frmFloatingButton)sender!).Tag as ITask;
 
-            if (entry != null && entry.StartedOn != null)
+            if (entry != null)
             {
-                var endOn = entry.StartedOn.Value.Add(ts.Duration);
+                m_FormView.RunningIDs.Remove(entry.ID);
 
-                StopTask(entry.ID, endOn);
+                if (entry.StartedOn != null)
+                {
+                    var endOn = entry.StartedOn.Value.Add(ts.Duration);
+
+                    StopTask(entry.ID, endOn);
+                }
             }
 
             m_FormView.RefreshList();

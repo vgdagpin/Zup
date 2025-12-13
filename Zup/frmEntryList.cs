@@ -16,6 +16,7 @@ public partial class frmEntryList : Form
     const int maxRankedTaskRow = 4;
 
     private readonly SettingHelper settingHelper;
+    private readonly TaskCollection p_Tasks;
     private frmMain m_FormMain = null!;
 
     private bool p_OnLoad = true;
@@ -150,12 +151,13 @@ public partial class frmEntryList : Form
         }
     }
 
-    public frmEntryList(ZupDbContext dbContext, SettingHelper settingHelper)
+    public frmEntryList(ZupDbContext dbContext, SettingHelper settingHelper, TaskCollection tasks)
     {
         InitializeComponent();
 
         m_DbContext = dbContext;
         this.settingHelper = settingHelper;
+        p_Tasks = tasks;
     }
 
     private void frmEntryList_Load(object sender, EventArgs e)
@@ -299,7 +301,7 @@ public partial class frmEntryList : Form
         var queuedTasks = new List<EachEntry>();
         var rankedTasks = new List<EachEntry>();
 
-        foreach (var task in m_FormMain.Tasks)
+        foreach (var task in p_Tasks)
         {
             var eachEntry = Translate(task);
 

@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Linq.Expressions;
@@ -24,6 +25,9 @@ public partial class frmViewList : Form
 
     public event OnExported? OnExportedEvent;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public HashSet<Guid> RunningIDs { get; set; } = new HashSet<Guid>();
+
     private IEnumerable<WeekData> WeekDataList = null!;
 
     public frmViewList(ZupDbContext dbContext, SettingHelper settingHelper)
@@ -48,13 +52,13 @@ public partial class frmViewList : Form
 
         typeof(DataGridView).InvokeMember("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty, null, dgView, new object[] { true });
 
-        TagHelper.Register<TimeLogSummary>("StartedOnTicks", (tagKey, dicAction) => dicAction.StartedOn!.Value.Ticks.ToString());
-        TagHelper.Register<TimeLogSummary>("Task", (tagKey, dicAction) => NoteSummary.CleanString(dicAction.Task, 200));
-        TagHelper.Register<TimeLogSummary>("Tags", (tagKey, dicAction) => ExtractTags(dicAction.ID));
-        TagHelper.Register<TimeLogSummary>("Tag", (tagKey, dicAction) => ExtractTag(tagKey, dicAction.ID));
-        TagHelper.Register<TimeLogSummary>("Comments", (tagKey, dicAction) => ExtractComments(dicAction.ID));
-        TagHelper.Register<TimeLogSummary>("Duration", (tagKey, dicAction) => dicAction.DurationString!);
-        TagHelper.Register<TimeLogSummary>("TimesheetDate", (tagKey, dicAction) => dtTimesheetDate.Value.ToString(dtTimesheetDate.CustomFormat));
+        TagHelper.Register<ZupTask>("StartedOnTicks", (tagKey, dicAction) => dicAction.StartedOn!.Value.Ticks.ToString());
+        TagHelper.Register<ZupTask>("Task", (tagKey, dicAction) => NoteSummary.CleanString(dicAction.Task, 200));
+        TagHelper.Register<ZupTask>("Tags", (tagKey, dicAction) => ExtractTags(dicAction.ID));
+        TagHelper.Register<ZupTask>("Tag", (tagKey, dicAction) => ExtractTag(tagKey, dicAction.ID));
+        TagHelper.Register<ZupTask>("Comments", (tagKey, dicAction) => ExtractComments(dicAction.ID));
+        TagHelper.Register<ZupTask>("Duration", (tagKey, dicAction) => dicAction.DurationString!);
+        TagHelper.Register<ZupTask>("TimesheetDate", (tagKey, dicAction) => dtTimesheetDate.Value.ToString(dtTimesheetDate.CustomFormat));
     }
 
     private void frmView_VisibleChanged(object sender, EventArgs e)
@@ -138,7 +142,7 @@ public partial class frmViewList : Form
                                 duration = $"{durationData!.Value.Hours:00}:{durationData.Value.Minutes:00}:{durationData.Value.Seconds:00}";
                             }
 
-                            return new TimeLogSummary
+                            return new ZupTask
                             {
                                 ID = a.Key.ID,
                                 Task = a.Key.Task,
@@ -146,6 +150,7 @@ public partial class frmViewList : Form
                                 EndedOn = a.Key.EndedOn,
                                 Duration = durationData,
                                 DurationString = duration,
+                                IsRunning = RunningIDs.Contains(a.Key.ID),
                                 Tags = a.Where(a => a.Tag != null)
                                     .OrderByDescending(a => a.Tag.CreatedOn)
                                     .Select(x => x.Tag.Name)
@@ -172,7 +177,8 @@ public partial class frmViewList : Form
     private void dgView_DoubleClick(object sender, EventArgs e)
     {
         dgView.SelectedRows.Cast<DataGridViewRow>()
-            .Select(a => (TimeLogSummary)a.DataBoundItem!)
+            .Select(a => a.DataBoundItem)
+            .Cast<ZupTask>()
             .ToList()
             .ForEach(a =>
             {
@@ -186,7 +192,7 @@ public partial class frmViewList : Form
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
             .Select(a => a.DataBoundItem)
-            .Cast<TimeLogSummary>()
+            .Cast<ZupTask>()
             .Where(a => a.Duration != null)
             .ToList()
             .ForEach(a =>
@@ -208,7 +214,7 @@ public partial class frmViewList : Form
 
         if (column.Name == "PlayAction" && column is DataGridViewButtonColumn buttonColumn)
         {
-            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+            var dataRow = (ZupTask)dgView.Rows[e.RowIndex].DataBoundItem!;
 
             // Ensure the column uses cell values instead of column text
             if (buttonColumn.UseColumnTextForButtonValue)
@@ -216,8 +222,9 @@ public partial class frmViewList : Form
                 buttonColumn.UseColumnTextForButtonValue = false;
             }
 
-            // If EndedOn is null and StartedOn is not null, show stop icon
-            if (dataRow.EndedOn == null && dataRow.StartedOn != null)
+            var rowStatus = dataRow.GetTaskStatus();
+
+            if (rowStatus == TaskStatus.Running)
             {
                 e.Value = Constants.Controls.Stop;
             }
@@ -241,19 +248,28 @@ public partial class frmViewList : Form
             && column is DataGridViewButtonColumn buttonColumn
             && buttonColumn.Text == Constants.Controls.Play)
         {
-            var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+            var dataRow = (ZupTask)dgView.Rows[e.RowIndex].DataBoundItem!;
 
-            var args = new NewEntryEventArgs(dataRow.Task)
+            if (dataRow.GetTaskStatus() == TaskStatus.Running)
             {
-                StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
-                StartNow = true,
-                ParentEntryID = dataRow.ID,
-                HideParent = false,
-                BringNotes = true,
-                BringTags = true
-            };
+                m_FormMain.StopTask(dataRow.ID, DateTime.Now);
+            }
+            else
+            {
+                var args = new NewEntryEventArgs(dataRow.Task)
+                {
+                    StopOtherTask = !ModifierKeys.HasFlag(Keys.Shift),
+                    StartNow = true,
+                    ParentEntryID = dataRow.ID,
+                    HideParent = false,
+                    BringNotes = true,
+                    BringTags = true
+                };
 
-            m_FormMain.RunTask(args);
+                m_FormMain.RunTask(args);
+            }
+
+
         }
     }
 
@@ -267,7 +283,7 @@ public partial class frmViewList : Form
         e.PaintBackground(e.CellBounds, true);
         e.PaintContent(e.CellBounds);
 
-        var dataRow = (TimeLogSummary)dgView.Rows[e.RowIndex].DataBoundItem!;
+        var dataRow = (ZupTask)dgView.Rows[e.RowIndex].DataBoundItem!;
         var tags = dataRow.Tags;
 
         if (tags == null || tags.Length == 0)
@@ -412,7 +428,8 @@ public partial class frmViewList : Form
         var content = new StringBuilder();
 
         dgView.SelectedRows.Cast<DataGridViewRow>()
-            .Select(a => (TimeLogSummary)a.DataBoundItem!)
+            .Select(a => a.DataBoundItem)
+            .Cast<ZupTask>()
             .Where(a => a.Duration != null && a.StartedOn != null)
             .ToList()
             .ForEach(a =>

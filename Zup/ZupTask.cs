@@ -13,6 +13,15 @@ public class ZupTask : ITask
     public byte? Rank { get; set; }
     public bool IsRunning { get; set; }
 
+
+    public TimeSpan? Duration { get; set; }
+    public string? DurationString { get; set; }
+    public DayOfWeek? DayOfWeek { get; set; }
+
+    public string[] Tags { get; set; } = Array.Empty<string>();
+
+
+
     public bool Equals(ITask? x, ITask? y)
     {
         if (x == null && y == null)

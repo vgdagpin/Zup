@@ -1,8 +1,8 @@
+using System.Reflection;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-using System.Reflection;
 
 namespace Zup;
 
@@ -13,7 +13,7 @@ internal static class Program
     static IHostBuilder CreateHostBuilder()
     {
         return Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) => 
+            .ConfigureServices((context, services) =>
             {
                 services.AddTransient<frmMain>();
                 services.AddTransient<frmFloatingButton>();
@@ -24,6 +24,7 @@ internal static class Program
                 services.AddTransient<frmUpdateEntry>();
                 services.AddTransient<frmTagEditor>();
                 services.AddSingleton<SettingHelper>();
+                services.AddSingleton<TaskCollection>();
 
                 services.AddDbContext<ZupDbContext>((sp, optionsAction) =>
                 {
