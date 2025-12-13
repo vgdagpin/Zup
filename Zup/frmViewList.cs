@@ -206,7 +206,7 @@ public partial class frmViewList : Form
             .ToList()
             .ForEach(a =>
             {
-                m_FormMain.ShowUpdateEntry(a.ID, a.StartedOn != null && a.EndedOn != null);
+                m_FormMain.ShowUpdateEntry(a.ID);
             });
     }
 
@@ -239,6 +239,7 @@ public partial class frmViewList : Form
         if (column.Name == "PlayAction" && column is DataGridViewButtonColumn buttonColumn)
         {
             var dataRow = (ZupTask)dgView.Rows[e.RowIndex].DataBoundItem!;
+            var cell = dgView.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
             // Ensure the column uses cell values instead of column text
             if (buttonColumn.UseColumnTextForButtonValue)
@@ -251,10 +252,19 @@ public partial class frmViewList : Form
             if (rowStatus == TaskStatus.Running)
             {
                 e.Value = Constants.Controls.Stop;
+                cell.ReadOnly = false;
+            }
+            else if (rowStatus == TaskStatus.Unclosed)
+            {
+                e.Value = string.Empty;
+                cell.ReadOnly = true; // Disable clicking
+                e.CellStyle.BackColor = dgView.DefaultCellStyle.BackColor;
+                e.CellStyle.ForeColor = dgView.DefaultCellStyle.BackColor;
             }
             else
             {
                 e.Value = Constants.Controls.Play;
+                cell.ReadOnly = false;
             }
         }
     }
@@ -273,14 +283,19 @@ public partial class frmViewList : Form
             && buttonColumn.Text == Constants.Controls.Play)
         {
             var dataRow = (ZupTask)dgView.Rows[e.RowIndex].DataBoundItem!;
+            var status = dataRow.GetTaskStatus();
 
-            if (dataRow.GetTaskStatus() == TaskStatus.Running)
+            if (status == TaskStatus.Running)
             {
-                p_Tasks.Stop(dataRow.ID);
+                p_Tasks.Stop(this, dataRow.ID);
+            }
+            else if (status == TaskStatus.Unclosed)
+            {
+
             }
             else
             {
-                p_Tasks.Start(dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, true, true, dataRow.ID);
+                p_Tasks.Start(this, dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, dataRow.ID);
             }
         }
     }

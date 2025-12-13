@@ -255,6 +255,13 @@ public partial class frmMain : Form
     {
         if (SettingHelper.UsePillTimer)
         {
+            // removed disposed floating buttons
+            FloatingButtons.Where(a => a.IsDisposed).ToList()
+                .ForEach(d =>
+                {
+                    FloatingButtons.Remove(d);
+                });
+
             ShowFloatingButton(args.Task);
 
             if (args.Task.GetTaskStatus() != TaskStatus.Queued
@@ -266,13 +273,6 @@ public partial class frmMain : Form
                     runningPills.Stop();
                 }
             }
-
-            // removed disposed floating buttons
-            FloatingButtons.Where(a => a.IsDisposed).ToList()
-                .ForEach(d =>
-                {
-                    FloatingButtons.Remove(d);
-                });
         }
 
         if (SettingHelper.AutoOpenUpdateWindow)
@@ -447,9 +447,9 @@ public partial class frmMain : Form
         notifIconZup.ShowBalloonTip(0, title, message, ToolTipIcon.Info);
     }
 
-    public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
+    public void ShowUpdateEntry(Guid taskID)
     {
-        m_FormUpdateEntry.ShowUpdateEntry(taskID, canReRun);
+        m_FormUpdateEntry.ShowUpdateEntry(taskID);
     }
 
     public void RunTask(NewEntryEventArgs args)
@@ -517,6 +517,13 @@ public partial class frmMain : Form
             Top = SettingHelper.FormLocationY
         };
 
+        var height = newFloatingButton.Height + 5;
+
+        if (FloatingButtons.Count > 0)
+        {
+            newFloatingButton.Top += (height * FloatingButtons.Count);
+        }
+
         newFloatingButton.Move += NewFloatingButton_Move;
 
         FloatingButtons.Add(newFloatingButton);
@@ -528,23 +535,6 @@ public partial class frmMain : Form
             if (entry != null)
             {
                 ShowUpdateEntry(entry.ID);
-            }
-        };
-
-        newFloatingButton.OnResetEvent += (sender, e) =>
-        {
-            var entry = ((frmFloatingButton)sender!).Tag as ITask;
-
-            if (entry != null)
-            {
-                var existingE = m_DbContext.TaskEntries.Find(entry.ID);
-
-                if (existingE != null)
-                {
-                    existingE.StartedOn = DateTime.Now;
-
-                    m_DbContext.SaveChanges();
-                }
             }
         };
 

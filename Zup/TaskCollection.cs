@@ -45,12 +45,12 @@ public class TaskCollection : IEnumerable<ITask>
         tasks.Add(task);
     }
 
-    public void Start(Guid id)
+    public void Resume(object sender, Guid id, bool stopOtherTasks)
     {
 
     }
 
-    public void Start(string text, bool startNow, bool stopOtherTasks, bool hideParent, bool bringNotes, bool bringTags, Guid? parentEntryID = null)
+    public void Start(object sender, string text, bool startNow, bool stopOtherTasks, bool hideParent, bool bringNotes, bool bringTags, Guid? parentEntryID = null)
     {
         var newE = new tbl_TaskEntry
         {
@@ -146,7 +146,8 @@ public class TaskCollection : IEnumerable<ITask>
             StartedOn = newE.StartedOn,
             EndedOn = newE.EndedOn,
             Reminder = newE.Reminder,
-            Rank = newE.Rank
+            Rank = newE.Rank,
+            IsRunning = startNow
         };
 
         var args = new NewEntryEventArgs(text)
@@ -162,16 +163,18 @@ public class TaskCollection : IEnumerable<ITask>
 
         tasks.Add(task);
 
-        OnTaskStarted?.Invoke(this, args);
+        OnTaskStarted?.Invoke(sender, args);
     }
 
-    public void Stop(Guid taskId, DateTime? endOn = null)
+    public void Stop(object sender, Guid taskId, DateTime? endOn = null)
     {
         var task = Find(taskId);
 
         if (task != null)
         {
             task.EndedOn = endOn ?? DateTime.Now;
+            task.IsRunning = false;
+
             runningIDs.Remove(taskId);
 
             var taskEntity = m_DbContext.TaskEntries.Find(taskId);
@@ -182,11 +185,11 @@ public class TaskCollection : IEnumerable<ITask>
                 m_DbContext.SaveChanges();
             }
 
-            OnTaskStopped?.Invoke(this, task);
+            OnTaskStopped?.Invoke(sender, task);
         }
     }
 
-    public void Delete(Guid taskId)
+    public void Delete(object sender, Guid taskId)
     {
         m_DbContext.TaskEntries.Where(a => a.ID == taskId).ExecuteDelete();
 
@@ -195,12 +198,12 @@ public class TaskCollection : IEnumerable<ITask>
         if (task != null)
         {
             tasks.Remove(task);
-            OnTaskDeleted?.Invoke(this, task);
+            OnTaskDeleted?.Invoke(sender, task);
             runningIDs.Remove(taskId);
         }
     }
 
-    public void Update(Guid taskId, ZupTask task)
+    public void Update(object sender, Guid taskId, ZupTask task)
     {
         var taskEntity = m_DbContext.TaskEntries.Find(taskId);
 
@@ -217,7 +220,23 @@ public class TaskCollection : IEnumerable<ITask>
 
             task.ID = taskId;
 
-            OnTaskUpdated?.Invoke(this, task);
+            OnTaskUpdated?.Invoke(sender, task);
+        }
+    }
+
+    public void Reset(object sender, Guid taskId)
+    {
+        var taskEntity = m_DbContext.TaskEntries.Find(taskId);
+        var task = Find(taskId);
+
+        if (taskEntity != null && task != null)
+        {
+            task.StartedOn = DateTime.Now;
+            taskEntity.StartedOn = DateTime.Now;
+
+            m_DbContext.SaveChanges();
+
+            OnTaskUpdated?.Invoke(sender, task);
         }
     }
 

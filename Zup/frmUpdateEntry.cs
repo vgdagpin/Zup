@@ -28,6 +28,7 @@ public partial class frmUpdateEntry : Form
 
     private bool startTracking = false;
 
+    #region Properties
     private bool isEntryModified = false;
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public bool IsEntryModified
@@ -94,14 +95,6 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public frmUpdateEntry(ZupDbContext dbContext, TaskCollection tasks)
-    {
-        InitializeComponent();
-        p_DbContext = dbContext;
-        p_Tasks = tasks;
-        SetControlsEnable(false);
-    }
-
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime? StartedOn
     {
@@ -145,6 +138,41 @@ public partial class frmUpdateEntry : Form
             }
         }
     }
+    #endregion
+
+    public frmUpdateEntry(ZupDbContext dbContext, TaskCollection tasks)
+    {
+        p_Tasks = tasks;
+
+        tasks.OnTaskUpdated += Tasks_OnTaskUpdated;
+        tasks.OnTaskStopped += Tasks_OnTaskStopped;
+
+        InitializeComponent();
+        p_DbContext = dbContext;
+        SetControlsEnable(false);
+    }
+
+    private void Tasks_OnTaskStopped(object? sender, ITask e)
+    {
+        if (sender is frmFloatingButton)
+        {
+            StartedOn = e.StartedOn;
+            EndedOn = e.EndedOn;
+            IsEntryModified = false;
+
+            btnRerun.Text = GetRunText(e);
+        }
+    }
+
+    private void Tasks_OnTaskUpdated(object? sender, ITask e)
+    {
+        if (sender is frmFloatingButton)
+        {
+            StartedOn = e.StartedOn;
+            EndedOn = e.EndedOn;
+            IsEntryModified = false;
+        }
+    }
 
     #region Save
     private void SaveEntry()
@@ -167,7 +195,7 @@ public partial class frmUpdateEntry : Form
 
         update.Tags = tokenBoxTags.Tokens.ToArray();
 
-        p_Tasks.Update(selectedEntryID!.Value, update);
+        p_Tasks.Update(this, selectedEntryID!.Value, update);
 
         IsEntryModified = false;
     }
@@ -331,7 +359,23 @@ public partial class frmUpdateEntry : Form
         }
     }
 
-    public void ShowUpdateEntry(Guid taskID, bool canReRun = false)
+    private string GetRunText(ITask task)
+    {
+        if (task.GetTaskStatus() == TaskStatus.Closed)
+        {
+            return "Re-run";
+        }
+        else if (task.GetTaskStatus() == TaskStatus.Running)
+        {
+            return "Stop";
+        }
+        else
+        {
+            return "Resume";
+        }
+    }
+
+    public void ShowUpdateEntry(Guid taskID)
     {
         var eachEntry = p_Tasks.Find(taskID) ?? throw new ArgumentNullException(taskID.ToString());
 
@@ -340,7 +384,9 @@ public partial class frmUpdateEntry : Form
         isEntryModified = false;
         isNotesModified = false;
 
-        btnRerun.Visible = canReRun;
+        btnRerun.Tag = eachEntry;
+        btnRerun.Text = GetRunText(eachEntry);
+
         btnRemind.Visible = eachEntry.GetTaskStatus() == TaskStatus.Queued || eachEntry.GetTaskStatus() == TaskStatus.Ranked;
 
         Show();
@@ -617,7 +663,7 @@ public partial class frmUpdateEntry : Form
             return;
         }
 
-        p_Tasks.Delete(selectedEntryID!.Value);
+        p_Tasks.Delete(this, selectedEntryID!.Value);
 
         Close();
     }
@@ -779,7 +825,21 @@ public partial class frmUpdateEntry : Form
 
     private void btnRerun_Click(object sender, EventArgs e)
     {
-        p_Tasks.Start(txtTask.Text, true, !ModifierKeys.HasFlag(Keys.Shift), false, true, true, selectedEntryID);
+        var eachEntry = (ITask)btnRerun.Tag!;
+
+        if (eachEntry.GetTaskStatus() == TaskStatus.Closed)
+        {
+            p_Tasks.Start(this, txtTask.Text, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, selectedEntryID);
+        }
+        else if (eachEntry.GetTaskStatus() == TaskStatus.Running)
+        {
+            p_Tasks.Stop(this, selectedEntryID!.Value);
+        }
+        else
+        {
+            p_Tasks.Resume(this, selectedEntryID!.Value, !ModifierKeys.HasFlag(Keys.Shift));
+        }
+
         Close();
     }
 

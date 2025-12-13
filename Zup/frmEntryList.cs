@@ -500,7 +500,7 @@ public partial class frmEntryList : Form
     {
         var eachEntry = GetEachEntryByID(id);
 
-        m_FormMain.ShowUpdateEntry(id, eachEntry?.GetTaskStatus() == TaskStatus.Closed);
+        m_FormMain.ShowUpdateEntry(id);
     }
 
     public EachEntry? GetEachEntryByID(Guid entryID)
@@ -552,7 +552,7 @@ public partial class frmEntryList : Form
 
     private void EachEntry_OnStopEventHandler(Guid id, DateTime endOn)
     {
-        p_Tasks.Stop(id, endOn);
+        p_Tasks.Stop(this, id, endOn);
 
         CurrentRunningTaskID = null;
     }

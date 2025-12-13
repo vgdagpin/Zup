@@ -35,7 +35,6 @@ public partial class frmFloatingButton : Form
     private readonly TaskCollection p_Tasks;
 
     // Events
-    public event EventHandler? OnResetEvent;
     public event EventHandler? OnShowUpdateEntry;
 
     #region Properties
@@ -102,7 +101,7 @@ public partial class frmFloatingButton : Form
 
                     var endOn = task!.StartedOn!.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
 
-                    p_Tasks.Stop(task!.ID, endOn);
+                    p_Tasks.Stop(this, task!.ID, endOn);
                 }
             }
             buttonBitmap?.Dispose();
@@ -669,8 +668,9 @@ public partial class frmFloatingButton : Form
         CreateButtonBitmap();
         Invalidate();
 
-        // Raise OnResetEvent
-        OnResetEvent?.Invoke(this, EventArgs.Empty);
+        var task = Tag as ITask;
+
+        p_Tasks.Reset(this, task!.ID);
     }
 
     private void OnControlButtonStart()
@@ -694,7 +694,7 @@ public partial class frmFloatingButton : Form
 
         var endOn = task!.StartedOn!.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
 
-        p_Tasks.Stop(task!.ID, endOn);
+        p_Tasks.Stop(this, task!.ID, endOn);
 
         // Close the form
         Close();
@@ -707,7 +707,7 @@ public partial class frmFloatingButton : Form
 
         var task = Tag as ITask;
 
-        p_Tasks.Delete(task!.ID);
+        p_Tasks.Delete(this, task!.ID);
 
         // Close the form
         Close();

@@ -29,7 +29,7 @@ partial class frmUpdateEntry
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
+        var resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateEntry));
         rtbNote = new RichTextBox();
         lbNotes = new ListBox();
         btnDeleteNote = new Button();
@@ -45,7 +45,7 @@ partial class frmUpdateEntry
         lbPreviousNotes = new ListBox();
         btnSaveChanges = new Button();
         btnDelete = new Button();
-        tokenBoxTags = new CustomControls.TokenBox();
+        tokenBoxTags = new Zup.CustomControls.TokenBox();
         label4 = new Label();
         label3 = new Label();
         label2 = new Label();
@@ -221,7 +221,7 @@ partial class frmUpdateEntry
         // btnSaveChanges
         // 
         btnSaveChanges.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnSaveChanges.Location = new Point(719, 133);
+        btnSaveChanges.Location = new Point(719, 113);
         btnSaveChanges.Name = "btnSaveChanges";
         btnSaveChanges.Size = new Size(94, 23);
         btnSaveChanges.TabIndex = 14;
@@ -232,7 +232,7 @@ partial class frmUpdateEntry
         // btnDelete
         // 
         btnDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnDelete.Location = new Point(719, 104);
+        btnDelete.Location = new Point(719, 84);
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(94, 23);
         btnDelete.TabIndex = 15;
@@ -272,7 +272,7 @@ partial class frmUpdateEntry
         label4.AutoSize = true;
         label4.Location = new Point(20, 99);
         label4.Name = "label4";
-        label4.Size = new Size(30, 15);
+        label4.Size = new Size(31, 15);
         label4.TabIndex = 19;
         label4.Text = "&Tags";
         // 
@@ -299,7 +299,7 @@ partial class frmUpdateEntry
         label1.AutoSize = true;
         label1.Location = new Point(19, 20);
         label1.Name = "label1";
-        label1.Size = new Size(29, 15);
+        label1.Size = new Size(30, 15);
         label1.TabIndex = 16;
         label1.Text = "T&ask";
         // 
@@ -327,19 +327,18 @@ partial class frmUpdateEntry
         // btnRerun
         // 
         btnRerun.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRerun.Location = new Point(719, 162);
+        btnRerun.Location = new Point(719, 142);
         btnRerun.Name = "btnRerun";
         btnRerun.Size = new Size(94, 23);
         btnRerun.TabIndex = 23;
         btnRerun.Text = "Re-run";
         btnRerun.UseVisualStyleBackColor = true;
-        btnRerun.Visible = false;
         btnRerun.Click += btnRerun_Click;
         // 
         // btnRemind
         // 
         btnRemind.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRemind.Location = new Point(719, 75);
+        btnRemind.Location = new Point(719, 55);
         btnRemind.Name = "btnRemind";
         btnRemind.Size = new Size(94, 23);
         btnRemind.TabIndex = 24;
