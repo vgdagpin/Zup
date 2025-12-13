@@ -686,7 +686,7 @@ public partial class frmMain : Form
             m_FormView.RefreshList();
         };
 
-        newFloatingButton.OnTaskTextDoubleClick += (sender, e) =>
+        newFloatingButton.OnShowUpdateEntry += (sender, e) =>
         {
             var entry = ((frmFloatingButton)sender!).Tag as ITask;
 

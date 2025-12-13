@@ -14,6 +14,7 @@ public partial class frmFloatingButton : Form
     private ContextMenuStrip? controlButtonMenu;
     private int elapsedSeconds = 0; // Elapsed time in seconds
     private RectangleF? taskTextBounds; // Bounds of the task text for tooltip detection
+    private RectangleF? timeTextBounds; // Bounds of the time text for click detection
     private ToolTip? taskTooltip;
     private DateTime? startedOn = null;
     private DateTime? scheduledOn = null;
@@ -37,7 +38,7 @@ public partial class frmFloatingButton : Form
     public event EventHandler<StopEventArgs>? OnStopEvent;
     public event EventHandler? OnResetEvent;
     public event EventHandler? OnDeleteEvent;
-    public event EventHandler? OnTaskTextDoubleClick;
+    public event EventHandler? OnShowUpdateEntry;
 
     #region Properties
     // Override Text property to refresh UI when changed
@@ -349,13 +350,21 @@ public partial class frmFloatingButton : Form
             float timeX = timeGroupX;
             g.DrawString(timeText, timeFont, textBrush, timeX, startY);
 
+            // Store time text bounds for click detection (scaled down to 1x, accounting for padding)
+            float padding2x = PADDING * 2;
+            timeTextBounds = new RectangleF(
+                (padding2x + timeX) / BITMAP_SCALE,
+                (padding2x + startY) / BITMAP_SCALE,
+                timeSize.Width / BITMAP_SCALE,
+                timeSize.Height / BITMAP_SCALE
+            );
+
             // Draw start/stop button icon beside time
             float buttonX = timeX + timeSize.Width + buttonSpacing;
             float buttonY = startY + (timeSize.Height - buttonSize) / 2f;
             RectangleF buttonRect = new RectangleF(buttonX, buttonY, buttonSize, buttonSize);
 
             // Store button bounds for click detection (scaled down to 1x, accounting for padding)
-            float padding2x = PADDING * 2;
             controlButtonBounds = new RectangleF(
                 (padding2x + buttonX) / BITMAP_SCALE,
                 (padding2x + buttonY) / BITMAP_SCALE,
@@ -542,11 +551,22 @@ public partial class frmFloatingButton : Form
             return;
         }
 
-        // Task text double-click detection
-        if (e.Button == MouseButtons.Left && e.Clicks == 2 && taskTextBounds.HasValue && taskTextBounds.Value.Contains(e.Location))
+        // Handle double-clicks on text areas
+        if (e.Button == MouseButtons.Left && e.Clicks == 2)
         {
-            OnTaskTextDoubleClick?.Invoke(this, EventArgs.Empty);
-            return; // swallow double-click so it doesn't drag window
+            // Task text double-click detection
+            if (taskTextBounds.HasValue && taskTextBounds.Value.Contains(e.Location))
+            {
+                OnShowUpdateEntry?.Invoke(this, EventArgs.Empty);
+                return; // swallow double-click so it doesn't drag window
+            }
+
+            // Time text double-click detection
+            if (timeTextBounds.HasValue && timeTextBounds.Value.Contains(e.Location))
+            {
+                OnShowUpdateEntry?.Invoke(this, EventArgs.Empty);
+                return; // swallow double-click so it doesn't drag window
+            }
         }
 
         if (controlButtonBounds.HasValue && controlButtonBounds.Value.Contains(e.Location))
