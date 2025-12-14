@@ -58,7 +58,20 @@ public class TaskCollection : IEnumerable<ITask>
 
             m_DbContext.SaveChanges();
 
-            OnTaskUpdated?.Invoke(sender, task);
+            var args = new NewEntryEventArgs(task.Task)
+            {
+                Task = task,
+                StopOtherTask = false,
+                StartNow = true,
+                ParentEntryID = null,
+                HideParent = false,
+                BringNotes = false,
+                BringTags = false
+            };
+
+            runningIDs.Add(id);
+
+            OnTaskStarted?.Invoke(sender, args);
         }
     }
 
@@ -148,7 +161,10 @@ public class TaskCollection : IEnumerable<ITask>
 
         m_DbContext.SaveChanges();
 
-        runningIDs.Add(newE.ID);
+        if (startNow)
+        {
+            runningIDs.Add(newE.ID);
+        }
 
         var task = new ZupTask
         {

@@ -88,8 +88,8 @@ public partial class frmFloatingButton : Form
                     isRunning = true;
                     updateTimer.Start();
 
-                    var task = Tag as ITask;
-                    p_Tasks.Resume(this, task!.ID);
+                    //var task = Tag as ITask;
+                    //p_Tasks.Resume(this, task!.ID);
                 }
             }
             else
@@ -708,18 +708,21 @@ public partial class frmFloatingButton : Form
 
     private void OnControlButtonStop()
     {
-        // Stop button clicked - stop timer and raise event
-        isRunning = false;
-        updateTimer?.Stop();
+        var task = (ITask?)Tag;
 
-        var task = Tag as ITask;
+        if (task != null && task.StartedOn != null)
+        {
+            var endOn = task.StartedOn.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
 
-        var endOn = task!.StartedOn!.Value.Add(TimeSpan.FromSeconds(elapsedSeconds));
+            p_Tasks.Stop(this, task.ID, endOn);
 
-        p_Tasks.Stop(this, task!.ID, endOn);
+            // Stop button clicked - stop timer and raise event
+            isRunning = false;
+            updateTimer?.Stop();
 
-        // Close the form
-        Close();
+            // Close the form
+            Close();
+        }
     }
 
     private void OnControlButtonDelete()

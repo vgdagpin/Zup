@@ -293,6 +293,10 @@ public partial class frmViewList : Form
             {
 
             }
+            else if (status == TaskStatus.Queued)
+            {
+                p_Tasks.Resume(this, dataRow.ID);
+            }
             else
             {
                 p_Tasks.Start(this, dataRow.Task, true, !ModifierKeys.HasFlag(Keys.Shift), false, false, true, false, dataRow.ID);

@@ -262,7 +262,10 @@ public partial class frmMain : Form
                     FloatingButtons.Remove(d);
                 });
 
-            ShowFloatingButton(args.Task);
+            if (!FloatingButtons.Any(a => ((ITask)a.Tag!).ID == args.Task.ID))
+            {
+                ShowFloatingButton(args.Task);
+            }
 
             if (args.Task.GetTaskStatus() != TaskStatus.Queued
                 && args.StopOtherTask
