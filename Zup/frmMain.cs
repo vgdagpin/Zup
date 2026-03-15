@@ -213,8 +213,8 @@ public partial class frmMain : Form
     {
         Tasks = tasks;
 
-        Tasks.OnTaskStarted += Tasks_OnTaskAdded;
-        Tasks.OnTaskStopped += Tasks_OnTaskRemoved;
+        Tasks.OnTaskStarted += Tasks_OnTaskStarted;
+        Tasks.OnTaskStopped += Tasks_OnTaskStopped;
 
 
         InitializeComponent();
@@ -246,12 +246,15 @@ public partial class frmMain : Form
 
     }
 
-    private void Tasks_OnTaskRemoved(object? sender, ITask e)
+    private void Tasks_OnTaskStopped(object? sender, ITask e)
     {
-
+        if (sender is frmFloatingButton)
+        {
+            ShowUpdateEntry(e.ID);
+        }
     }
 
-    private void Tasks_OnTaskAdded(object? sender, NewEntryEventArgs args)
+    private void Tasks_OnTaskStarted(object? sender, NewEntryEventArgs args)
     {
         if (SettingHelper.UsePillTimer)
         {

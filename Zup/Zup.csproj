@@ -8,8 +8,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ApplicationIcon>Zup.ico</ApplicationIcon>
 		<ForceDesignerDPIUnaware>true</ForceDesignerDPIUnaware>
-		<AssemblyVersion>2.0.0.7</AssemblyVersion>
-		<FileVersion>2.0.0.7</FileVersion>
+		<AssemblyVersion>2.0.0.8</AssemblyVersion>
+		<FileVersion>2.0.0.8</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
