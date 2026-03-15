@@ -23,11 +23,12 @@ jobs:
 
       - name: Extract version
         id: version
-        shell: bash
+        shell: pwsh
         run: |
-          VERSION=$(grep -oP '(?<=<AssemblyVersion>)[^<]+' App/Zup/Zup.csproj)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+          $xml = [xml](Get-Content App/Zup/Zup.csproj)
+          $version = $xml.Project.PropertyGroup.AssemblyVersion
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "TAG=v$version" >> $env:GITHUB_OUTPUT
 
       - name: Publish
         run: dotnet publish App/Zup/Zup.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/
