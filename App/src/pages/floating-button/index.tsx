@@ -41,6 +41,24 @@ function FloatingButton() {
 		return () => clearInterval(t);
 	}, [isRunning, data]);
 
+	// Attach mousemove/mouseup at the document level so dragging doesn't stop
+	// when the cursor moves outside the small pill window bounds.
+	useEffect(() => {
+		const onMove = (e: MouseEvent) => {
+			if (!isDragging.current) return;
+			window.zupAPI.moveWindow(e.screenX - dragOffset.current.x, e.screenY - dragOffset.current.y);
+		};
+		const onUp = () => {
+			isDragging.current = false;
+		};
+		document.addEventListener('mousemove', onMove);
+		document.addEventListener('mouseup', onUp);
+		return () => {
+			document.removeEventListener('mousemove', onMove);
+			document.removeEventListener('mouseup', onUp);
+		};
+	}, []);
+
 	const handleStop = () => {
 		if (data) window.zupAPI.stopTask(data.taskId);
 	};
@@ -56,19 +74,10 @@ function FloatingButton() {
 		e.preventDefault();
 	};
 
-	const handleMouseMove = (e: React.MouseEvent) => {
-		if (!isDragging.current) return;
-		window.zupAPI.moveWindow(e.screenX - dragOffset.current.x, e.screenY - dragOffset.current.y);
-	};
-
-	const handleMouseUp = () => {
-		isDragging.current = false;
-	};
-
 	const label = data ? data.taskName.slice(0, 22) + (data.taskName.length > 22 ? '…' : '') : '—';
 
 	return (
-		<div className="pill" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
+		<div className="pill" onMouseDown={handleMouseDown}>
 			<span className="task-name" title={data?.taskName} onDoubleClick={handleOpen}>
 				{label}
 			</span>

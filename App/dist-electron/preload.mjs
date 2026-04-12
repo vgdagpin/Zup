@@ -1,1 +1,55 @@
-"use strict";const n=require("electron");n.contextBridge.exposeInMainWorld("zupAPI",{getTasks:()=>n.ipcRenderer.invoke("tasks:getAll"),getRunningIds:()=>n.ipcRenderer.invoke("tasks:getRunningIds"),startTask:e=>n.ipcRenderer.invoke("tasks:start",e),stopTask:(e,t)=>n.ipcRenderer.invoke("tasks:stop",e,t),deleteTask:e=>n.ipcRenderer.invoke("tasks:delete",e),updateTask:(e,t)=>n.ipcRenderer.invoke("tasks:update",e,t),resumeTask:e=>n.ipcRenderer.invoke("tasks:resume",e),resetTask:e=>n.ipcRenderer.invoke("tasks:reset",e),trimTasks:e=>n.ipcRenderer.invoke("tasks:trim",e),queryTasks:(e,t,i)=>n.ipcRenderer.invoke("tasks:query",e,t,i),getNotes:e=>n.ipcRenderer.invoke("notes:getForTask",e),saveNote:(e,t,i,r)=>n.ipcRenderer.invoke("notes:save",e,t,i,r),deleteNote:e=>n.ipcRenderer.invoke("notes:delete",e),getTags:()=>n.ipcRenderer.invoke("tags:getAll"),updateTag:(e,t,i)=>n.ipcRenderer.invoke("tags:update",e,t,i),deleteTag:e=>n.ipcRenderer.invoke("tags:delete",e),getSettings:()=>n.ipcRenderer.invoke("settings:getAll"),setSetting:(e,t)=>n.ipcRenderer.invoke("settings:set",e,t),changeDbPath:e=>n.ipcRenderer.invoke("settings:changeDbPath",e),backupDb:()=>n.ipcRenderer.invoke("db:backup"),getDbPath:()=>n.ipcRenderer.invoke("db:getCurrentPath"),getWeekData:e=>n.ipcRenderer.invoke("utility:getWeekData",e),exportTimesheets:(e,t,i,r,o)=>n.ipcRenderer.invoke("export:generate",e,t,i,r,o),showNewEntry:()=>n.ipcRenderer.invoke("window:showNewEntry"),showUpdateEntry:e=>n.ipcRenderer.invoke("window:showUpdateEntry",e),showViewList:()=>n.ipcRenderer.invoke("window:showViewList"),showSettings:()=>n.ipcRenderer.invoke("window:showSettings"),showTagEditor:e=>n.ipcRenderer.invoke("window:showTagEditor",e),moveToCenter:()=>n.ipcRenderer.invoke("window:moveEntryListToCenter"),savePosition:(e,t)=>n.ipcRenderer.invoke("window:savePosition",e,t),moveWindow:(e,t)=>n.ipcRenderer.invoke("window:move",e,t),createFloatingButton:(e,t,i)=>n.ipcRenderer.invoke("window:createFloatingButton",e,t,i),openPath:e=>n.ipcRenderer.invoke("shell:openPath",e),on:(e,t)=>{n.ipcRenderer.on(e,(i,...r)=>t(...r))},off:(e,t)=>{n.ipcRenderer.removeListener(e,t)}});
+'use strict';
+const electron = require('electron');
+electron.contextBridge.exposeInMainWorld('zupAPI', {
+	// Tasks
+	getTasks: () => electron.ipcRenderer.invoke('tasks:getAll'),
+	getRunningIds: () => electron.ipcRenderer.invoke('tasks:getRunningIds'),
+	startTask: (args) => electron.ipcRenderer.invoke('tasks:start', args),
+	stopTask: (taskId, endOn) => electron.ipcRenderer.invoke('tasks:stop', taskId, endOn),
+	deleteTask: (taskId) => electron.ipcRenderer.invoke('tasks:delete', taskId),
+	updateTask: (taskId, args) => electron.ipcRenderer.invoke('tasks:update', taskId, args),
+	resumeTask: (taskId) => electron.ipcRenderer.invoke('tasks:resume', taskId),
+	resetTask: (taskId) => electron.ipcRenderer.invoke('tasks:reset', taskId),
+	trimTasks: (days) => electron.ipcRenderer.invoke('tasks:trim', days),
+	queryTasks: (from, to, search) => electron.ipcRenderer.invoke('tasks:query', from, to, search),
+	// Notes
+	getNotes: (taskId) => electron.ipcRenderer.invoke('notes:getForTask', taskId),
+	saveNote: (taskId, noteId, notes, rtf) => electron.ipcRenderer.invoke('notes:save', taskId, noteId, notes, rtf),
+	deleteNote: (noteId) => electron.ipcRenderer.invoke('notes:delete', noteId),
+	// Tags
+	getTags: () => electron.ipcRenderer.invoke('tags:getAll'),
+	updateTag: (tagId, name, description) => electron.ipcRenderer.invoke('tags:update', tagId, name, description),
+	deleteTag: (tagId) => electron.ipcRenderer.invoke('tags:delete', tagId),
+	// Settings
+	getSettings: () => electron.ipcRenderer.invoke('settings:getAll'),
+	setSetting: (key, value) => electron.ipcRenderer.invoke('settings:set', key, value),
+	changeDbPath: (newPath) => electron.ipcRenderer.invoke('settings:changeDbPath', newPath),
+	// DB
+	backupDb: () => electron.ipcRenderer.invoke('db:backup'),
+	getDbPath: () => electron.ipcRenderer.invoke('db:getCurrentPath'),
+	// Utility
+	getWeekData: (year) => electron.ipcRenderer.invoke('utility:getWeekData', year),
+	// Export
+	exportTimesheets: (tasks, format, folder, ext, dateStr) =>
+		electron.ipcRenderer.invoke('export:generate', tasks, format, folder, ext, dateStr),
+	// Window management
+	showNewEntry: () => electron.ipcRenderer.invoke('window:showNewEntry'),
+	showUpdateEntry: (taskId) => electron.ipcRenderer.invoke('window:showUpdateEntry', taskId),
+	showViewList: () => electron.ipcRenderer.invoke('window:showViewList'),
+	showSettings: () => electron.ipcRenderer.invoke('window:showSettings'),
+	showTagEditor: (tag) => electron.ipcRenderer.invoke('window:showTagEditor', tag),
+	moveToCenter: () => electron.ipcRenderer.invoke('window:moveEntryListToCenter'),
+	savePosition: (x, y) => electron.ipcRenderer.invoke('window:savePosition', x, y),
+	moveWindow: (x, y) => electron.ipcRenderer.invoke('window:move', x, y),
+	createFloatingButton: (taskId, taskName, startedOn) =>
+		electron.ipcRenderer.invoke('window:createFloatingButton', taskId, taskName, startedOn),
+	// Shell
+	openPath: (p) => electron.ipcRenderer.invoke('shell:openPath', p),
+	// Events (renderer subscribes to main-process push events)
+	on: (channel, fn) => {
+		electron.ipcRenderer.on(channel, (_e, ...args) => fn(...args));
+	},
+	off: (channel, fn) => {
+		electron.ipcRenderer.removeListener(channel, fn);
+	},
+});

@@ -48,7 +48,7 @@ declare global {
 			showTagEditor: (tag?: string) => Promise<void>;
 			moveToCenter: () => Promise<void>;
 			savePosition: (x: number, y: number) => Promise<void>;
-moveWindow: (x: number, y: number) => Promise<void>;
+			moveWindow: (x: number, y: number) => Promise<void>;
 			createFloatingButton: (taskId: string, taskName: string, startedOn: string | null) => Promise<void>;
 
 			// Shell
@@ -62,4 +62,3 @@ moveWindow: (x: number, y: number) => Promise<void>;
 }
 
 export {};
-

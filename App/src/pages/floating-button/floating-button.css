@@ -1,6 +1,6 @@
 body {
 	background: transparent;
-	overflow: hidden;
+	padding: 4px;
 }
 
 .pill {
@@ -11,7 +11,7 @@ body {
 	border: 1.5px solid rgba(160, 160, 160, 0.8);
 	border-radius: 22px;
 	padding: 4px 10px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 	height: 40px;
 	cursor: grab;
 	white-space: nowrap;

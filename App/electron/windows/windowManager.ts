@@ -186,8 +186,8 @@ export function createFloatingButton(
 	y: number,
 ): BrowserWindow {
 	const win = new BrowserWindow({
-		width: 220,
-		height: 44,
+		width: 228,
+		height: 52,
 		x,
 		y,
 		frame: false,
