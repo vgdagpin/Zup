@@ -1,0 +1,48 @@
+{
+	"name": "zup-electron",
+	"private": true,
+	"version": "2.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"dist": "npm run build && electron-builder --win portable",
+		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+		"rebuild": "electron-rebuild -f -w better-sqlite3",
+		"typecheck": "tsc",
+		"format": "prettier --write ."
+	},
+	"dependencies": {
+		"@tanstack/react-table": "^8.21.3",
+		"@tiptap/extension-link": "^3.22.3",
+		"@tiptap/pm": "^3.22.3",
+		"@tiptap/react": "^3.22.3",
+		"@tiptap/starter-kit": "^3.22.3",
+		"better-sqlite3": "^12.8.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"uuid": "^13.0.0",
+		"zustand": "^5.0.12"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/react": "^18.2.64",
+		"@types/react-dom": "^18.2.21",
+		"@types/uuid": "^10.0.0",
+		"@typescript-eslint/eslint-plugin": "^7.1.1",
+		"@typescript-eslint/parser": "^7.1.1",
+		"@vitejs/plugin-react": "^4.2.1",
+		"electron": "^30.0.1",
+		"electron-builder": "^24.13.3",
+		"electron-rebuild": "^3.2.9",
+		"eslint": "^8.57.0",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"eslint-plugin-react-refresh": "^0.4.5",
+		"prettier": "^3.8.2",
+		"typescript": "^5.2.2",
+		"vite": "^5.1.6",
+		"vite-plugin-electron": "^0.28.6",
+		"vite-plugin-electron-renderer": "^0.14.5"
+	},
+	"main": "dist-electron/main.js"
+}

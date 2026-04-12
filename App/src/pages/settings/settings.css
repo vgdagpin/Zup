@@ -1,0 +1,59 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background: #fff;
+}
+.header {
+	padding: 10px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	border-bottom: 1px solid #eee;
+	background: #f7f7f7;
+}
+.content {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 0 12px;
+}
+.section {
+	padding: 10px 16px 4px;
+}
+.section-title {
+	font-size: 11px;
+	font-weight: 700;
+	color: #888;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	padding: 6px 0 4px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 6px;
+}
+.field {
+	display: flex;
+	align-items: center;
+	padding: 5px 0;
+	gap: 10px;
+}
+.field label {
+	width: 160px;
+	font-size: 12px;
+	color: #444;
+	flex-shrink: 0;
+}
+.field-content {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex: 1;
+}
+.footer {
+	padding: 10px 16px;
+	border-top: 1px solid #eee;
+	display: flex;
+	justify-content: flex-end;
+}
+.loading {
+	padding: 20px;
+	color: #999;
+}

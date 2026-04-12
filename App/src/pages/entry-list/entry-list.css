@@ -1,0 +1,136 @@
+body {
+	background: transparent;
+	overflow: hidden;
+}
+
+.container {
+	background: rgba(255, 255, 255, 0.96);
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	min-width: 300px;
+	overflow: hidden;
+	cursor: grab;
+}
+.container:active {
+	cursor: grabbing;
+}
+
+.titlebar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 8px;
+	background: #f0f0f0;
+	border-bottom: 1px solid #ddd;
+}
+.title {
+	font-weight: 600;
+	font-size: 12px;
+	color: #555;
+}
+.titlebar-actions {
+	display: flex;
+	gap: 4px;
+}
+.titlebar-actions button {
+	padding: 2px 6px;
+	font-size: 13px;
+	border-radius: 4px;
+}
+
+.task-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border-bottom: 1px solid #f0f0f0;
+	cursor: default;
+	transition: background 0.1s;
+}
+.task-row:hover {
+	background: #f8f8f8;
+}
+.task-row.running {
+	background: #fce4ec;
+	border-left: 3px solid #e75480;
+}
+.task-row.running:hover {
+	background: #f8bbd0;
+}
+.task-row.queued {
+	background: #e8f5e9;
+	border-left: 3px solid #66bb6a;
+}
+.task-row.ranked {
+	background: #e3f2fd;
+	border-left: 3px solid #42a5f5;
+}
+
+.toggle-btn {
+	border: none;
+	background: none;
+	font-size: 10px;
+	padding: 2px 4px;
+	border-radius: 3px;
+	cursor: pointer;
+	color: #555;
+	flex-shrink: 0;
+}
+.toggle-btn:hover {
+	background: rgba(0, 0, 0, 0.08);
+}
+.running .toggle-btn {
+	color: #e75480;
+}
+
+.task-text {
+	flex: 1;
+	font-size: 12px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tags {
+	font-size: 10px;
+	color: #999;
+	flex-shrink: 0;
+}
+
+.separator {
+	height: 1px;
+	background: #e0e0e0;
+	margin: 2px 0;
+}
+.separator.queued-sep,
+.separator.ranked-sep {
+	height: auto;
+	background: none;
+	display: flex;
+	align-items: center;
+	padding: 2px 10px;
+}
+.separator.queued-sep span,
+.separator.ranked-sep span {
+	font-size: 10px;
+	color: #999;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.confirm-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(255, 255, 255, 0.95);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	z-index: 10;
+}
+.confirm-btns {
+	display: flex;
+	gap: 8px;
+}

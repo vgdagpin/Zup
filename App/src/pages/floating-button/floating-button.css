@@ -1,0 +1,61 @@
+body {
+	background: transparent;
+	overflow: hidden;
+}
+
+.pill {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background: linear-gradient(to bottom, #fcfcfc, #ebebeb);
+	border: 1.5px solid rgba(160, 160, 160, 0.8);
+	border-radius: 22px;
+	padding: 4px 10px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	height: 40px;
+	cursor: grab;
+	white-space: nowrap;
+	width: 100%;
+}
+
+.pill:active {
+	cursor: grabbing;
+}
+
+.task-name {
+	flex: 1;
+	font-size: 12px;
+	font-weight: 500;
+	color: #333;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: default;
+}
+
+.duration {
+	font-size: 11px;
+	font-family: 'Consolas', monospace;
+	color: #555;
+	cursor: default;
+}
+
+.stop-btn {
+	border: none;
+	background: #e75480;
+	color: #fff;
+	border-radius: 50%;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	font-size: 10px;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.stop-btn:hover {
+	background: #c62a5a;
+}

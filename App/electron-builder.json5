@@ -1,0 +1,27 @@
+// @see - https://www.electron.build/configuration/configuration
+{
+	$schema: 'https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json',
+	appId: 'com.zup.app',
+	asar: true,
+	productName: 'Zup',
+	directories: {
+		output: 'release/${version}',
+	},
+	files: ['dist', 'dist-electron', 'public'],
+	extraResources: [
+		{
+			from: 'node_modules/better-sqlite3/build/Release',
+			to: 'better-sqlite3/build/Release',
+			filter: ['*.node'],
+		},
+	],
+	win: {
+		target: [
+			{
+				target: 'portable',
+				arch: ['x64'],
+			},
+		],
+		artifactName: 'Zup-v${version}-win-x64.${ext}',
+	},
+}
