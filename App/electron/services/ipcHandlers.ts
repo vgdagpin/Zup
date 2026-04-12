@@ -50,12 +50,7 @@ export function registerIpcHandlers(): void {
 
 	// ---- Settings ----
 	ipcMain.handle('settings:getAll', () => ({
-		showQueuedTasks: settingHelper.ShowQueuedTasks,
-		showRankedTasks: settingHelper.ShowRankedTasks,
-		showClosedTasks: settingHelper.ShowClosedTasks,
-		entryListOpacity: settingHelper.EntryListOpacity,
 		numDaysOfDataToLoad: settingHelper.NumDaysOfDataToLoad,
-		itemsToShow: settingHelper.ItemsToShow,
 		autoOpenUpdateWindow: settingHelper.AutoOpenUpdateWindow,
 		usePillTimer: settingHelper.UsePillTimer,
 		dayStart: settingHelper.DayStart,
@@ -74,12 +69,7 @@ export function registerIpcHandlers(): void {
 		const s = settingHelper as Record<string, unknown>;
 		// Map camelCase key to SettingHelper property
 		const map: Record<string, string> = {
-			showQueuedTasks: 'ShowQueuedTasks',
-			showRankedTasks: 'ShowRankedTasks',
-			showClosedTasks: 'ShowClosedTasks',
-			entryListOpacity: 'EntryListOpacity',
 			numDaysOfDataToLoad: 'NumDaysOfDataToLoad',
-			itemsToShow: 'ItemsToShow',
 			autoOpenUpdateWindow: 'AutoOpenUpdateWindow',
 			usePillTimer: 'UsePillTimer',
 			dayStart: 'DayStart',

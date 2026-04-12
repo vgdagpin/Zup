@@ -49,6 +49,9 @@ function FloatingButton() {
 			window.zupAPI.moveWindow(e.screenX - dragOffset.current.x, e.screenY - dragOffset.current.y);
 		};
 		const onUp = () => {
+			if (isDragging.current) {
+				window.zupAPI.savePosition(window.screenX, window.screenY);
+			}
 			isDragging.current = false;
 		};
 		document.addEventListener('mousemove', onMove);

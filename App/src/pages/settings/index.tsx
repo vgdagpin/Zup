@@ -51,45 +51,12 @@ function Settings() {
 			<div className="header">Settings</div>
 			<div className="content">
 				<Section title="Display">
-					<Field label="Items to show">
-						<input
-							type="number"
-							min="1"
-							max="20"
-							value={s.itemsToShow}
-							onChange={(e) => set('itemsToShow', parseInt(e.target.value))}
-						/>
-					</Field>
-					<Field label="Opacity">
-						<input
-							type="range"
-							min="20"
-							max="100"
-							value={Math.round(s.entryListOpacity * 100)}
-							onChange={(e) => set('entryListOpacity', parseInt(e.target.value) / 100)}
-						/>
-						<span>{Math.round(s.entryListOpacity * 100)}%</span>
-					</Field>
 					<Field label="Days to load">
 						<input
 							type="number"
 							min="1"
 							value={s.numDaysOfDataToLoad}
 							onChange={(e) => set('numDaysOfDataToLoad', parseInt(e.target.value))}
-						/>
-					</Field>
-					<Field label="Show queued tasks">
-						<input
-							type="checkbox"
-							checked={s.showQueuedTasks}
-							onChange={(e) => set('showQueuedTasks', e.target.checked)}
-						/>
-					</Field>
-					<Field label="Show ranked tasks">
-						<input
-							type="checkbox"
-							checked={s.showRankedTasks}
-							onChange={(e) => set('showRankedTasks', e.target.checked)}
 						/>
 					</Field>
 				</Section>

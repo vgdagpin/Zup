@@ -32,12 +32,7 @@ export interface ZupNote {
 }
 
 export interface ZupSettings {
-	showQueuedTasks: boolean;
-	showRankedTasks: boolean;
-	showClosedTasks: boolean;
-	entryListOpacity: number;
 	numDaysOfDataToLoad: number;
-	itemsToShow: number;
 	autoOpenUpdateWindow: boolean;
 	usePillTimer: boolean;
 	dayStart: string; // "HH:mm"

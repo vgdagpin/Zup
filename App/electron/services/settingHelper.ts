@@ -5,12 +5,7 @@ import { getDb, getDefaultDbPath } from './database.js';
 
 // All defaults mirror Properties.Settings.Default in the WinForms app
 const DEFAULTS: Record<string, string> = {
-	ShowQueuedTasks: 'false',
-	ShowRankedTasks: 'false',
-	ShowClosedTasks: 'false',
-	EntryListOpacity: '1',
 	NumDaysOfDataToLoad: '30',
-	ItemsToShow: '5',
 	AutoOpenUpdateWindow: 'false',
 	UsePillTimer: 'true',
 	DayStart: '07:00',
@@ -64,46 +59,11 @@ function set(name: string, value: string): void {
 }
 
 export const settingHelper = {
-	get ShowQueuedTasks() {
-		return get('ShowQueuedTasks') === 'true';
-	},
-	set ShowQueuedTasks(v) {
-		set('ShowQueuedTasks', String(v));
-	},
-
-	get ShowRankedTasks() {
-		return get('ShowRankedTasks') === 'true';
-	},
-	set ShowRankedTasks(v) {
-		set('ShowRankedTasks', String(v));
-	},
-
-	get ShowClosedTasks() {
-		return get('ShowClosedTasks') === 'true';
-	},
-	set ShowClosedTasks(v) {
-		set('ShowClosedTasks', String(v));
-	},
-
-	get EntryListOpacity() {
-		return parseFloat(get('EntryListOpacity'));
-	},
-	set EntryListOpacity(v) {
-		set('EntryListOpacity', String(v));
-	},
-
 	get NumDaysOfDataToLoad() {
 		return parseInt(get('NumDaysOfDataToLoad'));
 	},
 	set NumDaysOfDataToLoad(v) {
 		set('NumDaysOfDataToLoad', String(v));
-	},
-
-	get ItemsToShow() {
-		return parseInt(get('ItemsToShow'));
-	},
-	set ItemsToShow(v) {
-		set('ItemsToShow', String(v));
 	},
 
 	get AutoOpenUpdateWindow() {

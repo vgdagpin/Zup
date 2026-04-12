@@ -47,7 +47,6 @@ contextBridge.exposeInMainWorld('zupAPI', {
 	showViewList: () => ipcRenderer.invoke('window:showViewList'),
 	showSettings: () => ipcRenderer.invoke('window:showSettings'),
 	showTagEditor: (tag?: string) => ipcRenderer.invoke('window:showTagEditor', tag),
-	moveToCenter: () => ipcRenderer.invoke('window:moveEntryListToCenter'),
 	savePosition: (x: number, y: number) => ipcRenderer.invoke('window:savePosition', x, y),
 	moveWindow: (x: number, y: number) => ipcRenderer.invoke('window:move', x, y),
 	createFloatingButton: (taskId: string, taskName: string, startedOn: string | null) =>

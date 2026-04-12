@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, nativeImage, Tray, Menu, app, nativeTheme } from 'electron';
+import { BrowserWindow, nativeImage, Tray, Menu, app, nativeTheme } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,7 +23,6 @@ function loadPage(win: BrowserWindow, page: string): void {
 const preloadPath = path.join(__dirname, 'preload.mjs');
 
 // ---- Window registry ----
-let entryListWin: BrowserWindow | null = null;
 let newEntryWin: BrowserWindow | null = null;
 let updateEntryWin: BrowserWindow | null = null;
 let viewListWin: BrowserWindow | null = null;
@@ -35,33 +34,6 @@ export let tray: Tray | null = null;
 
 function isAlive(w: BrowserWindow | null): w is BrowserWindow {
 	return w != null && !w.isDestroyed();
-}
-
-// ---- Entry List ----
-export function getEntryListWindow(): BrowserWindow {
-	if (!isAlive(entryListWin)) {
-		entryListWin = new BrowserWindow({
-			width: 320,
-			height: 400,
-			frame: false,
-			resizable: false,
-			alwaysOnTop: true,
-			skipTaskbar: true,
-			transparent: true,
-			webPreferences: { preload: preloadPath, contextIsolation: true },
-		});
-		loadPage(entryListWin, 'entry-list');
-		entryListWin.on('closed', () => {
-			entryListWin = null;
-		});
-	}
-	return entryListWin;
-}
-
-export function showEntryList(): void {
-	const w = getEntryListWindow();
-	w.show();
-	w.focus();
 }
 
 // ---- New Entry ----
@@ -251,15 +223,4 @@ export function updateTrayIcon(queueCount: number): void {
 	tray.setImage(getTrayIcon());
 	const tip = queueCount > 0 ? `Zup (${queueCount} queued)` : 'Zup';
 	tray.setToolTip(tip);
-}
-
-export function moveEntryListToCenter(): void {
-	if (!isAlive(entryListWin)) return;
-	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-	entryListWin.setPosition(
-		Math.floor(width / 2 - entryListWin.getBounds().width / 2),
-		Math.floor(height / 2 - entryListWin.getBounds().height / 2),
-	);
-	entryListWin.show();
-	entryListWin.focus();
 }

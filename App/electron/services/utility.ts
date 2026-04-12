@@ -24,7 +24,8 @@ export function getWeekData(year: number): WeekData[] {
 		if (data.has(wn)) continue;
 
 		const day = d.getDay(); // 0=Sun, 1=Mon, ...
-		const offset = day === 0 ? 0 : -day;
+		// ISO weeks start on Monday — align week start to Monday
+		const offset = day === 0 ? -6 : 1 - day;
 		const weekStart = new Date(d);
 		weekStart.setDate(d.getDate() + offset);
 

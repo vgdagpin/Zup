@@ -7,7 +7,6 @@ import { loadTasks, getAllTasks, startTask, stopTask, taskEvents } from './servi
 import { registerIpcHandlers } from './services/ipcHandlers.js';
 import { getWeekNumber } from './services/utility.js';
 import {
-	getEntryListWindow,
 	showNewEntry,
 	showUpdateEntry,
 	showViewList,
@@ -17,7 +16,6 @@ import {
 	getFloatingButtons,
 	setupTray,
 	updateTrayIcon,
-	moveEntryListToCenter,
 	RENDERER_DIST,
 	VITE_DEV_SERVER_URL,
 } from './windows/windowManager.js';
@@ -49,7 +47,6 @@ app.whenReady().then(() => {
 	ipcMain.handle('window:showViewList', () => showViewList());
 	ipcMain.handle('window:showSettings', () => showSettings());
 	ipcMain.handle('window:showTagEditor', (_e, tag?: string) => showTagEditor(tag));
-	ipcMain.handle('window:moveEntryListToCenter', () => moveEntryListToCenter());
 
 	ipcMain.handle('window:savePosition', (_e, x: number, y: number) => {
 		settingHelper.FormLocationX = x;
@@ -68,21 +65,6 @@ app.whenReady().then(() => {
 		const x = settingHelper.FormLocationX || width - 240;
 		const y = (settingHelper.FormLocationY || height - 60) + buttons.length * 50;
 		createFloatingButton(taskId, taskName, startedOn, x, y);
-	});
-
-	// Show entry list on startup
-	const entryList = getEntryListWindow();
-	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-	const x = settingHelper.FormLocationX || width - 325;
-	const y = settingHelper.FormLocationY || height - 420;
-	entryList.setPosition(x, y);
-	entryList.show();
-
-	// Save position when dragged via native -webkit-app-region drag
-	entryList.on('moved', () => {
-		const [wx, wy] = entryList.getPosition();
-		settingHelper.FormLocationX = wx;
-		settingHelper.FormLocationY = wy;
 	});
 
 	// System tray

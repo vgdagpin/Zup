@@ -3,7 +3,7 @@ import path from 'node:path';
 import electron from 'vite-plugin-electron/simple';
 import react from '@vitejs/plugin-react';
 
-const pages = ['entry-list', 'floating-button', 'new-entry', 'update-entry', 'view-list', 'settings', 'tag-editor'];
+const pages = ['floating-button', 'new-entry', 'update-entry', 'view-list', 'settings', 'tag-editor'];
 
 export default defineConfig({
 	plugins: [
