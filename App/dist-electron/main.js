@@ -280,6 +280,61 @@ function v4(options, buf, offset) {
   }
   return _v4(options);
 }
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
+}
+function getWeekData(year) {
+  const data = /* @__PURE__ */ new Map();
+  const from = new Date(year, 0, 1);
+  const to = new Date(year, 11, 31);
+  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+    const wn = getWeekNumber(d);
+    if (data.has(wn)) continue;
+    const day = d.getDay();
+    const offset = day === 0 ? -6 : 1 - day;
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() + offset);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+    const fmt = (dt) => `${String(dt.getMonth() + 1).padStart(2, "0")}/${String(dt.getDate()).padStart(2, "0")}/${String(dt.getFullYear()).slice(2)}`;
+    data.set(wn, {
+      weekNumber: wn,
+      start: weekStart.toISOString(),
+      end: weekEnd.toISOString(),
+      label: `${fmt(weekStart)} - ${fmt(weekEnd)}`
+    });
+  }
+  return Array.from(data.values()).sort((a, b) => a.weekNumber - b.weekNumber);
+}
+function getDayShift(date, dayStartStr, dayEndStr) {
+  const [startH, startM] = dayStartStr.split(":").map(Number);
+  const [endH, endM] = dayEndStr.split(":").map(Number);
+  const start = new Date(date);
+  start.setHours(startH, startM, 0, 0);
+  const end = new Date(date);
+  end.setDate(end.getDate() + 1);
+  end.setHours(endH, endM, 59, 999);
+  return { start, end };
+}
+function getDayOfWeek(startedOn, dayStart, dayEnd) {
+  if (!startedOn) return null;
+  const dt = new Date(startedOn);
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  for (let offset = -1; offset <= 1; offset++) {
+    const base = new Date(dt);
+    base.setDate(base.getDate() + offset);
+    base.setHours(0, 0, 0, 0);
+    const shift = getDayShift(base, dayStart, dayEnd);
+    if (dt >= shift.start && dt <= shift.end) {
+      return days[base.getDay()];
+    }
+  }
+  return null;
+}
 const taskEvents = new EventEmitter();
 const tasks = /* @__PURE__ */ new Map();
 const runningIDs = /* @__PURE__ */ new Set();
@@ -619,39 +674,10 @@ function queryTasks(from, to, search) {
       isRunning: runIds.includes(r.ID),
       tags: tagRows.map((t) => t.Name),
       duration,
-      durationString
+      durationString,
+      dayOfWeek: getDayOfWeek(r.StartedOn, settingHelper.DayStart, settingHelper.DayEnd)
     };
   });
-}
-function getWeekNumber(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
-}
-function getWeekData(year) {
-  const data = /* @__PURE__ */ new Map();
-  const from = new Date(year, 0, 1);
-  const to = new Date(year, 11, 31);
-  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
-    const wn = getWeekNumber(d);
-    if (data.has(wn)) continue;
-    const day = d.getDay();
-    const offset = day === 0 ? -6 : 1 - day;
-    const weekStart = new Date(d);
-    weekStart.setDate(d.getDate() + offset);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-    const fmt = (dt) => `${String(dt.getMonth() + 1).padStart(2, "0")}/${String(dt.getDate()).padStart(2, "0")}/${String(dt.getFullYear()).slice(2)}`;
-    data.set(wn, {
-      weekNumber: wn,
-      start: weekStart.toISOString(),
-      end: weekEnd.toISOString(),
-      label: `${fmt(weekStart)} - ${fmt(weekEnd)}`
-    });
-  }
-  return Array.from(data.values()).sort((a, b) => a.weekNumber - b.weekNumber);
 }
 function parseTagKey(raw) {
   if (!raw) return null;

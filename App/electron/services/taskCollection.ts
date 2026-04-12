@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'node:events';
 import { getDb, backupDb } from './database.js';
 import { settingHelper } from './settingHelper.js';
+import { getDayOfWeek } from './utility.js';
 import type { ZupTask, UpdateEntryArgs } from '../../src/types/index.js';
 import { BrowserWindow } from 'electron';
 
@@ -479,6 +480,7 @@ export function queryTasks(from: string, to: string, search?: string): ZupTask[]
 			tags: tagRows.map((t) => t.Name),
 			duration,
 			durationString,
+			dayOfWeek: getDayOfWeek(r.StartedOn, settingHelper.DayStart, settingHelper.DayEnd),
 		};
 	});
 }
