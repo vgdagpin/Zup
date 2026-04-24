@@ -64,6 +64,8 @@ partial class frmViewList
         btnRowFormatHelp = new Button();
         btnRefresh = new Button();
         lbWeek = new ListBox();
+        label5 = new Label();
+        txtContentWrapperPath = new TextBox();
         btnExportAll = new Button();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         statusStrip1.SuspendLayout();
@@ -347,12 +349,32 @@ partial class frmViewList
         groupBox1.Controls.Add(dtTimesheetDate);
         groupBox1.Controls.Add(label2);
         groupBox1.Controls.Add(txtExtension);
-        groupBox1.Location = new Point(11, 491);
+        groupBox1.Controls.Add(label5);
+        groupBox1.Controls.Add(txtContentWrapperPath);
+        groupBox1.Location = new Point(11, 464);
         groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(1061, 86);
+        groupBox1.Size = new Size(1061, 113);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
         groupBox1.Text = "Export Settings";
+        // 
+        // label5
+        // 
+        label5.AutoSize = true;
+        label5.Location = new Point(7, 86);
+        label5.Name = "label5";
+        label5.TabIndex = 20;
+        label5.Text = "Content Wrapper:";
+        // 
+        // txtContentWrapperPath
+        // 
+        txtContentWrapperPath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        txtContentWrapperPath.BackColor = SystemColors.Control;
+        txtContentWrapperPath.Location = new Point(122, 83);
+        txtContentWrapperPath.Name = "txtContentWrapperPath";
+        txtContentWrapperPath.ReadOnly = true;
+        txtContentWrapperPath.Size = new Size(931, 23);
+        txtContentWrapperPath.TabIndex = 21;
         // 
         // btnRowFormatHelp
         // 
@@ -452,6 +474,8 @@ partial class frmViewList
     private Button btnRefresh;
     private ListBox lbWeek;
     private Button btnExportAll;
+    private Label label5;
+    private TextBox txtContentWrapperPath;
     private DataGridViewTextBoxColumn ID;
     private DataGridViewTextBoxColumn Task;
     private DataGridViewTextBoxColumn StartedOn;

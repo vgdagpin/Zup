@@ -369,6 +369,10 @@ public partial class frmViewList : Form
         {
             ttsPath.Text = ex.Message;
         }
+
+        txtContentWrapperPath.Text = string.IsNullOrWhiteSpace(txtTimesheetFolder.Text)
+            ? string.Empty
+            : Path.Combine(txtTimesheetFolder.Text, "data-wrapper.js");
     }
 
     private string GetOutputPath()
