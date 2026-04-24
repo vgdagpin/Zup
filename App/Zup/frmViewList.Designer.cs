@@ -62,10 +62,10 @@ partial class frmViewList
         label4 = new Label();
         groupBox1 = new GroupBox();
         btnRowFormatHelp = new Button();
-        btnRefresh = new Button();
-        lbWeek = new ListBox();
         label5 = new Label();
         txtContentWrapperPath = new TextBox();
+        btnRefresh = new Button();
+        lbWeek = new ListBox();
         btnExportAll = new Button();
         ((System.ComponentModel.ISupportInitialize)dgView).BeginInit();
         statusStrip1.SuspendLayout();
@@ -85,7 +85,7 @@ partial class frmViewList
         dgView.ReadOnly = true;
         dgView.RowHeadersVisible = false;
         dgView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgView.Size = new Size(914, 406);
+        dgView.Size = new Size(914, 424);
         dgView.TabIndex = 1;
         dgView.CellContentClick += dgView_CellContentClick;
         dgView.CellFormatting += dgView_CellFormatting;
@@ -200,7 +200,7 @@ partial class frmViewList
         // lblSelectedTotal
         // 
         lblSelectedTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-        lblSelectedTotal.Location = new Point(997, 450);
+        lblSelectedTotal.Location = new Point(997, 468);
         lblSelectedTotal.Name = "lblSelectedTotal";
         lblSelectedTotal.Size = new Size(75, 23);
         lblSelectedTotal.TabIndex = 1;
@@ -301,7 +301,7 @@ partial class frmViewList
         // statusStrip1
         // 
         statusStrip1.Items.AddRange(new ToolStripItem[] { ttsPath });
-        statusStrip1.Location = new Point(0, 589);
+        statusStrip1.Location = new Point(0, 615);
         statusStrip1.Name = "statusStrip1";
         statusStrip1.Size = new Size(1084, 22);
         statusStrip1.TabIndex = 11;
@@ -351,18 +351,30 @@ partial class frmViewList
         groupBox1.Controls.Add(txtExtension);
         groupBox1.Controls.Add(label5);
         groupBox1.Controls.Add(txtContentWrapperPath);
-        groupBox1.Location = new Point(11, 464);
+        groupBox1.Location = new Point(11, 494);
         groupBox1.Name = "groupBox1";
         groupBox1.Size = new Size(1061, 113);
         groupBox1.TabIndex = 16;
         groupBox1.TabStop = false;
         groupBox1.Text = "Export Settings";
         // 
+        // btnRowFormatHelp
+        // 
+        btnRowFormatHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRowFormatHelp.Location = new Point(1029, 22);
+        btnRowFormatHelp.Name = "btnRowFormatHelp";
+        btnRowFormatHelp.Size = new Size(24, 23);
+        btnRowFormatHelp.TabIndex = 17;
+        btnRowFormatHelp.Text = "?";
+        btnRowFormatHelp.UseVisualStyleBackColor = true;
+        btnRowFormatHelp.Click += btnRowFormatHelp_Click;
+        // 
         // label5
         // 
         label5.AutoSize = true;
         label5.Location = new Point(7, 86);
         label5.Name = "label5";
+        label5.Size = new Size(101, 15);
         label5.TabIndex = 20;
         label5.Text = "Content Wrapper:";
         // 
@@ -375,17 +387,6 @@ partial class frmViewList
         txtContentWrapperPath.ReadOnly = true;
         txtContentWrapperPath.Size = new Size(931, 23);
         txtContentWrapperPath.TabIndex = 21;
-        // 
-        // btnRowFormatHelp
-        // 
-        btnRowFormatHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRowFormatHelp.Location = new Point(1029, 22);
-        btnRowFormatHelp.Name = "btnRowFormatHelp";
-        btnRowFormatHelp.Size = new Size(24, 23);
-        btnRowFormatHelp.TabIndex = 17;
-        btnRowFormatHelp.Text = "?";
-        btnRowFormatHelp.UseVisualStyleBackColor = true;
-        btnRowFormatHelp.Click += btnRowFormatHelp_Click;
         // 
         // btnRefresh
         // 
@@ -405,7 +406,7 @@ partial class frmViewList
         lbWeek.Location = new Point(8, 41);
         lbWeek.Name = "lbWeek";
         lbWeek.SelectionMode = SelectionMode.MultiExtended;
-        lbWeek.Size = new Size(144, 409);
+        lbWeek.Size = new Size(144, 424);
         lbWeek.TabIndex = 18;
         lbWeek.SelectedIndexChanged += lbWeek_SelectedIndexChanged;
         // 
@@ -413,7 +414,7 @@ partial class frmViewList
         // 
         btnExportAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         btnExportAll.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        btnExportAll.Location = new Point(8, 456);
+        btnExportAll.Location = new Point(8, 468);
         btnExportAll.Name = "btnExportAll";
         btnExportAll.Size = new Size(144, 23);
         btnExportAll.TabIndex = 19;
@@ -425,7 +426,7 @@ partial class frmViewList
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(1084, 611);
+        ClientSize = new Size(1084, 637);
         Controls.Add(btnExportAll);
         Controls.Add(lbWeek);
         Controls.Add(btnRefresh);

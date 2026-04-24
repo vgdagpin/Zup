@@ -688,13 +688,6 @@ public partial class frmViewList : Form
 
     private void btnExportAll_Click(object sender, EventArgs e)
     {
-        var all = p_DbContext.TaskEntries.ToList();
-
-        var json = System.Text.Json.JsonSerializer.Serialize(all, new System.Text.Json.JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-
         if (string.IsNullOrWhiteSpace(txtTimesheetFolder.Text))
         {
             throw new Exception("Timesheet directory is empty!");
@@ -705,8 +698,17 @@ public partial class frmViewList : Form
             throw new Exception("Timesheet directory doesn't exist!");
         }
 
+        var data = (List<ZupTask>)dgView.DataSource!;
+
+        var json = System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
         var outputPath = Path.Combine(txtTimesheetFolder.Text, "export-all.json");
 
         File.WriteAllText(outputPath, json);
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(outputPath) { UseShellExecute = true });
     }
 }
