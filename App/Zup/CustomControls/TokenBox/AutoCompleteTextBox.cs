@@ -292,6 +292,7 @@ public class AutoCompleteTextBox : TextBox
         {
             var matches = Values
                 .Where(a => a.Contains(word, StringComparison.OrdinalIgnoreCase) && !ParentTokenBox.Tokens.Contains(a))
+                .Take(10)
                 .ToArray();
 
             if (matches.Length > 0)

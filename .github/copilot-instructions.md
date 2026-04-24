@@ -16,11 +16,13 @@ dotnet run --project Zup        # Run the application
 
 ### After completing a task
 
-After finishing any code change, run a Release publish:
+After finishing any code change, run a **Debug build only** to verify the code compiles:
 
 ```bash
-dotnet publish App/Zup/Zup.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/
+dotnet build App/Zup/Zup.csproj
 ```
+
+Do **not** run a Release publish after every task.
 
 ### EF Core migrations
 
