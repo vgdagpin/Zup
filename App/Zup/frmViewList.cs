@@ -383,9 +383,16 @@ public partial class frmViewList : Form
             throw new Exception("Timesheet directory doesn't exist!");
         }
 
-        var fileName = dtTimesheetDate.Value.ToString(dtTimesheetDate.CustomFormat);
+        var date = dtTimesheetDate.Value;
+        var year = date.Year.ToString();
+        var month = date.Month.ToString("00");
+        var subDir = Path.Combine(txtTimesheetFolder.Text, year, month);
 
-        return Path.Combine(txtTimesheetFolder.Text, $"{fileName}{txtExtension.Text}");
+        Directory.CreateDirectory(subDir);
+
+        var fileName = date.ToString(dtTimesheetDate.CustomFormat);
+
+        return Path.Combine(subDir, $"{fileName}{txtExtension.Text}");
     }
 
     private string GetContentWrapperPath(string wrapperFilename)
