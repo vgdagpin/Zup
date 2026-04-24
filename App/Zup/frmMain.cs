@@ -683,6 +683,30 @@ public partial class frmMain : Form
     private void moveToCenterToolStripMenuItem_Click(object sender, EventArgs e)
     {
         m_FormEntryList.MoveToCenterAndBringToFront();
+
+        FloatingButtons.RemoveAll(a => a.IsDisposed);
+
+        if (FloatingButtons.Count == 0)
+        {
+            return;
+        }
+
+        var workingArea = Screen.PrimaryScreen!.WorkingArea;
+        var buttonHeight = FloatingButtons[0].Height + 5;
+        var totalHeight = (buttonHeight * FloatingButtons.Count) - 5;
+
+        var centerLeft = (workingArea.Width / 2) - (FloatingButtons[0].Width / 2);
+        var centerTop = (workingArea.Height / 2) - (totalHeight / 2);
+
+        for (int i = 0; i < FloatingButtons.Count; i++)
+        {
+            FloatingButtons[i].Left = centerLeft;
+            FloatingButtons[i].Top = centerTop + (buttonHeight * i);
+        }
+
+        SettingHelper.FormLocationX = centerLeft;
+        SettingHelper.FormLocationY = centerTop;
+        SettingHelper.Save();
     }
 
     private void tmrSaveSetting_Tick(object sender, EventArgs e)

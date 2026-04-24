@@ -65,11 +65,6 @@ public static class TagHelper
 
     public static void Register<T>(string tag, Func<TagKey, T, string> func)
     {
-        if (data.ContainsKey(tag))
-        {
-            return;
-        }
-
         data[tag] = func;
     }
 
